@@ -949,7 +949,7 @@ function jInval(){if(J.on){J.quiet=true;jStop(true);J.quiet=false;}J.built=false
 function jBegin(){
   if(J.on)return;
   J.save={p:camera.position.clone(),q:camera.quaternion.clone(),t:controls.target.clone(),fov:camera.fov};
-  controls.enabled=false;J.on=true;J.snap=true;J.cur=-1;
+  controls.enabled=false;J.on=true;J.snap=true;J.cur=-1;J.z=0;
 }
 function jStop(restore,redraw){
   const was=J.on;J.on=false;J.playing=false;J.cur=-1;J.count=0;J.u=0;J.dwell=0;
@@ -976,15 +976,16 @@ function jSet(v){
 const _jp=new THREE.Vector3(),_jl=new THREE.Vector3(),_jm=new THREE.Matrix4(),_jq=new THREE.Quaternion(),_jw=new THREE.Vector3();
 function jCam(dt){
   const f=u=>J.curve.getPointAt(Math.max(0,Math.min(1,u/J.len)));
-  _jp.copy(f(J.u));_jl.copy(f(Math.min(J.len,J.u+.25)));
-  if(_jl.distanceToSquared(_jp)<1e-6){_jl.copy(f(Math.max(0,J.u-.25)));_jl.copy(_jp).multiplyScalar(2).sub(_jl);}
+  const zt=J.dwell>0||!J.playing?1:0;J.z=(J.z||0)+(zt-(J.z||0))*Math.min(1,dt*3);const z=J.z;
+  const trail=.3-.17*z,ahead=.16-.12*z;
+  _jp.copy(f(Math.max(0,J.u-trail)));_jp.y+=.06*(1-.5*z);_jl.copy(f(Math.min(J.len,J.u+ahead)));
   G.localToWorld(_jp);G.localToWorld(_jl);
   camera.position.copy(_jp);
   _jm.lookAt(_jp,_jl,camera.up);_jq.setFromRotationMatrix(_jm);
   if(J.snap){camera.quaternion.copy(_jq);J.snap=false;}else camera.quaternion.slerp(_jq,1-Math.exp(-dt*7));
-  camera.fov+=(86-camera.fov)*Math.min(1,dt*3);camera.updateProjectionMatrix();
+  camera.fov+=((82-30*z)-camera.fov)*Math.min(1,dt*4);camera.updateProjectionMatrix();
   /* labels right on top of the camera would fill the screen: fade them out as we pass through */
-  labelGroup.children.forEach(c=>{c.getWorldPosition(_jw);const d=_jw.distanceTo(_jp);c.material.opacity=Math.max(0,Math.min(1,(d-.07)/.2));});
+  labelGroup.children.forEach(c=>{c.getWorldPosition(_jw);const d=_jw.distanceTo(_jp);c.material.opacity=Math.max(0,Math.min(1,(d-.03)/.1));});
 }
 function jStep(dt){
   if(!J.on)return;
@@ -1081,8 +1082,8 @@ function applyState(quick){
     for(let i=0;i<N;i++)nI[i]=.18+1.9*Math.pow(ni[i],1.2);
     for(let e=0;e<E;e++){ei[e]=(.04+.14*edges[e].wn)*(.45+.9*(nodes[edges[e].s].nf+nodes[edges[e].t].nf)/2);er[e]=Math.min(1,.45*edges[e].wn);}
   }
-  const pre=nI.slice();
-  if(SS.size){
+  const pre=nI.slice(),sm=SS.size&&!J.on;
+  if(sm){
     for(let i=0;i<N;i++)nI[i]*=.55;for(let e=0;e<E;e++){ei[e]=Math.max(ei[e]*.35,.025);er[e]=0;}
     ea.fill(.3);labs.length=0;
     const isN=new Map();
@@ -1101,8 +1102,10 @@ function applyState(quick){
     });
   }
   if(J.on&&SS.size){
+    labs.length=0;/* only the selected words keep their text; everything else stays as unlabeled background */
     J.pe.forEach(k=>{ei[k]=Math.max(ei[k],1.1);ec[k]=2;er[k]=Math.max(er[k],.9);});
-    J.pn.forEach(i=>{if(!nc[i])nc[i]=3;nI[i]=Math.max(nI[i],.85);ea[i]=1;if(!labs.some(l=>l[0]===i))labs.push([i,0]);});
+    J.pn.forEach(i=>{if(!nc[i])nc[i]=3;nI[i]=Math.max(nI[i],.85);ea[i]=1;});
+    SS.forEach(s=>{nI[s]=Math.max(nI[s],1.3);nc[s]=2;ea[s]=1;labs.push([s,1]);});
     if(J.cur>=0)nI[J.cur]=Math.max(nI[J.cur],1.5);
   }
   const hid=new Uint8Array(N);let newest=-1;
@@ -1120,7 +1123,7 @@ function applyState(quick){
   }
   visible=[];
   for(let i=0;i<N;i++){
-    nA[i]=nI[i];nP[i]=SS.has(i)?1:0;nF[i]=SS.size?(nc[i]>=2?1:0):(Q&&Q.A?(nc[i]===1?1:0):.3+.7*ni[i]);nS[i]=.013+.055*ni[i]+(nc[i]===2?.03:nc[i]===1?.012*nI[i]:0);
+    nA[i]=nI[i];nP[i]=SS.has(i)?1:0;nF[i]=(SS.size&&(sm||nc[i]>=2))?(nc[i]>=2?1:0):(Q&&Q.A?(nc[i]===1?1:0):.3+.7*ni[i]);nS[i]=.013+.055*ni[i]+(nc[i]===2?.03:nc[i]===1?.012*nI[i]:0);
     const col=nc[i]===2?GO:nc[i]===1?mix(CY,AM,Math.min(1,nI[i])):nc[i]===3?WH:(ni[i]<.7?mix(VI,CY,ni[i]/.7):mix(CY,WH,(ni[i]-.7)/.3));
     nC.set(col,i*3);if(!hid[i]&&(nI[i]>.1||pre[i]>.1))visible.push(i);
   }
