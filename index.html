@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Concept Field</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&display=swap">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <style>
 :root{--cy:#5df0ff;--am:#ffb347;--bg:#01040a;--ink:#d6f6ff}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:'Chakra Petch',system-ui,sans-serif;overflow:hidden}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:'Space Grotesk',system-ui,sans-serif;overflow:hidden}
 canvas{display:block}
 [hidden]{display:none!important}
 .vig{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,8,20,.75)),repeating-linear-gradient(0deg,rgba(93,240,255,.03) 0 1px,transparent 1px 3px)}
@@ -148,6 +148,19 @@ input[type=text],input[type=password],select,textarea{background:rgba(255,255,25
 #sbtn{position:fixed;right:14px;top:14px;z-index:4;width:38px;height:38px;padding:0;border-radius:50%;font-size:21px;line-height:1}
 #autol{display:inline-flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;color:var(--ink)}
 #auto{position:static;opacity:1;width:16px;height:16px;accent-color:var(--am);cursor:pointer}
+
+#infob{display:flex;flex-direction:column;overflow:hidden}
+#infob .ih{flex:none;padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid var(--glass-b)}
+#infob .il{flex:1 1 auto;min-height:0;overflow:auto}
+#info h2{position:static;top:auto;background:none;padding:0;margin:0 0 4px;z-index:auto}
+#info .sc{position:relative;display:inline-flex;align-items:center;padding-top:18px}
+#info .sx{position:absolute;top:0;left:50%;transform:translateX(-50%);margin:0;padding:0 7px;border:0;border-radius:4px;background:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;font-size:15px;line-height:1.2;font-weight:700;color:#ff3b3b;text-shadow:0 0 8px rgba(255,59,59,.7);opacity:0;pointer-events:none;transition:opacity .12s}
+#info .sc:hover .sx,#info .sc:focus-within .sx{opacity:1;pointer-events:auto}
+#info .sx:hover{background:rgba(255,59,59,.22);color:#ff6b6b}
+@media (hover:none){#info .sx{opacity:1;pointer-events:auto}}
+#infof #clr{white-space:nowrap;margin-left:auto}
+#clr{color:#ff6b6b;background:rgba(255,70,70,.16);border-color:rgba(255,120,120,.7)}
+#clr:hover{background:rgba(255,70,70,.32)}
 </style>
 </head>
 <body>
@@ -161,7 +174,7 @@ input[type=text],input[type=password],select,textarea{background:rgba(255,255,25
     <button id="ar" hidden style="color:var(--am);border-color:var(--am)">Enter mixed reality</button>
   </div>
   <div id="docs" hidden></div>
-  <div class="row" id="tl" hidden><button id="play" title="With words selected: fly through them in resonant order as the current. Otherwise reveal words one by one.">Play</button><input id="tlr" type="range" min="0" max="0" value="0" step="1" aria-label="Resonance timeline"><span id="tlc">0/0</span><button id="spd" title="Playback speed">1×</button><button id="clr">Clear selection</button></div>
+  <div class="row" id="tl" hidden><button id="play" title="With words selected: fly through them in resonant order as the current. Otherwise reveal words one by one.">Play</button><input id="tlr" type="range" min="0" max="0" value="0" step="1" aria-label="Resonance timeline"><span id="tlc">0/0</span><button id="spd" title="Playback speed">1×</button></div>
   <div id="stat"></div>
 </div>
 <form id="qf" class="panel"><input id="q" type="text" placeholder="Ask about your text, e.g. how does heat affect the ocean?" autocomplete="off"><button type="submit" id="askb" aria-label="Ask" title="Ask"></button></form>
@@ -173,7 +186,7 @@ input[type=text],input[type=password],select,textarea{background:rgba(255,255,25
   <div id="wkr" style="max-height:300px;overflow:auto;margin-top:6px"></div>
   <div class="ha"><button id="wkadd" disabled>Add to field</button></div><div id="wks" class="hs">Search, tap pages to queue them, then add. They join any text already in the field.</div>
 </div>
-<div id="info" class="panel"><div id="infob"></div><div id="infof"><button id="brain" title="Send the selected concepts and your query to the assistant">Ask LLM</button><label id="autol" title="Auto: run the assistant whenever you ask a query"><input id="auto" type="checkbox">Auto</label></div></div>
+<div id="info" class="panel"><div id="infob"></div><div id="infof"><button id="brain" title="Send the selected concepts and your query to the assistant">Ask LLM</button><label id="autol" title="Auto: run the assistant whenever you ask a query"><input id="auto" type="checkbox">Auto</label><button id="clr" title="Clear selection">Clear</button></div></div>
 <div id="hist" class="panel" hidden>
   <div class="htabs"><button data-t="res">Results</button><button data-t="files">Files</button><button id="hclr" title="Delete all saved results">Clear all</button><button id="hx" title="Close">✕</button></div>
   <input id="hf" type="text" placeholder="Filter by word or query…" autocomplete="off">
@@ -1182,7 +1195,7 @@ const RAMP=[[0,[.42,.3,1]],[.3,CY],[.55,[.45,1,.72]],[.78,AM],[1,[1,.96,.86]]];
 function ramp(t){t=Math.max(0,Math.min(1,t));for(let i=1;i<RAMP.length;i++)if(t<=RAMP[i][0]){const a=RAMP[i-1],b=RAMP[i];return mix(a[1],b[1],(t-a[0])/(b[0]-a[0]));}return RAMP[RAMP.length-1][1];}
 let nL=null,nHW=null,wvPend=false,wvT=0;
 const _mc=document.createElement('canvas').getContext('2d');
-function wordHW(n){if(n.hw===undefined){_mc.font='600 100px "Chakra Petch",system-ui,sans-serif';n.hw=Math.min(768,_mc.measureText(n.word).width)/768*.2/2+.008;}return n.hw;}
+function wordHW(n){if(n.hw===undefined){_mc.font='600 100px "Space Grotesk",system-ui,sans-serif';n.hw=Math.min(768,_mc.measureText(n.word).width)/768*.2/2+.008;}return n.hw;}
 function refreshWV(){
   if(!pts||!nHW||nHW.length!==nodes.length)return;
   nHW.fill(0);nL.fill(0);
@@ -1199,7 +1212,7 @@ function label(i,kind){
   const key=nodes[i].word+kind;let s=labelCache.get(key);
   if(!s){
     const c=document.createElement('canvas');c.width=768;c.height=192;const x=c.getContext('2d');
-    x.font='600 100px "Chakra Petch",system-ui,sans-serif';x.textAlign='center';x.textBaseline='middle';
+    x.font='600 100px "Space Grotesk",system-ui,sans-serif';x.textAlign='center';x.textBaseline='middle';
     x.shadowColor=kind===1?'#ffb347':'#5df0ff';x.shadowBlur=24;x.fillStyle=kind===1?'#ffe2a8':'#d6fbff';x.fillText(nodes[i].word,384,96);
     const tx=new THREE.CanvasTexture(c);tx.anisotropy=8;tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
     const m=new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false,blending:THREE.AdditiveBlending});
@@ -1286,7 +1299,7 @@ function jPlay(){
   if(!J.curve){stat('Select two or more connected concepts, or one with links, to ride the current.');return;}
   if(J.playing){J.playing=false;tlUI();return;}
   if(!J.on){jBegin();J.u=0;J.count=0;J.dwell=0;}
-  J.playing=true;tlUI();
+  J.playing=true;applyState(true);tlUI();
 }
 function jSet(v){
   jEnsure();if(!J.curve)return;
@@ -1299,14 +1312,14 @@ const _jp=new THREE.Vector3(),_jl=new THREE.Vector3(),_jm=new THREE.Matrix4(),_j
 function jCam(dt){
   const f=u=>J.curve.getPointAt(Math.max(0,Math.min(1,u/J.len)));
   const zt=J.dwell>0||!J.playing?1:0;J.z=(J.z||0)+(zt-(J.z||0))*Math.min(1,dt*3);const z=J.z;
-  const trail=.3-.17*z,ahead=.16-.12*z;
+  const trail=.3-.1*z,ahead=.16-.12*z;
   _jp.copy(f(Math.max(0,J.u-trail)));_jp.y+=.06*(1-.5*z);_jl.copy(f(Math.min(J.len,J.u+ahead)));
   G.localToWorld(_jp);G.localToWorld(_jl);
   camera.position.copy(_jp);
   _jm.lookAt(_jp,_jl,camera.up);_jq.setFromRotationMatrix(_jm);
   if(J.snap){camera.quaternion.copy(_jq);J.snap=false;}else camera.quaternion.slerp(_jq,1-Math.exp(-dt*7));
   camera.fov+=((82-30*z)-camera.fov)*Math.min(1,dt*4);camera.updateProjectionMatrix();
-    labelGroup.children.forEach(c=>{c.getWorldPosition(_jw);const d=_jw.distanceTo(_jp);c.material.opacity=Math.max(0,Math.min(1,(d-.03)/.1));});
+    labelGroup.children.forEach(c=>{c.getWorldPosition(_jw);const d=_jw.distanceTo(_jp);c.material.opacity=Math.max(0,Math.min(1,(d-.02)/.05));});
 }
 function jStep(dt){
   if(!J.on)return;
@@ -1429,7 +1442,7 @@ function applyState(quick){
     });
   }
   if(J.on&&SS.size){
-    labs.length=0;    J.pe.forEach(k=>{ei[k]=Math.max(ei[k],1.1);ec[k]=2;er[k]=Math.max(er[k],.9);});
+    labs.length=0;    J.pn.forEach(i=>labs.push([i,0]));J.pe.forEach(k=>{ei[k]=Math.max(ei[k],1.1);ec[k]=2;er[k]=Math.max(er[k],.9);});
     J.pn.forEach(i=>{if(!nc[i])nc[i]=3;nI[i]=Math.max(nI[i],.85);ea[i]=1;});
     SS.forEach(s=>{nI[s]=Math.max(nI[s],1.3);nc[s]=2;ea[s]=1;labs.push([s,1]);});
     if(J.cur>=0)nI[J.cur]=Math.max(nI[J.cur],1.5);
@@ -1508,8 +1521,8 @@ let docCount=0;
 function updateInfo(){
   const d=infoData();
   if(d){$info.style.display='flex';$info.style.paddingTop=d.t?'':'4px';
-    const hd=SS.size?[...SS].map(i=>`<span class="sc">${esc(nodes[i].word)}<button class="sx" data-x="${i}" title="Unselect ${esc(nodes[i].word)}" aria-label="Unselect ${esc(nodes[i].word)}">\u00d7</button></span>`).join('<span class="sp"> + </span>'):esc(d.t);
-    $('#infob').innerHTML=`${d.t?`<h2>${hd}</h2><div>${esc(d.s)}</div>`:''}<ul${d.t?'':' style="margin-top:0"'}>${d.rows.map(r=>`<li data-i="${r.i}"><span>${esc(r.l)}</span><span class="w">${r.n}</span></li>`).join('')}</ul>`;
+    const hd=SS.size?[...SS].map(i=>`<span class="sc">${esc(nodes[i].word)}<button class="sx" data-x="${i}" title="Unselect ${esc(nodes[i].word)}" aria-label="Unselect ${esc(nodes[i].word)}">\u2715</button></span>`).join('<span class="sp"> + </span>'):esc(d.t);
+    $('#infob').innerHTML=`${d.t?`<div class="ih"><h2>${hd}</h2><div>${esc(d.s)}</div></div>`:''}<div class="il"><ul${d.t?'':' style="margin-top:0"'}>${d.rows.map(r=>`<li data-i="${r.i}"><span>${esc(r.l)}</span><span class="w">${r.n}</span></li>`).join('')}</ul></div>`;
   }else $info.style.display='none';
   hud();
 }
@@ -1617,7 +1630,7 @@ const kc=document.createElement('canvas');kc.width=KW;kc.height=KH;
 const kctx=kc.getContext('2d'),ktex=new THREE.CanvasTexture(kc);ktex.colorSpace=THREE.SRGBColorSpace;ktex.anisotropy=4;
 const kb=new THREE.Mesh(new THREE.PlaneGeometry(.64,.64*KH/KW),new THREE.MeshBasicMaterial({map:ktex,transparent:true,depthTest:false}));
 kb.renderOrder=30;kb.visible=false;kb.frustumCulled=false;scene.add(kb);
-const IW=640,IH=600,HEAD=110,ROW=52,VIS=7,FNT='"Chakra Petch",system-ui,sans-serif';
+const IW=640,IH=600,HEAD=110,ROW=52,VIS=7,FNT='"Space Grotesk",system-ui,sans-serif';
 let HV=110,ibChips=[];const ic=document.createElement('canvas');ic.width=IW;ic.height=IH;
 const ictx=ic.getContext('2d'),itex=new THREE.CanvasTexture(ic);itex.colorSpace=THREE.SRGBColorSpace;itex.anisotropy=4;
 const ib=new THREE.Mesh(new THREE.PlaneGeometry(.4,.4*IH/IW),new THREE.MeshBasicMaterial({map:itex,transparent:true,depthTest:false}));
@@ -1707,7 +1720,7 @@ function hud(){
 })();
 function rr(x,a,b,w,h,r){x.beginPath();if(x.roundRect)x.roundRect(a,b,w,h,r);else x.rect(a,b,w,h);}
 function drawKB(){
-  const x=kctx,ext=kExt(),F='"Chakra Petch",system-ui,sans-serif';
+  const x=kctx,ext=kExt(),F='"Space Grotesk",system-ui,sans-serif';
   x.clearRect(0,0,KW,KH);
   rr(x,0,0,KW,ext,16);x.fillStyle='rgba(40,52,72,.72)';x.fill();
   rr(x,1.5,1.5,KW-3,ext-3,16);x.strokeStyle='rgba(255,255,255,.4)';x.lineWidth=3;x.stroke();
@@ -2345,7 +2358,7 @@ const lodGroup=new THREE.Group();G.add(lodGroup);
 const lodMap=new Map(),_cl=new THREE.Vector3(),_cw=new THREE.Vector3();
 function lodSprite(i){
   const c=document.createElement('canvas');c.width=512;c.height=128;const x=c.getContext('2d');
-  x.font='600 66px "Chakra Petch",system-ui,sans-serif';x.textAlign='center';x.textBaseline='middle';
+  x.font='600 66px "Space Grotesk",system-ui,sans-serif';x.textAlign='center';x.textBaseline='middle';
   x.shadowColor='#5df0ff';x.shadowBlur=16;x.fillStyle='#d6fbff';x.fillText(nodes[i].word,256,64);
   const tx=new THREE.CanvasTexture(c);tx.anisotropy=8;tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false,blending:THREE.AdditiveBlending}));
@@ -2695,6 +2708,11 @@ function colUpd(dt){
     el.style.width=d.w+'px';if(id==='hist')el.style.height=d.h+'px';el.style.right='auto';el.style.bottom='auto';el.style.transform='none';el.dataset.moved='1';try{el.setPointerCapture(e.pointerId);}catch(_){}}
    el.style.left=Math.max(0,Math.min(innerWidth-60,e.clientX-d.x))+'px';el.style.top=Math.max(0,Math.min(innerHeight-40,e.clientY-d.y))+'px';});
   const end=()=>{d=null;};el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);});})();
+(document.fonts&&document.fonts.load?Promise.all(['400 16px "Space Grotesk"','600 16px "Space Grotesk"'].map(f=>document.fonts.load(f))):Promise.resolve()).then(()=>{
+  labelCache.forEach(sp=>{sp.material.map.dispose();sp.material.dispose();});labelCache.clear();lodClear();
+  nodes.forEach(n=>{n.hw=undefined;});wvPend=true;kDirty=true;iDirty=true;rdD=true;
+  if(nodes.length&&pts)applyState(true);
+}).catch(()=>{});
 const clock=new THREE.Clock();
 renderer.setAnimationLoop((t,frame)=>{
   const dt=Math.min(clock.getDelta(),.05);U.uT.value+=dt;
