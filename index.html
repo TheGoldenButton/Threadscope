@@ -29,6 +29,18 @@ input[type=file]{position:absolute;opacity:0;width:0;height:0}
 #info li{margin:2px 0;list-style:none;display:flex;justify-content:space-between;gap:10px}
 #info ul{margin:6px 0 0;padding:0}
 #info .w{opacity:.6}
+#docs{margin-top:8px;max-height:min(240px,30vh);overflow:auto;border:1px solid rgba(93,240,255,.22);background:rgba(0,0,0,.25)}
+#docs .dh{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:4px 8px;font-size:11px;opacity:.85;background:rgba(3,16,28,.95);border-bottom:1px solid rgba(93,240,255,.18)}
+#docs .dr{display:flex;align-items:center;gap:6px;padding:4px 8px;font-size:12px;border-bottom:1px solid rgba(93,240,255,.1)}
+#docs .dn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;background:none;border:0;padding:0;text-align:left;color:var(--ink);font-size:12px}
+#docs .dn:hover{color:var(--am)}#docs .dm{font-size:11px;opacity:.6;white-space:nowrap}
+#docs .dx{padding:0 6px 1px;line-height:1.2;font-size:13px;color:#ff8a8a;border-color:rgba(255,138,138,.5);background:rgba(255,138,138,.06)}
+#docs .dx:hover{background:rgba(255,138,138,.25)}
+#docs .dp{margin:0;padding:6px 8px;font:inherit;font-size:11px;line-height:1.4;opacity:.8;white-space:pre-wrap;overflow-wrap:anywhere;max-height:110px;overflow:auto;background:rgba(0,0,0,.3);border-bottom:1px solid rgba(93,240,255,.1)}
+#docs .da{padding:0 8px}#docs .da button{font-size:11px;padding:3px 7px}
+#info .sc{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}#info .sp{opacity:.6}
+#info .sx{font-size:13px;line-height:1;padding:0 5px 1px;margin-left:2px;border-radius:50%;color:var(--am);border:1px solid rgba(255,179,71,.5);background:rgba(255,179,71,.1);text-shadow:none;vertical-align:middle}
+#info .sx:hover{background:rgba(255,179,71,.35);color:#fff}
 #hint{bottom:58px;left:14px;font-size:12px;opacity:.8;max-width:min(520px,calc(100vw - 150px));line-height:1.45}
 #VRButton{background:rgba(3,16,28,.8)!important;border:1px solid var(--cy)!important;color:var(--cy)!important;font-family:inherit!important;border-radius:2px!important}
 #hist{left:14px;top:230px;bottom:14px;width:min(380px,calc(100vw - 28px));display:flex;flex-direction:column;padding:0;overflow:hidden}
@@ -110,6 +122,7 @@ textarea{font:inherit;color:var(--ink);background:rgba(0,0,0,.4);border:1px soli
     <button id="vr" hidden>Enter VR</button>
     <button id="ar" hidden style="color:var(--am);border-color:var(--am)">Enter mixed reality</button>
   </div>
+  <div id="docs" hidden></div>
   <form id="qf" class="row"><input id="q" type="text" placeholder="Ask about your text, e.g. how does heat affect the ocean?" autocomplete="off"><button type="submit">Ask</button></form>
   <div class="row"><button id="clr">Clear query &amp; selection</button><button id="ctx" title="Remove the attached text and its saved copy">Clear text</button><button id="brain" title="Send the selected concepts and your query to the assistant">🧠</button><button id="auto" title="Auto: run the assistant whenever you ask a query">Auto</button><button id="hbtn">History</button><button id="sbtn">Settings</button></div>
   <div class="row" id="tl" hidden><button id="play" title="With words selected: fly through them in resonant order as the current. Otherwise reveal words one by one.">Play</button><input id="tlr" type="range" min="0" max="0" value="0" step="1" aria-label="Resonance timeline"><span id="tlc">0/0</span><button id="spd" title="Playback speed">1×</button></div>
@@ -174,7 +187,7 @@ const rawId=new Map();
 let svocab=[''],sfreq=[0];const srawId=new Map();
 function sidFor(e){let t=srawId.get(e);if(t===undefined){t=svocab.length;svocab.push(e);srawId.set(e,t);}return t;}
 function setRange(h,a){HZ=h;DEC=Array.from({length:h+1},(_,s)=>s?Math.pow(s,-a):0);}
-function resetCorpus(){PCC.m.clear();corp=[];vocab=['','\u0001'];cfreq=[0,0];rawId.clear();exclC=null;svocab=[''];sfreq=[0];srawId.clear();}
+function resetCorpus(){FORCE.clear();PCC.m.clear();corp=[];vocab=['','\u0001'];cfreq=[0,0];rawId.clear();exclC=null;svocab=[''];sfreq=[0];srawId.clear();}
 function idFor(e){let t=rawId.get(e);if(t!==undefined)return t;
   if(e.charCodeAt(0)<58?e.length>15:(e.length<2||STOP.has(e)||junkW(e))){rawId.set(e,-1);return -1;}
   t=vocab.length;vocab.push(e);cfreq.push(0);rawId.set(e,t);return t;}
@@ -318,7 +331,7 @@ function coocc(qWords){
     ids.forEach(x=>o[x]=1);
     a.push({q:t,ids,sids,main:st,st:!ids.length,f:ids.reduce((x,y)=>x+cfreq[y],0)+sids.reduce((x,y)=>x+sfreq[y],0)});});
   if(!a.length)return null;
-  const wi=e=>Math.log(1+CN/e.f),lm=Math.max(...a.map(wi))||1;a.forEach(e=>{e.w=wi(e)/lm;});
+  const wi=e=>Math.log(1+CN/e.f),lm=Math.max(...a.map(wi))||1;a.forEach(e=>{e.w=.3+.7*wi(e)/lm;});
   const d=new Uint8Array(s);for(let e=0;e<s;e++)d[e]=exclC[e]||o[e];headIds().forEach(i=>{d[i]=1;});
   const u=leapScan(a,d),m=a.map((_,i)=>i).filter(i=>u[i].hits>0);
   if(!m.length)return {seeds:a,M:[]};
@@ -750,7 +763,7 @@ function pruneWords(M){
 
 let nodes=[],edges=[],word2i=new Map(),sel=-1,Q=null;const SS=new Set();let selV=0;
 let curDocs=[],curCorpus=null,replaying=false,hist=[],corpora=[];
-const NCAP=2500,K=6;
+const NCAP=2500,K=6;const FORCE=new Set();
 function buildField(){
   const cand=[];
   for(let i=2;i<vocab.length;i++){
@@ -761,6 +774,7 @@ function buildField(){
   let list=cand.filter(c=>cfreq[c[0]]>=2);if(list.length<30)list=cand;
   list=list.sort((a,b)=>b[1]-a[1]);
   {const tot=list.reduce((t,c)=>t+c[1],0);let acc=0,n=0;while(n<list.length&&n<NCAP&&(n<40||acc<.85*tot)){acc+=list[n][1];n++;}list=list.slice(0,n);}
+  FORCE.forEach(id=>{if(cfreq[id]&&!list.some(c=>c[0]===id))list.push([id,cfreq[id]*Math.max(cIdf[id],.08)]);});
   const id2k=new Map(list.map((c,k)=>[c[0],k]));
   const scan=leapScan(list.map(c=>({ids:[c[0]]})),exclC);
   const pairs=new Map();
@@ -772,7 +786,7 @@ function buildField(){
       let e=pairs.get(key);if(!e){e={a:Math.min(k,j),b:Math.max(k,j),sw:0,dir:0,c:0};pairs.set(key,e);}
       e.sw+=v;e.c++;e.dir+=(k===e.a?fa:1-fa);});
   });
-  const used=new Set();pairs.forEach(e=>{used.add(e.a);used.add(e.b);});
+  const used=new Set();pairs.forEach(e=>{used.add(e.a);used.add(e.b);});FORCE.forEach(id=>{const k=id2k.get(id);if(k!==undefined)used.add(k);});
   nodes=[];word2i=new Map();const remap=new Map();
   [...used].sort((x,y)=>x-y).forEach(k=>{const [id,score]=list[k];remap.set(k,nodes.length);word2i.set(id,nodes.length);
     nodes.push({id,word:vocab[id],freq:cfreq[id],score,adj:[]});});
@@ -845,7 +859,7 @@ float h=pow(1.-d*2.,2.);float c=smoothstep(.22,.0,d);float k=smoothstep(.3,.26,d
 float sharp=h*(1.1-.6*uX)+c*1.9+ring*.7+uX*(k*.8+rim*.7);float soft=pow(1.-d*2.,1.4)*.9;float rp=fract(uT*.8);float rg=vP*(1.-rp)*smoothstep(.06,.0,abs(d-(.14+.34*rp)))*1.8;float bp=1.+vP*.6*(.5+.5*sin(uT*5.5));gl_FragColor=vec4((vC*mix(soft,sharp,vF)*bp+vec3(1.,.8,.45)*rg)*vI*uG,1.);}`});
 const edgeMat=new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,...ADD,
 vertexShader:`attribute float aT;attribute float aI;attribute float aPh;attribute vec3 aCol;uniform float uT;varying float vA;varying vec3 vC;
-void main(){vA=aI*mix(.55,1.,aT);vC=aCol;
+void main(){vA=aI>0.?min(1.,aI*1.9+.035)*mix(.7,1.,aT):0.;vC=aCol;
 gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
 fragmentShader:`uniform float uG;varying float vA;varying vec3 vC;void main(){gl_FragColor=vec4(vC*vA*uG,1.);}`});
 const TR=7,PN=TR*2;
@@ -1145,11 +1159,13 @@ function applyState(quick){
   labelGroup.clear();labs.forEach(([i,k])=>labelGroup.add(label(i,k)));forcedSet=new Set(labs.map(l=>l[0]));
   if(quick){kDirty=true;tlUI();}else updateInfo();
 }
-function runQuery(text){
+function runQuery(text,again){
   if(!nodes.length){stat('Build the field first.');return;}
   const words=[...new Set([...text.toLowerCase().replace(/[\u2018\u2019]/g,"'").matchAll(TOKRE)].map(m=>/^\d/.test(m[0])?m[0].replace(/,/g,''):m[0]).filter(w=>/^[\p{L}\p{M}\d]/u.test(w)))];
   const res=coocc(words);
   if(!res){Q=null;applyState();stat('None of those words occur in your text. Try terms from it.');return;}
+  if(!again){const need=[];res.seeds.forEach(sd=>sd.ids.forEach(id=>{if(word2i.get(id)===undefined&&cfreq[id])need.push(id);}));
+    if(need.length){need.slice(0,60).forEach(id=>FORCE.add(id));stat('Adding your query words to the field\u2026');buildField();buildVisuals();return runQuery(text,true);}}
   const N=nodes.length,E=edges.length,A=new Float32Array(N),show=new Uint8Array(N),pq=new Array(N);let miss=0,n1=0,n2=0;
   res.seeds.forEach(sd=>sd.ids.forEach(id=>{const k=word2i.get(id);if(k!==undefined){A[k]=1;show[k]=1;pq[k]=new Map([[sd.q,1]]);}}));
   res.M.forEach(e=>{const k=word2i.get(e.id);if(k===undefined){miss++;return;}
@@ -1172,22 +1188,47 @@ const summary=()=>`${nodes.length} concepts, ${edges.length} links from ${docCou
 let docCount=0;
 function updateInfo(){
   const d=infoData();
-  if(d){$info.style.display='block';
-    $info.innerHTML=`<h2>${esc(d.t)}</h2><div>${esc(d.s)}</div><ul>${d.rows.map(r=>`<li data-i="${r.i}"><span>${esc(r.l)}</span><span class="w">${r.n}</span></li>`).join('')}</ul>`;
+  if(d){$info.style.display='block';$info.style.paddingTop=d.t?'':'4px';
+    const hd=SS.size?[...SS].map(i=>`<span class="sc">${esc(nodes[i].word)}<button class="sx" data-x="${i}" title="Unselect ${esc(nodes[i].word)}" aria-label="Unselect ${esc(nodes[i].word)}">\u00d7</button></span>`).join('<span class="sp"> + </span>'):esc(d.t);
+    $info.innerHTML=`${d.t?`<h2>${hd}</h2><div>${esc(d.s)}</div>`:''}<ul${d.t?'':' style="margin-top:0"'}>${d.rows.map(r=>`<li data-i="${r.i}"><span>${esc(r.l)}</span><span class="w">${r.n}</span></li>`).join('')}</ul>`;
   }else $info.style.display='none';
   hud();
 }
 async function load(files){
-  const docs=[];for(const f of files)docs.push({name:f.name,text:await f.text()});
-  ingest(docs);
+  const nw=[];for(const f of files)nw.push({name:f.name,text:await f.text()});
+  if(!nw.length)return;
+  const keep=curDocs.filter(d=>!nw.some(n=>n.name===d.name));
+  await ingest([...keep,...nw]);
+  $('#file').value='';
 }
+const docsEl=$('#docs'),docOpen=new Set();
+function renderDocs(){
+  if(!curDocs.length){docsEl.hidden=true;docsEl.innerHTML='';return;}
+  const wc=t=>t.split(/\s+/).filter(Boolean).length;
+  docsEl.hidden=false;
+  docsEl.innerHTML=`<div class="dh"><span>${curDocs.length} attached text${curDocs.length===1?'':'s'}</span><span>${curDocs.reduce((a,d)=>a+wc(d.text),0).toLocaleString()} words</span></div>`+
+    curDocs.map((d,i)=>`<div class="dr"><button class="dn" data-v="${i}" title="Show or hide a preview">${docOpen.has(d.name)?'\u25be':'\u25b8'} ${esc(d.name)}</button><span class="dm">${wc(d.text).toLocaleString()} w</span><button class="dx" data-d="${i}" title="Remove ${esc(d.name)}" aria-label="Remove ${esc(d.name)}">\u00d7</button></div>`+
+    (docOpen.has(d.name)?`<pre class="dp">${esc(d.text.slice(0,1500))}${d.text.length>1500?'\n\u2026':''}</pre>`:'')).join('')+
+    `<div class="da"><button id="docadd" title="Add more text files to the field">+ Add more files</button></div>`;
+}
+docsEl.addEventListener('click',async e=>{
+  if(e.target.closest('#docadd')){$('#file').click();return;}
+  const v=e.target.closest('button[data-v]');
+  if(v){const n=curDocs[+v.dataset.v].name;docOpen.has(n)?docOpen.delete(n):docOpen.add(n);renderDocs();return;}
+  const x=e.target.closest('button[data-d]');
+  if(x){
+    const rest=curDocs.filter((_,i)=>i!==+x.dataset.d);
+    if(!rest.length){unloadField();return;}
+    await ingest(rest);
+  }
+});
 function ingest(docs,opts={}){
   return new Promise(res=>{
     stat('Building field…');
     setTimeout(()=>{
       resetCorpus();docs.forEach(d=>corp.push(encode(d.text)));foldPlurals();recount();docCount=docs.length;curDocs=docs;curCorpus=opts.id||hashDocs(docs);buildField();
-      if(nodes.length<3){stat('Not enough repeated concepts. Attach longer text.');res(false);return;}
-      buildVisuals();stat(summary());
+      if(nodes.length<3){stat('Not enough repeated concepts. Attach longer text.');renderDocs();res(false);return;}
+      buildVisuals();stat(summary());renderDocs();
       curCorpus=opts.id||hashDocs(docs);
       if(!opts.noSave)saveCorpus(docs,curCorpus);
       try{localStorage.setItem('cf.last',curCorpus);}catch(e){}
@@ -1239,7 +1280,7 @@ $('#play').onclick=tlPlay;
 $('#spd').onclick=tlSpeed;
 $('#helpbtn').onclick=()=>{const h=$('#hint');h.hidden=!h.hidden;$('#helpbtn').setAttribute('aria-expanded',String(!h.hidden));};
 $('#tlr').addEventListener('input',e=>tlSet(+e.target.value));
-$info.addEventListener('click',e=>{const li=e.target.closest('li[data-i]');if(li)select(+li.dataset.i);});
+$info.addEventListener('click',e=>{const xb=e.target.closest('button[data-x]');if(xb){e.stopPropagation();toggleSel(+xb.dataset.x);return;}const li=e.target.closest('li[data-i]');if(li)select(+li.dataset.i);});
 let needCenter=false,arMode=false,placing=false,placedOnce=false,arScale=null,lastHit=false,reqLook=null,sessAR=false,centerS=.3,xrNote='';
 let hudA='Concept field',hudB='';
 const KW=1024,KH=532,KEYS=[];
@@ -1266,7 +1307,7 @@ function infoData(){
     const rows=dr.concat([...m].sort((a,b)=>b[1].c-a[1].c||b[1].v-a[1].v).map(([i,o])=>({i,l:nodes[i].word+(o.c>1?' \u2605':''),v:Math.min(1,o.v+.4*(o.c-1)),n:o.c+'/'+sl.length})));
     return {key:'m'+sl.join(','),t:sl.map(i=>nodes[i].word).join(' + '),s:`${sl.length} selected \u00b7 \u2605 links several`,rows};
   }
-  if(Q&&Q.top)return {key:'q'+Q.terms.join(' '),t:'Query',s:Q.terms.join(', '),rows:Q.top.map(i=>({i,l:nodes[i].word,v:Q.A[i],n:Q.A[i].toFixed(2)}))};
+  if(Q&&Q.top)return {key:'q'+Q.terms.join(' '),t:'',s:'',rows:Q.top.map(i=>({i,l:nodes[i].word,v:Q.A[i],n:Q.A[i].toFixed(2)}))};
   return null;
 }
 let iScroll=0,ibHot=false;
@@ -1947,7 +1988,7 @@ function lodLabels(dt){
 }
 function unloadField(){
   resetCorpus();
-  nodes=[];edges=[];word2i=new Map();SS.clear();selV++;sel=-1;Q=null;visible=[];forcedSet=new Set();docCount=0;curCorpus=null;
+  nodes=[];edges=[];word2i=new Map();SS.clear();selV++;sel=-1;Q=null;visible=[];forcedSet=new Set();docCount=0;curCorpus=null;curDocs=[];renderDocs();
   if(pts){G.remove(pts,lines,dots);pts.geometry.dispose();lines.geometry.dispose();dots.geometry.dispose();pts=lines=dots=null;}
   labelGroup.clear();labelCache.forEach(sp=>{sp.material.map.dispose();sp.material.dispose();});labelCache.clear();lodClear();
   $q.value='';$('#file').value='';updateInfo();stat('Attach one or more text files to build the field.');tlReset();
