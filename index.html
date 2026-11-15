@@ -232,7 +232,7 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
   <div id="wkr" style="max-height:300px;overflow:auto;margin-top:6px"></div>
   <div class="ha"><button id="wkadd" disabled>Add to field</button></div><div id="wks" class="hs">Search, tap pages to queue them, then add. They join any text already in the field.</div>
 </div>
-<div id="info" class="panel"><div id="infob"></div><div id="infof"><button id="psbtn" title="Show the source passages for the selection or query">Passages</button><button id="brain" title="Send the selected concepts and your query to the assistant">Ask LLM</button><label id="autol" title="Auto: run the assistant whenever you ask a query"><input id="auto" type="checkbox">Auto</label><button id="clr" title="Clear selection">Clear</button></div></div>
+<div id="info" class="panel"><div id="infob"></div><div id="infof"><button id="psbtn" title="Show the source passages for the selection or query">Passages</button><button id="cpbtn" title="Copy the LLM prompt (instructions plus the words and passages) to use elsewhere">Copy</button><button id="brain" title="Send the selected concepts and your query to the assistant">Ask LLM</button><label id="autol" title="Auto: run the assistant whenever you ask a query"><input id="auto" type="checkbox">Auto</label><button id="clr" title="Clear selection">Clear</button></div></div>
 <div id="ps" class="panel" hidden><div class="hh"><b id="pst">Passages</b><button id="psc" title="Copy these passages with citations">Copy</button><button id="psx" title="Close">&#10005;</button></div><div id="psm" class="hs"></div><div id="psb"></div><div id="pspg" hidden><button id="pspv" title="Previous 60 passages">‹ Prev</button><span id="pspn"></span><button id="psnx" title="Next 60 passages">Next ›</button></div><div id="pssv"><label title="Only passages scoring at or above the cut-off go to the LLM; the rest stay visible here, dimmed"><input id="pssc" type="checkbox"> Token saver: send to LLM only passages scoring ≥</label><input id="psth" type="text" inputmode="decimal" autocomplete="off" aria-label="Passage relevance cut-off (0 to 1)"><span id="pssn" class="hs"></span></div></div>
 <div id="ur" class="panel" hidden><div class="hh"><b>Web pages</b><button id="urx" title="Close">&#10005;</button></div><textarea id="urt" rows="4" placeholder="One URL per line: web pages, articles, or links to PDFs" style="margin-top:8px"></textarea><label style="display:block;margin-top:6px;font-size:12px;opacity:.85"><input id="urp" type="checkbox" checked> If a site blocks direct access, retry through a public proxy (the URL is sent to it)</label><div class="ha"><button id="urgo">Fetch and add</button></div><div id="urs" class="hs"></div></div>
 <div id="hist" class="panel" hidden>
@@ -276,8 +276,8 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 let CUR=null;
 const PROG=t=>{if(CUR!==null)self.postMessage({rid:CUR,prog:t});};
 const NCAP=3000,K=6,FORCE=new Set();
-let nodes=[],edges=[],word2i=new Map();
-const FV=1;
+let nodes=[],edges=[],word2i=new Map(),FAMH=new Map();
+const FV=3;
 
 const STOP=new Set(`the and for with are there was were been has had have did does doing having done you your yours her hers him his she they them their theirs its our ours mine that this per of to in is it be by as at an on am he me my we us if or so do but off out himself herself itself myself yourself ourselves themselves yes no thereby get gets got getting goes going went let lets one ones than then too very just also can could would should might may must shall these those such some any each both either neither other others another about from into onto here while upon up down even yet nor quite whenever wherever whatever whoever whichever what when where which who whom whose why how because since during before after above below between through under again further once`.split(' '));
 
@@ -288,10 +288,10 @@ const STRUCT=new Set(`today tonight yesterday tomorrow later earlier twice ago s
 const GEN=new Map();`able actually almost although art automatically basically bring brought came certain chapter come comes coming currently eventually far finally find first following found gave give given gives go gone good great immediately include included includes including keep kept knew know known knows last least leave less like look looked looks made make makes making man mean means meant men more most near need needs never new next now obtain obtained own potentially previously probably provide provides put really refer refers same saw see seemed seen show showed shown shows simply six specifically start still suddenly take taken takes therefore think thought three thus took tried try two use used uses using want wanted well whether will value values type types line version file result list set form view valid return returns returned single multiple different possible similar specific particular exactly indicate indicates indicating contents users user due argument arguments default defaults instance instances object objects`.split(' ').forEach(w=>GEN.set(w,.25));
 const BREAKW=new Set('but however although though yet whereas while nevertheless nonetheless instead'.split(' '));
 const WHW=new Set('what when where who whom whose which why how'.split(' '));
-const okw=e=>e.length<=24&&!/(.)\1\1/.test(e)&&!WHW.has(e);
+const okw=e=>e.length<=(e.indexOf(' ')>0?36:24)&&!/(.)\1\1/.test(e)&&!WHW.has(e);
 function junkW(e){if(/n't$/.test(e))return true;if(e.indexOf("'")<0)return false;const t=/^([a-z-]+)'(s|d|ll|ve|re|m|t)$/.exec(e);return !t||STOP.has(t[1])||t[1].length<2||t[2]!=='s';}
 const TOKRE=/[\p{L}\p{M}]+(?:['-][\p{L}\p{M}]+)*|\d+(?:[.,]\d+)*|[.!?;:()\u2014\u2013]+|,|\n[ \t\r]*\n/gu;
-const FILL=1,BRKP=.9,MAXBRK=40;
+const FILL=1,BRKP=.9,MAXBRK=40,XSEG=.4;
 let corp=[],vocab=['','\u0001'],cfreq=[0,0],cIdf=new Float32Array(0),CN=0,LT=1,HZ=120,DEC=[],PMIN=25,DOCW=80,exclC=null;
 const rawId=new Map();
 let PASS=null,PIX=null,DOCS=[],FOLDM=null;
@@ -324,6 +324,44 @@ function foldPlurals(){
       const j=s&&rawId.get(s);if(j>1&&j!==i){rm[i]=j;any=true;break;}}}
   if(any)corp.forEach(d=>{for(let k=0;k<d.ids.length;k++)d.ids[k]=rm[d.ids[k]];});
 }
+// ---- phrase detection ----
+// Adjacent content-word pairs with high PMI and enough mass become one token ("sea level").
+// The second slot becomes a filler so every position, distance and array stays aligned.
+function mergePhrases(){
+  const V=vocab.length,uni=new Uint32Array(V),bi=new Map();let T=0;
+  const okTok=x=>x>FILL&&x<V&&vocab[x].charCodeAt(0)>=97&&vocab[x].length>=3&&!STRUCT.has(vocab[x]);
+  corp.forEach(d=>{const t=d.ids;
+    for(let k=0;k<t.length;k++){const a=t[k];if(a<=FILL)continue;uni[a]++;T++;
+      const b=t[k+1];
+      if(k+1<t.length&&a!==b&&okTok(a)&&okTok(b)){const key=a*V+b;bi.set(key,(bi.get(key)||0)+1);}}});
+  if(T<400)return;
+  const minC=T<1e4?2:3,cand=[];
+  bi.forEach((c,key)=>{
+    if(c<minC)return;const a=Math.floor(key/V),b=key-a*V;
+    const pmi=Math.log(c*T/(uni[a]*uni[b]));
+    if(pmi<2.5||c<.25*Math.min(uni[a],uni[b]))return;
+    cand.push([key,c*pmi]);});
+  if(!cand.length)return;
+  cand.sort((x,y)=>y[1]-x[1]);
+  const acc=new Set(cand.slice(0,4000).map(c=>c[0])),pid=new Map();
+  corp.forEach(d=>{const t=d.ids;
+    for(let k=0;k+1<t.length;k++){
+      const a=t[k],b=t[k+1];if(a<=FILL||b<=FILL||a>=V||b>=V)continue;
+      const key=a*V+b;if(!acc.has(key))continue;
+      let p=pid.get(key);
+      if(p===undefined){const w=vocab[a]+' '+vocab[b];p=vocab.length;vocab.push(w);cfreq.push(0);rawId.set(w,p);pid.set(key,p);}
+      t[k]=p;t[k+1]=FILL;d.n--;k++;}});
+}
+// Query helper: join adjacent query words into a phrase id when the corpus has that phrase.
+function wid(t){let id=rawId.get(t);if(id>1&&FOLDM&&FOLDM[id]!==undefined)id=FOLDM[id];return id>1?id:0;}
+function mergeQ(seq){
+  const o=[];
+  for(let i=0;i<seq.length;i++){
+    if(i+1<seq.length){const a=wid(seq[i]),b=wid(seq[i+1]);
+      if(a&&b){const w=vocab[a]+' '+vocab[b],p=rawId.get(w);if(p>1&&cfreq[p]){o.push(w);i++;continue;}}}
+    o.push(seq[i]);}
+  return [...new Set(o)];
+}
 function recount(){
   cfreq=new Array(vocab.length).fill(0);CN=0;LT=0;
   sfreq=new Array(svocab.length).fill(0);corp.forEach(d=>{for(let i=0;i<d.sw.length;i++)if(d.sw[i])sfreq[d.sw[i]]++;});
@@ -337,7 +375,7 @@ function recount(){
   PMIN=med?Math.max(8,Math.min(40,Math.round(.25*med))):25;DOCW=med?Math.max(50,Math.min(120,Math.round(.8*med))):80;
   const df=new Uint32Array(vocab.length),flag=new Uint8Array(vocab.length);let nw=0,cnt=0,cur=[];
   const flush=()=>{if(cnt){nw++;for(const x of cur){df[x]++;flag[x]=0;}cur.length=0;cnt=0;}};
-  corp.forEach(d=>{const t=d.ids;for(let e=0;e<t.length;e++){const x=t[e];if(x>FILL){if(!flag[x]){flag[x]=1;cur.push(x);}cnt++;}if(cnt>=DOCW||(x===0&&cnt>=DOCW/2))flush();}flush();});
+  let sidc=0;corp.forEach(d=>{const t=d.ids;d.seg=new Uint32Array(t.length);for(let e=0;e<t.length;e++){const x=t[e];d.seg[e]=sidc;if(x>FILL){if(!flag[x]){flag[x]=1;cur.push(x);}cnt++;}if(cnt>=DOCW||(x===0&&cnt>=DOCW/2)){flush();sidc++;}}flush();sidc++;});
   cIdf=new Float32Array(vocab.length);WDF=df;NWIN=nw;
   for(let i=1;i<vocab.length;i++)if(cfreq[i]){
     if(nw>=3)cIdf[i]=Math.max(0,Math.log(1+(nw-df[i]+.5)/(df[i]+.5)));
@@ -393,13 +431,18 @@ function scanRaw(items){
   let hasS=false,L=null;
   const R=items.map((e,t)=>{
     e.ids.forEach(x=>{s[x]=t+1;});e.sids.forEach(x=>{ss[x]=t+1;hasS=true;});
-    const w={acc:new Map(),raw:new Map(),fw:new Map(),hits:0};
-    const f=fwd=>(p,dist,m)=>{const r=L[p];if(exclC[r])return;const a=DEC[dist]*m;
-      w.acc.set(r,(w.acc.get(r)||0)+a);w.raw.set(r,(w.raw.get(r)||0)+1);if(fwd)w.fw.set(r,(w.fw.get(r)||0)+a);};
+    const w={acc:new Map(),raw:new Map(),fw:new Map(),hits:0,sg:-1,sm:new Map()};
+    // Within one segment a neighbour counts once, at its strongest (nearest) link to ANY occurrence of
+    // the term, so repeating a word ("data structures" x5) never adds weight. Links that leave the
+    // anchor's segment are discounted (topic shift), so contexts do not bleed into each other.
+    const f=fwd=>(p,dist,m)=>{const r=L[p];if(exclC[r])return;let a=DEC[dist]*m;if(SG&&SG[p]!==CS)a*=XSEG;
+      let v=w.sm.get(r);if(!v)w.sm.set(r,v=[0,0]);if(a>v[0])v[0]=a;if(fwd&&a>v[1])v[1]=a;};
     w.fF=f(1);w.fB=f(0);return w;});
+  const flushSeg=w=>{w.sm.forEach((v,r)=>{w.acc.set(r,(w.acc.get(r)||0)+v[0]);w.raw.set(r,(w.raw.get(r)||0)+1);if(v[1]>0)w.fw.set(r,(w.fw.get(r)||0)+v[1]);});w.sm.clear();};
+  let SG=null,CS=-1;
   let off=0;
   for(const d of corp){
-    const l=d.ids,h=l.length,base=off;off+=h;L=l;
+    const l=d.ids,h=l.length,base=off;off+=h;L=l;SG=d.seg;
     buildPost(d);if(hasS)buildSPost(d);
     const u=[];
     items.forEach(e=>{
@@ -411,9 +454,10 @@ function scanRaw(items){
       let s0=o,e0=o;for(;s0>0&&o-s0<60&&l[s0-1]!==0;)s0--;for(;e0<h-1&&e0-o<60&&l[e0+1]!==0;)e0++;
       if(e0-s0>=4){let k=2166136261;for(let q=s0;q<=e0;q++)k=Math.imul(k^l[q],16777619);k=(k>>>0)+'_'+(e0-s0);
         const at=base+s0,pv=SD.get(k);if(pv===undefined)SD.set(k,at);else if(pv!==at)continue;}
-      w.hits++;
+      CS=d.seg[o];if(w.sg!==CS){flushSeg(w);w.sg=CS;w.hits++;}
       eachFwd(l,o,w.fF,h,d.pb);eachBwd(l,o,w.fB,0,d.pb);
     }
+    R.forEach(w=>{flushSeg(w);w.sg=-1;});
   }
   return R.map(packScan);
 }
@@ -465,7 +509,8 @@ const FAMS=new Map(),FAMC={cos:.6};let WDF=null,NWIN=0;
 function wForms(e,t){
   const n=[],s=e.length,r=x=>{x.length>2&&x!==e&&!n.includes(x)&&n.push(x);},a=x=>!(x.length<=4&&/[^aeiou][aeiou][^aeiouwxy]$/.test(x));
   if(e.endsWith("'s")){r(e.slice(0,-2));return n;}
-  if(s>3&&e.endsWith('s')&&!/(ss|us|is)$/.test(e)&&(e.endsWith('ies')&&r(e.slice(0,-3)+'y'),r(e.slice(0,-1)),/(ch|sh|s|x|z|o)es$/.test(e)&&r(e.slice(0,-2)),t)){
+  if(s>3&&e.endsWith('s')&&!/(ss|us|is)$/.test(e)){e.endsWith('ies')&&r(e.slice(0,-3)+'y');r(e.slice(0,-1));/(ch|sh|s|x|z|o)es$/.test(e)&&r(e.slice(0,-2));}
+  if(t){
     if(s>4&&e.endsWith('ed')){e.endsWith('ied')&&r(e.slice(0,-3)+'y');r(e.slice(0,-1));const x=e.slice(0,-2);a(x)&&r(x);e[s-3]===e[s-4]&&r(e.slice(0,-3));}
     if(s>5&&e.endsWith('ing')){const x=e.slice(0,-3);a(x)&&r(x);r(x+'e');e[s-4]===e[s-5]&&r(e.slice(0,-4));}
   }
@@ -496,13 +541,13 @@ function headIds(){
 function coocc(qWords){
   PAIR=new Map();
   const s=vocab.length,o=new Uint8Array(s),a=[],pref=new Map();
-  for(let i=2;i<s;i++){const w=vocab[i];if(!cfreq[i]||w.length<3||w.charCodeAt(0)<97)continue;const k=w.slice(0,3),l=pref.get(k);l?l.push(i):pref.set(k,[i]);}
+  for(let i=2;i<s;i++){const w=vocab[i];if(!cfreq[i]||w.length<3||w.charCodeAt(0)<97||w.indexOf(' ')>0)continue;const k=w.slice(0,3),l=pref.get(k);l?l.push(i):pref.set(k,[i]);}
   qWords.forEach(t=>{
     const ids=[],sids=[];let id=rawId.get(t);
     if(!(id>1&&cfreq[id])&&t.endsWith("'s")){const b=rawId.get(t.slice(0,-2));if(b>1&&cfreq[b])id=b;}
     const st=id>1&&cfreq[id]?id:void 0;
     if(st!==void 0)ids.push(st);else{const sid=srawId.get(t);if(sid&&sfreq[sid])sids.push(sid);}
-    if(t.length>=3&&t.charCodeAt(0)>=97){const e=pref.get(t.slice(0,3));
+    if(t.length>=3&&t.charCodeAt(0)>=97&&t.indexOf(' ')<0){const e=pref.get(t.slice(0,3));
       e&&e.forEach(x=>{if(x===st)return;
         if((famNear(vocab[x],t)||(editVar(vocab[x],t)&&cfreq[x]>=3&&(st===void 0||3*cfreq[st]<cfreq[x])))&&!ids.includes(x))ids.push(x);});}
     if(!ids.length&&!sids.length)return;
@@ -537,7 +582,7 @@ function coocc(qWords){
   M=M.filter(e=>okw(e.w)&&!junkW(e.w));
   {const cs=(x,y)=>{if(!x.size||!y.size)return 1;let d=0,nx=0,ny=0;x.forEach((v,k)=>{nx+=v*v;const u=y.get(k);u&&(d+=v*u);});y.forEach(v=>{ny+=v*v;});return d/(Math.sqrt(nx*ny)||1);},out=[];
    M.slice().sort((x,y)=>y.s-x.s).forEach(e=>{let h=null;
-     if(e.w.length>=4)for(const g of out)if(g.w.length>=4&&g.w.slice(0,3)===e.w.slice(0,3)&&famNear(g.w,e.w)&&cs(g.per,e.per)>=FAMC.cos){h=g;break;}
+     if(e.w.length>=4)for(const g of out)if(g.w.length>=4&&g.w.slice(0,3)===e.w.slice(0,3)&&famNear(g.w,e.w)){h=g;break;}
      if(h){(h.fam||(h.fam=[{id:h.id,s:h.s}])).push({id:e.id,s:e.s});e.per.forEach((v,q)=>{(h.per.get(q)||0)<v&&h.per.set(q,v);});e.via.forEach(q=>{h.via.includes(q)||h.via.push(q);});h.tq=h.tq||e.tq;h.A=h.A||e.A;}
      else out.push(e);});
    M=out;}
@@ -552,6 +597,19 @@ function coocc(qWords){
     const Lx=M.map((e,i)=>{let aa=0,bb=0;for(let j=0;j<n;j++)if(j!==i){aa+=M[j].s*ov[i*n+j];bb+=M[j].s;}return bb?aa/bb:0;}),
       lmx=Math.max(1e-9,...Lx),Ln=Lx.map(x=>x/lmx),ml=Ln.reduce((x,y)=>x+y,0)/n;
     M.forEach((e,i)=>{e.s*=(Ln[i]+ml)/(1+ml);});
+    // Conceptual clustering: group emerged words by shared context, then keep clusters that link the
+    // query terms together; a cluster reached through only one term (another sense/context) is damped.
+    if(a.length>1){
+      let pm=1e-9;for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)if(ov[i*n+j]>pm)pm=ov[i*n+j];
+      const ord=M.map((_,i)=>i).sort((x,y)=>M[y].s-M[x].s),cl=new Int32Array(n).fill(-1),sd=[];
+      for(const i of ord){let b=-1,bv=.4*pm;for(let c=0;c<sd.length;c++){const v=ov[i*n+sd[c]];if(v>=bv){bv=v;b=c;}}
+        if(b<0){sd.push(i);b=sd.length-1;}cl[i]=b;}
+      const nc=sd.length,mass=a.map(()=>new Float64Array(nc));
+      M.forEach((e,i)=>{a.forEach((z,k)=>{const v=e.pq&&e.pq.get?e.pq.get(z.q)||0:0;mass[k][cl[i]]+=e.s*v;});});
+      const cov=new Float64Array(nc);let nq=0;
+      a.forEach((z,k)=>{const bq=Math.max(0,...mass[k]);if(!(bq>0))return;nq++;for(let c=0;c<nc;c++)if(mass[k][c]>=.4*bq)cov[c]++;});
+      if(nq>1)M.forEach((e,i)=>{const f=.45+.55*Math.min(1,cov[cl[i]]/nq);e.s*=e.A||e.tq?Math.max(.7,f):f;});
+    }
   }
   M.sort((x,z)=>z.s-x.s);
   const S=M[0]?M[0].s:1;M.forEach(e=>{e.s/=S;});
@@ -559,7 +617,7 @@ function coocc(qWords){
   M.con=a.map(z=>({q:z.q,w:z.w,assoc:false,st:z.st,id:z.st?undefined:(z.main!==undefined?z.main:z.ids[0])}));
   M=pruneWords(M);
   const X=[];
-  M.forEach(h=>{X.push(h);if(h.fam){const o0=h.fam[0].s||1;h.fam.slice(1).forEach(v=>X.push({id:v.id,w:vocab[v.id],s:h.s*(v.s/o0),lp:h.lp,pq:h.per,per:h.per,via:h.via}));}});
+  M.forEach(h=>{X.push(h);});
   return {seeds:a,M:X};
 }
 
@@ -962,7 +1020,14 @@ function buildField(){
   let list=cand.filter(c=>cfreq[c[0]]>=2);if(list.length<30)list=cand;
   list=list.sort((a,b)=>b[1]-a[1]);
   list=list.slice(0,NCAP);
-  FORCE.forEach(id=>{if(cfreq[id]&&!list.some(c=>c[0]===id))list.push([id,cfreq[id]*Math.max(cIdf[id],.08)]);});
+  // One node per word family (happen / happens / happened): the highest-scoring form stays, the rest map to it.
+  FAMH=new Map();
+  {const kept=[],byP=new Map(),headOf=id=>{const w=vocab[id],b=byP.get(w.slice(0,2));if(b)for(const j of b)if(famNear(vocab[j],w))return j;return null;};
+   for(const c of list){const h=headOf(c[0]);if(h!==null){FAMH.set(c[0],h);continue;}
+     const k=vocab[c[0]].slice(0,2),b=byP.get(k);b?b.push(c[0]):byP.set(k,[c[0]]);kept.push(c);}
+   list=kept;
+   FORCE.forEach(id=>{if(!cfreq[id]||list.some(c=>c[0]===id))return;const h=headOf(id);
+     if(h!==null)FAMH.set(id,h);else{const k=vocab[id].slice(0,2),b=byP.get(k);b?b.push(id):byP.set(k,[id]);list.push([id,cfreq[id]*Math.max(cIdf[id],.08)]);}});}
   const id2k=new Map(list.map((c,k)=>[c[0],k]));
   PROG('Scanning corpus\u2026');
   const scan=leapScan(list.map(c=>({ids:[c[0]]})),exclC);
@@ -1090,10 +1155,43 @@ function bhRepulse(P,D,N,k2){
   }
 }
 
+// Label propagation on the weighted link graph -> a handful of topic communities.
+function communities(N){
+  const l=Int32Array.from({length:N},(_,i)=>i),order=[...Array(N).keys()];
+  for(let it=0;it<20;it++){
+    for(let i=N-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
+    let ch=0;
+    for(const i of order){
+      const s=new Map();
+      for(const a of nodes[i].adj){const w=edges[a.e].wn*edges[a.e].wn+.02;s.set(l[a.j],(s.get(l[a.j])||0)+w);}
+      let b=l[i],bv=s.get(b)||0;
+      for(const [c,v] of s)if(v>bv+1e-9){bv=v;b=c;}
+      if(b!==l[i]){l[i]=b;ch++;}
+    }
+    if(!ch)break;
+  }
+  const cnt=new Map();l.forEach(x=>cnt.set(x,(cnt.get(x)||0)+1));
+  const minS=Math.max(3,Math.round(.03*N));
+  const keep=[...cnt].filter(([,v])=>v>=minS).sort((a,b)=>b[1]-a[1]).slice(0,10).map(x=>x[0]);
+  const idx=new Map(keep.map((c,i)=>[c,i])),out=new Int32Array(N).fill(-1);
+  for(let i=0;i<N;i++)if(idx.has(l[i]))out[i]=idx.get(l[i]);
+  for(let pass=0;pass<4;pass++)for(let i=0;i<N;i++){
+    if(out[i]>=0)continue;const s=new Map();
+    for(const a of nodes[i].adj)if(out[a.j]>=0)s.set(out[a.j],(s.get(out[a.j])||0)+edges[a.e].wn);
+    let b=-1,bv=0;for(const [c,v] of s)if(v>bv){bv=v;b=c;}
+    if(b>=0)out[i]=b;}
+  for(let i=0;i<N;i++)if(out[i]<0)out[i]=0;
+  return {l:out,nc:Math.max(1,keep.length)};
+}
 function layout(){
   const N=nodes.length,P=new Float32Array(N*3),D=new Float32Array(N*3);
   for(let i=0;i<N;i++){const u=Math.random()*2-1,a=Math.random()*6.283,r=Math.sqrt(1-u*u);P[i*3]=r*Math.cos(a);P[i*3+1]=u;P[i*3+2]=r*Math.sin(a);}
   const k=Math.cbrt(8/N),it=Math.max(60,Math.min(320,Math.floor(5e8/(N*N))));
+  const CMN=N>=12?communities(N):{l:new Int32Array(N),nc:1},cm=CMN.l,nc=CMN.nc;
+  const cc=new Float64Array(nc*3),cn=new Float64Array(nc),pv=new Float64Array(nc*3);
+  if(nc>1){// seed each community in its own region of the ball
+    for(let i=0;i<N;i++){const j=cm[i],y=1-2*(j+.5)/nc,r=Math.sqrt(Math.max(0,1-y*y)),a=j*2.399963;
+      P[i*3]=.75*r*Math.cos(a)+.45*P[i*3];P[i*3+1]=.75*y+.45*P[i*3+1];P[i*3+2]=.75*r*Math.sin(a)+.45*P[i*3+2];}}
   for(let n=0;n<it;n++){
     D.fill(0);
     if(N<BH_MIN){
@@ -1105,8 +1203,19 @@ function layout(){
     }else bhRepulse(P,D,N,k*k);
     for(const e of edges){
       const i=e.s,j=e.t,dx=P[i*3]-P[j*3],dy=P[i*3+1]-P[j*3+1],dz=P[i*3+2]-P[j*3+2];
-      const d=Math.sqrt(dx*dx+dy*dy+dz*dz)+1e-4,f=d/k*(.3+.7*e.wn);
+      const d=Math.sqrt(dx*dx+dy*dy+dz*dz)+1e-4,f=d/k*(.3+.7*e.wn)*(nc>1?(cm[i]===cm[j]?1.8:.25):1);
       D[i*3]-=dx*f;D[i*3+1]-=dy*f;D[i*3+2]-=dz*f;D[j*3]+=dx*f;D[j*3+1]+=dy*f;D[j*3+2]+=dz*f;
+    }
+    if(nc>1){
+      cc.fill(0);cn.fill(0);pv.fill(0);
+      for(let i=0;i<N;i++){const c=cm[i];cc[c*3]+=P[i*3];cc[c*3+1]+=P[i*3+1];cc[c*3+2]+=P[i*3+2];cn[c]++;}
+      for(let c=0;c<nc;c++)if(cn[c]){cc[c*3]/=cn[c];cc[c*3+1]/=cn[c];cc[c*3+2]/=cn[c];}
+      for(let a=0;a<nc;a++)for(let b=a+1;b<nc;b++){
+        const dx=cc[a*3]-cc[b*3],dy=cc[a*3+1]-cc[b*3+1],dz=cc[a*3+2]-cc[b*3+2],f=.35/(dx*dx+dy*dy+dz*dz+.04);
+        pv[a*3]+=dx*f;pv[a*3+1]+=dy*f;pv[a*3+2]+=dz*f;pv[b*3]-=dx*f;pv[b*3+1]-=dy*f;pv[b*3+2]-=dz*f;}
+      const coh=1.0*(1-.5*n/it);
+      for(let i=0;i<N;i++){const c=cm[i];
+        D[i*3]+=(cc[c*3]-P[i*3])*coh+pv[c*3];D[i*3+1]+=(cc[c*3+1]-P[i*3+1])*coh+pv[c*3+1];D[i*3+2]+=(cc[c*3+2]-P[i*3+2])*coh+pv[c*3+2];}
     }
     const t=.35*(1-n/it)+.01;
     for(let i=0;i<N;i++){
@@ -1153,23 +1262,42 @@ function splitPass(text){
 }
 const normSrc=r=>r.replace(/[\u2018\u2019]/g,"'").replace(/[\u2010\u2011]/g,'-').toLowerCase();
 function tokId(e){if(e.charCodeAt(0)<97)return 0;let id=rawId.get(e);if(!(id>1))return 0;if(FOLDM&&FOLDM[id]!==undefined)id=FOLDM[id];return cfreq[id]>0?id:0;}
+// Tokens of a passage with phrases joined, as {id,s,e[,ph:[id1,id2,end1,start2]]}.
+function rawTok(e){if(e.charCodeAt(0)<97)return 0;let id=rawId.get(e);if(!(id>1))return 0;if(FOLDM&&FOLDM[id]!==undefined)id=FOLDM[id];return id;}
+function passToks(norm){
+  const ms=[...norm.matchAll(TOKRE)],out=[];
+  for(let i=0;i<ms.length;i++){
+    const m=ms[i],r1=rawTok(m[0]);
+    if(r1&&i+1<ms.length){const m2=ms[i+1],r2=rawTok(m2[0]);
+      if(r2){const p=rawId.get(vocab[r1]+' '+vocab[r2]);
+        if(p>1&&cfreq[p]){out.push({id:p,s:m.index,e:m2.index+m2[0].length,ph:[r1,r2,m.index+m[0].length,m2.index]});i++;continue;}}}
+    if(r1&&cfreq[r1]>0)out.push({id:r1,s:m.index,e:m.index+m[0].length});
+  }
+  return out;
+}
 function buildPass(){
   PASS=[];PIX=new Map();
   DOCS.forEach((d,di)=>{
     for(const [a,b] of splitPass(d.text)){
       const raw=d.text.slice(a,b);if(raw.trim().length<25)continue;
       const set=new Set();
-      for(const mt of normSrc(raw).matchAll(TOKRE)){const id=tokId(mt[0]);if(id)set.add(id);}
+      const alone=new Set(),sub=new Map();
+      for(const k of passToks(normSrc(raw))){set.add(k.id);if(k.ph){set.add(k.ph[0]);set.add(k.ph[1]);for(const c of [k.ph[0],k.ph[1]]){const l=sub.get(c);l?l.push(k.id):sub.set(c,[k.id]);}}else alone.add(k.id);}
+      alone.forEach(c=>sub.delete(c));
       const ids=Uint32Array.from(set),pi=PASS.length;
-      PASS.push({d:di,a,b,ids});
+      PASS.push({d:di,a,b,ids,sub});
       ids.forEach(id=>{const l=PIX.get(id);l?l.push(pi):PIX.set(id,[pi]);});
     }
   });
 }
 function fmtPass(r,ps,wi){
   const doc=DOCS[ps.d],raw=doc.text.slice(ps.a,ps.b),lead=raw.length-raw.trimStart().length,t=raw.trim(),mk=[];
-  for(const mt of normSrc(raw).matchAll(TOKRE)){const e=mt[0],id=tokId(e);if(!id)continue;const o=wi.get(id);if(!o)continue;
-    const s0=mt.index-lead,e0=s0+e.length;if(s0<0||e0>t.length)continue;mk.push([s0,e0,o.must?1:0]);}
+  const put=(a,b,o)=>{const s0=a-lead,e0=b-lead;if(s0<0||e0>t.length||e0<=s0)return;mk.push([s0,e0,o.must?1:0]);};
+  for(const k of passToks(normSrc(raw))){
+    const o=wi.get(k.id);
+    if(o){put(k.s,k.e,o);continue;}
+    if(k.ph){const o1=wi.get(k.ph[0]),o2=wi.get(k.ph[1]);if(o1)put(k.s,k.ph[2],o1);if(o2)put(k.ph[3],k.e,o2);}
+  }
   return {doc:doc.name,pct:Math.round(100*ps.a/Math.max(1,doc.text.length)),text:t,m:mk,mc:r.mc,s:r.s};
 }
 // m: {ids, w, must:[indices into ids], need?:index, all, R (resonance 0..1), cap}
@@ -1186,7 +1314,7 @@ function getPassages(m){
   // Score = weighted count of distinct emerged words in the passage per unit of text (density).
   const rows=[];let maxmc=0;
   cand.forEach(p=>{const ps=PASS[p];let mc=0,sc=0,hn=needId==null;const qs=nG?new Set():null;
-    for(const id of ps.ids){if(qs){const qq=qmap.get(id);if(qq)qq.forEach(g=>qs.add(g));}const o=wi.get(id);if(!o)continue;if(o.must){mc++;sc+=o.w*Math.max(.25,cIdf[id]||0);}if(id===needId)hn=true;}
+    for(const id of ps.ids){if(qs){const qq=qmap.get(id);if(qq)qq.forEach(g=>qs.add(g));}const o=wi.get(id);if(!o)continue;const sb=ps.sub&&ps.sub.get(id);if(sb&&sb.some(q=>wi.has(q)))continue;if(o.must){mc++;sc+=o.w*Math.max(.25,cIdf[id]||0);}if(id===needId)hn=true;}
     if(!hn||!mc)return;
     if(mc>maxmc)maxmc=mc;
     rows.push({p,mc,qc:qs?qs.size:0,s:sc/Math.max(10,(ps.b-ps.a)/6)*(nG?.4+.6*qs.size/nG:1)});});
@@ -1217,21 +1345,21 @@ self.onmessage=e=>{
       PROG('Encoding text\u2026');
       resetCorpus();nodes=[];edges=[];word2i=new Map();
       DOCS=m.docs;m.docs.forEach(d=>corp.push(encode(d.text)));
-      foldPlurals();PROG('Counting\u2026');recount();
+      foldPlurals();PROG('Finding phrases\u2026');mergePhrases();PROG('Counting\u2026');recount();
       let built=false;
       if(!(m.pre&&restoreField(m.pre))){buildField();built=true;}
       self.postMessage({rid:m.rid,nodes,edges,force:forceWords(),built});return;}
     if(m.t==='passages'){self.postMessage(Object.assign({rid:m.rid},getPassages(m)));return;}
     if(m.t==='query'){
-      const res=coocc(m.words);
+      const res=coocc(m.seq?mergeQ(m.seq):m.words);
       if(!res){self.postMessage({rid:m.rid,res:null});return;}
       let rebuilt=null;
       if(!m.again){
-        const need=[];res.seeds.forEach(sd=>sd.ids.forEach(id=>{if(word2i.get(id)===undefined&&cfreq[id])need.push(id);}));
+        const need=[];res.seeds.forEach(sd=>sd.ids.forEach(id=>{if(word2i.get(id)===undefined&&cfreq[id]&&!FAMH.has(id))need.push(id);}));
         if(need.length){need.slice(0,60).forEach(id=>FORCE.add(id));buildField();rebuilt={nodes,edges,force:forceWords()};}}
       self.postMessage({rid:m.rid,rebuilt,res:{
-        seeds:res.seeds.map(s=>({q:s.q,ids:s.ids})),
-        M:res.M.map(x=>({id:x.id,lp:x.lp,s:x.s,pq:x.pq}))}});return;}
+        seeds:res.seeds.map(s=>({q:s.q,ids:[...new Set(s.ids.map(i=>FAMH.has(i)?FAMH.get(i):i))]})),
+        M:(()=>{const m=new Map();res.M.forEach(x=>{const id=FAMH.has(x.id)?FAMH.get(x.id):x.id,o=m.get(id);if(!o||x.s>o.s)m.set(id,{id,lp:x.lp,s:x.s,pq:x.pq});});return [...m.values()];})()}});return;}
   }catch(err){self.postMessage({rid:m.rid,err:String(err&&err.stack||err)});}
   finally{CUR=null;}
 };
@@ -1258,7 +1386,7 @@ const ENG=(()=>{
 let EPOCH=0,ingesting=false,qSeq=0,forceWords=[],qBusy=0;
 const thinking=()=>qBusy>0||ingesting||!!rdBusy;
 let nD=null,eD=null,pulseKey='',pulseOn=0;
-const txtWords=()=>new Set(($q.value.toLowerCase().match(/[\p{L}\d'-]+/gu)||[]));
+const txtWords=()=>{const a=$q.value.toLowerCase().match(/[\p{L}\d'-]+/gu)||[],s=new Set(a);for(let i=0;i+1<a.length;i++)s.add(a[i]+' '+a[i+1]);return s;};
 // Distance (along the field's own links) from the input's trigger nodes to every node, so the
 // pulse travels outward from where the input actually lands.
 function updatePulse(textOnly){
@@ -1289,7 +1417,7 @@ let FS=1,VS=1;try{const v=parseFloat(localStorage.getItem('cf.fs'));if(isFinite(
 let nodes=[],edges=[],word2i=new Map(),sel=-1,Q=null;const SS=new Set();let selV=0;
 let curDocs=[],curCorpus=null,replaying=false,hist=[],corpora=[];
 const col={lv:null,f:0,n:-1,hide:null,cnt:null,t:0};
-const FV=1;var fsT=0,PRE=null;
+const FV=3;var fsT=0,PRE=null;
 let HLOG=[];
 function saveField(){
   clearTimeout(fsT);const id=curCorpus;if(!id||!nodes.length)return;
@@ -1301,7 +1429,7 @@ const COARSE=matchMedia('(pointer:coarse)').matches,LOW=COARSE||(navigator.hardw
 const PRMAX=Math.min(devicePixelRatio,COARSE?1.75:2),PRMIN=Math.min(PRMAX,.75);let prCur=PRMAX,lastAct=0,lastR=0,lastDown=0;
 const renderer=new THREE.WebGLRenderer({antialias:!(LOW&&devicePixelRatio>=2),alpha:true,powerPreference:'high-performance'});
 renderer.setPixelRatio(prCur);renderer.setSize(innerWidth,innerHeight);
-renderer.xr.enabled=true;renderer.xr.setFramebufferScaleFactor(1.4);renderer.xr.setReferenceSpaceType('local-floor');
+renderer.xr.enabled=true;renderer.xr.setFramebufferScaleFactor(1.0);renderer.xr.setReferenceSpaceType('local-floor');
 document.body.prepend(renderer.domElement);
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x01040a);
 const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.01,200);
@@ -1405,8 +1533,8 @@ function buildVisuals(){
   G.add(lines,pts,dots);SS.clear();selV++;sel=-1;Q=null;RV.cn=-1;RV.playing=false;pulseKey='';updatePulse(true);applyState();psAuto();
 }
 const RV={on:false,playing:false,order:[],count:0,acc:0,cs:-2,cq:null,cn:-1,speed:1};
-const J={on:false,playing:false,built:false,quiet:false,snap:false,seq:[],count:0,curve:null,len:0,marks:[],u:0,dwell:0,pe:new Set(),pn:new Set(),pd:new Map(),cur:-1,save:null};
-const jOK=()=>SS.size>0&&!renderer.xr.isPresenting;
+const J={on:false,vr:false,playing:false,built:false,quiet:false,snap:false,seq:[],count:0,curve:null,len:0,marks:[],u:0,dwell:0,pe:new Set(),pn:new Set(),pd:new Map(),cur:-1,save:null};
+const jOK=()=>SS.size>0;
 function jSeq(){
   const S=[...SS];
   if(S.length===1){const o=resonanceOrder();return o.slice(0,Math.min(o.length,8));}
@@ -1441,11 +1569,13 @@ function jEnsure(){if(!J.built){jBuild();J.built=true;}}
 function jInval(){if(J.on){J.quiet=true;jStop(true);J.quiet=false;}J.built=false;J.count=0;J.u=0;}
 function jBegin(){
   if(J.on)return;
+  J.vr=!!renderer.xr.isPresenting;
+  if(J.vr){J.save=null;J.on=true;J.cur=-1;J.z=0;return;}
   J.save={p:camera.position.clone(),q:camera.quaternion.clone(),t:controls.target.clone(),fov:camera.fov};
   controls.enabled=false;J.on=true;J.snap=true;J.cur=-1;J.z=0;
 }
 function jStop(restore,redraw){
-  const was=J.on;J.on=false;J.playing=false;J.cur=-1;J.count=0;J.u=0;J.dwell=0;
+  const was=J.on;J.on=false;J.vr=false;J.playing=false;J.cur=-1;J.count=0;J.u=0;J.dwell=0;
   labelGroup.children.forEach(c=>{c.visible=true;c.material.opacity=1;});
   if(was&&restore&&J.save){camera.position.copy(J.save.p);camera.quaternion.copy(J.save.q);camera.fov=J.save.fov;camera.updateProjectionMatrix();controls.target.copy(J.save.t);controls.enabled=true;controls.update();}
   else if(was)controls.enabled=true;
@@ -1481,7 +1611,20 @@ function jCam(dt){
 }
 function jStep(dt){
   if(!J.on)return;
-  if(renderer.xr.isPresenting||!SS.size||!J.curve){jStop(true);return;}
+  if(!SS.size||!J.curve||J.vr!==!!renderer.xr.isPresenting){jStop(true);return;}
+  if(J.vr){// VR: no camera flight; step a highlight pulse from concept to concept in place
+    if(J.playing){
+      if(J.dwell>0)J.dwell-=dt;
+      if(J.dwell<=0){
+        if(J.count>=J.seq.length){jStop(true,true);xrNote='';hud();return;}
+        const k=J.count++;J.cur=J.seq[k];J.dwell=1.7/RV.speed;
+        const t='\u26a1 '+nodes[J.cur].word+' \u00b7 '+J.count+'/'+J.seq.length;stat(t);xrNote=t;hud();
+        if(AU.on)sfxTick(1.5);
+        applyState(true);
+      }
+    }
+    return;
+  }
   const sp=RV.speed;
   if(J.playing){
     if(J.dwell>0){J.dwell-=dt;if(J.dwell<=0&&J.count>=J.seq.length){jStop(true,true);return;}}
@@ -1654,11 +1797,11 @@ function applyState(quick){
 }
 async function runQuery(text,again){
   if(!nodes.length){stat('Build the field first.');return;}
-  const words=[...new Set([...text.toLowerCase().replace(/[\u2018\u2019]/g,"'").matchAll(TOKRE)].map(m=>/^\d/.test(m[0])?m[0].replace(/,/g,''):m[0]).filter(w=>/^[\p{L}\p{M}\d]/u.test(w)))];
+  const seq=[...text.toLowerCase().replace(/[\u2018\u2019]/g,"'").matchAll(TOKRE)].map(m=>/^\d/.test(m[0])?m[0].replace(/,/g,''):m[0]).filter(w=>/^[\p{L}\p{M}\d]/u.test(w)),words=[...new Set(seq)];
   if(ingesting){stat('The field is still building. Try again in a moment.');return;}
   LASTQ=text.trim();
   const my=++qSeq,ep=EPOCH,tm=setTimeout(()=>stat('Searching…'),250);
-  pulseKey='';updatePulse(true);let rr;qBusy++;try{rr=await ENG.call({t:'query',words,again:!!again});}catch(err){qBusy--;clearTimeout(tm);stat('Query failed: '+err.message);return;}qBusy--;
+  pulseKey='';updatePulse(true);let rr;qBusy++;try{rr=await ENG.call({t:'query',words,seq,again:!!again});}catch(err){qBusy--;clearTimeout(tm);stat('Query failed: '+err.message);return;}qBusy--;
   clearTimeout(tm);
   if(my!==qSeq||ep!==EPOCH)return;
   if(rr.rebuilt){setField(rr.rebuilt);replayHebb();saveField();buildVisuals();}
@@ -1683,6 +1826,7 @@ async function runQuery(text,again){
     ov=(ov+.25*Math.min(A[e.s],A[e.t]))*(.4+.6*e.wn);eIv[k]=ov;mo=Math.max(mo,ov);});
   for(let k=0;k<E;k++)eIv[k]=eIv[k]>0?.1+.95*Math.pow(eIv[k]/mo,.8):.03;
   if(!replaying)hebbPull([...seedK,...top.slice(0,4)]);
+  sfxWash();
   Q={A,show,top,eI:eIv,terms:res.seeds.map(s=>s.q),seed:seedK,cv,sg:res.seeds.map(s=>s.ids.slice())};SS.clear();selV++;sel=-1;updatePulse(false);applyState();if(!replaying){pushHist(queryEntry(text,top,A,eIv));}
   psAuto();stat(summary());
 }
@@ -1705,7 +1849,7 @@ function replayHebb(){
   HLOG.forEach(g=>hebbMove(g.map(w=>ix.get(w)).filter(i=>i!==undefined)));
 }
 function toggleSel(i){if(SS.has(i))SS.delete(i);else SS.add(i);sel=SS.size?[...SS].pop():-1;selV++;if(SS.has(i)&&SS.size>1&&!replaying)hebbPull([...SS]);applyState();psAuto();return SS.has(i);}
-function select(i){if(i<0)return;const on=toggleSel(i);if(on&&SS.size===1&&!replaying)pushHist(selectEntry(i));}
+function select(i){if(i<0)return;const on=toggleSel(i);if(on)sfxChime(i);if(on&&SS.size===1&&!replaying)pushHist(selectEntry(i));}
 function clearAll(){SS.clear();selV++;sel=-1;Q=null;$q.value='';applyState();psAuto();if(nodes.length)stat(summary());}
 const $=s=>document.querySelector(s),$q=$('#q'),$info=$('#info');
 const stat=t=>{const s=$('#stat');s.textContent=t;clearTimeout(stat.t);stat.t=setTimeout(()=>{s.textContent='';},4000);hud();};
@@ -1852,6 +1996,46 @@ function fieldR(){let r=.3;for(const n of nodes){const d=Math.hypot(n.x,n.y,n.z)
 const fitScale=t=>THREE.MathUtils.clamp(t/fieldR(),.08,4);
 let needCenter=false,arMode=false,placing=false,placedOnce=false,arScale=null,lastHit=false,reqLook=null,sessAR=false,centerS=.3,xrNote='';
 let hudA='',hudB='';
+// ---- Synthesized audio: harmonic chimes, soft UI ticks, and a wash for queries (no audio files) ----
+const AU={ctx:null,out:null,on:true,nb:null,last:{c:0,t:0,w:0}};
+try{AU.on=localStorage.getItem('cf.snd')!=='0';}catch(e){}
+function auCtx(){
+  if(!AU.on)return null;
+  if(!AU.ctx){try{const C=window.AudioContext||window.webkitAudioContext;AU.ctx=new C();const m=AU.ctx.createGain();m.gain.value=.55;const lp=AU.ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3400;m.connect(lp);lp.connect(AU.ctx.destination);AU.out=m;}catch(e){AU.on=false;return null;}}
+  if(AU.ctx.state==='suspended')AU.ctx.resume().catch(()=>{});
+  return AU.ctx;
+}
+document.addEventListener('pointerdown',()=>auCtx(),{once:true});
+const PENT=[0,2,4,7,9];
+function nodeFreq(i){
+  const n=nodes[i];if(!n)return 440;
+  let mf=1;for(let k=0;k<nodes.length;k++)if(nodes[k].freq>mf)mf=nodes[k].freq;
+  const fq=Math.log(1+(n.freq||1))/Math.log(1+mf),oct=2-Math.round(fq*2);   // frequent words sound lower
+  const midi=48+PENT[(n.adj?n.adj.length:0)%5]+12*oct;                       // degree picks the pentatonic note
+  return 440*Math.pow(2,(midi-69)/12);
+}
+function sfxChime(i){
+  const c=auCtx();if(!c)return;const t=c.currentTime;if(t-AU.last.c<.06)return;AU.last.c=t;
+  const f=nodeFreq(i);
+  [[1,.16],[2,.06],[3,.025]].forEach(([m,a],k)=>{
+    const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=f*m*(1+k*.0008);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(a,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+1.2-k*.25);
+    o.connect(g);g.connect(AU.out);o.start(t);o.stop(t+1.25);
+  });
+}
+function sfxTick(v){
+  const c=auCtx();if(!c)return;const t=c.currentTime;if(t-AU.last.t<.05)return;AU.last.t=t;
+  const o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.setValueAtTime(1800,t);o.frequency.exponentialRampToValueAtTime(900,t+.03);
+  g.gain.setValueAtTime(.05*(v||1),t);g.gain.exponentialRampToValueAtTime(.0001,t+.045);o.connect(g);g.connect(AU.out);o.start(t);o.stop(t+.05);
+}
+function sfxWash(){
+  const c=auCtx();if(!c)return;const t=c.currentTime;if(t-AU.last.w<.5)return;AU.last.w=t;
+  if(!AU.nb){const n=c.sampleRate*1.5|0,b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;AU.nb=b;}
+  const s=c.createBufferSource();s.buffer=AU.nb;const f=c.createBiquadFilter();f.type='bandpass';f.Q.value=1.1;
+  f.frequency.setValueAtTime(260,t);f.frequency.exponentialRampToValueAtTime(2200,t+1.2);
+  const g=c.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.05,t+.4);g.gain.exponentialRampToValueAtTime(.0001,t+1.4);
+  s.connect(f);f.connect(g);g.connect(AU.out);s.start(t);s.stop(t+1.45);
+}
 const KW=1600,KH=900,KEYS=[];
 const kc=document.createElement('canvas');kc.width=KW;kc.height=KH;
 const kctx=kc.getContext('2d'),ktex=new THREE.CanvasTexture(kc);ktex.colorSpace=THREE.SRGBColorSpace;ktex.anisotropy=4;
@@ -1939,6 +2123,7 @@ function hud(){
     {id:'corp',x:100,y:24,w:64,h:64,act:'corp'},
     {id:'wiki',x:176,y:24,w:64,h:64,act:'wiki'},
     {id:'pass',x:B-64-12-64-12-64,y:24,w:64,h:64,act:'pass'},
+    {id:'snd',x:252,y:24,w:64,h:64,act:'snd'},
     {id:'hist',x:B-64-12-64,y:24,w:64,h:64,act:'hist'},
     {id:'set',x:B-64,y:24,w:64,h:64,act:'set'},
     {id:'play',x:28,y:104,w:120,h:56,act:'play',tlk:true},
@@ -1978,11 +2163,11 @@ function drawKB(){
     if((k.tlk||k.ctk)&&!ctx)continue;
     if(k.llm&&!CFG.on)continue;
     const on=hov.has(k),fl=pressK===k&&now-pressT<170;
-    if(k.id==='plus'||k.id==='hist'||k.id==='set'||k.id==='help'||k.id==='corp'||k.id==='wiki'||k.id==='pass'){
+    if(k.id==='plus'||k.id==='hist'||k.id==='set'||k.id==='help'||k.id==='corp'||k.id==='wiki'||k.id==='pass'||k.id==='snd'){
       const cx=k.x+k.w/2,cy=k.y+k.h/2;
       x.beginPath();x.arc(cx,cy,k.w/2,0,6.2832);x.fillStyle=fl?'rgba(255,179,71,.6)':on?'rgba(255,255,255,.3)':'rgba(255,255,255,.12)';x.fill();x.strokeStyle='rgba(255,255,255,.45)';x.lineWidth=2;x.stroke();
       x.fillStyle='#d6f6ff';x.textAlign='center';x.font=k.id==='plus'?'300 46px '+F:'32px '+F;
-      x.fillText(({plus:'+',hist:'\uD83C\uDF33',set:'\u2699',corp:'\u21C4',wiki:'W',pass:'\u00B6'})[k.id]||'?',cx,cy+(k.id==='plus'?-3:1));x.textAlign='left';continue;
+      x.fillText(({plus:'+',hist:'\uD83C\uDF33',set:'\u2699',corp:'\u21C4',wiki:'W',pass:'\u00B6',snd:AU.on?'\u266A':'\u2715'})[k.id]||'?',cx,cy+(k.id==='plus'?-3:1));x.textAlign='left';continue;
     }
     if(k.id==='field'){
       rr(x,k.x,k.y,k.w,k.h,12);x.fillStyle='rgba(255,255,255,.08)';x.fill();x.strokeStyle=on||kbOpen?'#ffb347':'rgba(255,255,255,.4)';x.lineWidth=2;x.stroke();
@@ -2034,6 +2219,13 @@ function keyAt(px,py){
   return {k:k||null,px,py};
 }
 const rc=new THREE.Raycaster(),_o=new THREE.Vector3(),_d=new THREE.Vector3(),_q=new THREE.Quaternion();
+function panelNear(c){
+  if(!kb.visible)return false;
+  rayOf(c);_d.set(0,0,-1).applyQuaternion(_q);rc.set(_o,_d);
+  const h=rc.intersectObject(kb,false)[0];if(!h||!h.uv)return false;
+  const px=h.uv.x*KW,py=(1-h.uv.y)*KH,m=28;
+  return KEYS.some(k=>(!k.kbk||kbOpen)&&(!(k.tlk||k.ctk)||hasCtx())&&(!k.llm||CFG.on)&&px>=k.x-m&&px<=k.x+k.w+m&&py>=k.y-m&&py<=k.y+k.h+m);
+}
 let RAYOV=null;
 function rayOf(c){if(RAYOV&&RAYOV.c===c){_o.copy(RAYOV.o);_q.copy(RAYOV.q);}else{c.getWorldPosition(_o);c.getWorldQuaternion(_q);}}
 function panelHit(c,keep){
@@ -2057,6 +2249,7 @@ function keyAct(k,r){
   else if(k.act==='auto'){AUTO=!AUTO;try{localStorage.setItem('cf.auto',AUTO?'1':'0');}catch(e){}$('#auto').checked=AUTO;}
   else if(k.act==='move'){MOVE=!MOVE;xrNote=MOVE?'Pinch and drag to move the field':'Pinch and drag to spin the field';hud();}
   else if(k.act==='plus')xrPaste();
+  else if(k.act==='snd'){AU.on=!AU.on;try{localStorage.setItem('cf.snd',AU.on?'1':'0');}catch(e){}kDirty=true;if(AU.on){auCtx();sfxTick(1.5);}xrNote=AU.on?'Sound on':'Sound off';hud();}
   else if(k.act==='corp')xrCycleCorpus();
   else if(k.act==='wiki')xrWiki();
   else if(k.act==='pass'){if(psXR){psXR=false;rdD=true;}else{const sp=SS.size?specSel():specQuery();if(!sp){xrNote='Select a word or ask a question first';hud();}else{psXR=true;PS.auto=true;rdD=true;showPassages(sp);}}}
@@ -2146,15 +2339,18 @@ function uiStep(){
       while(H.length>2&&nw-H[1].t>260)H.shift();
       if(r.pin&&!r.tp){let e=null;for(const x of H){if(nw-x.t>=80)e=x;}if(e)RAYOV={c:r.c,o:e.o,q:e.q};}
     }
-    let hit=panelHit(r.c,r.slide),ih=infoHit(r.c),rh=rdHit(r.c);RAYOV=null;
+    let hit=panelHit(r.c,r.slide),ih=infoHit(r.c),rh=rdHit(r.c);
+    // A pinch that lands in the gaps around the keys is swallowed by the HUD instead of grabbing the field behind it.
+    const nr=!hit&&(r.c.userData.isHand?r.pin:r.c.userData.tr)&&!r.tp?panelNear(r.c):false;RAYOV=null;
     // Whichever panel the ray reaches first wins, so a floating panel in front never clicks keys behind it.
     if(r.slide&&hit){ih=null;rh=null;}else if(r.ibd&&ih){hit=null;rh=null;}else if(r.rds&&rh){hit=null;ih=null;}
     else{const dh=hit?hit.d:1e9,di=ih?ih.d:1e9,dr=rh?rh.d:1e9,m=Math.min(dh,di,dr);if(dh>m)hit=null;if(di>m)ih=null;if(dr>m)rh=null;}
     r.hk=hit?hit.k:null;if(ih)ibHot=true;if(rh){rbHot=true;rbHov=rh.k;}
     const trig=r.c.userData.isHand?r.pin:r.c.userData.tr,press=trig&&!r.tp;r.tp=trig;
+    if(press&&((hit&&hit.k)||(rh&&rh.k)||ih))sfxTick(1);
     if(press&&hit){r.uiHold=true;if(hit.k){keyAct(hit.k,r);if(hit.k.act==='tl'){r.slide=true;tlFromPx(hit.px);}}}
     else if(press&&ih){r.uiHold=true;r.ibd={px:ih.px,py:ih.py,off:iScroll,mv:false};}
-    else if(press&&rh){r.uiHold=true;if(rh.k)rdAct(rh.k);else if(rh.py<68)r.rdd=rh.d;else r.rds={py:rh.py,off:rdSy,mv:false};}else if(press&&placing)confirmPlace();
+    else if(press&&rh){r.uiHold=true;if(rh.k)rdAct(rh.k);else if(rh.py<68)r.rdd=rh.d;else r.rds={py:rh.py,off:rdSy,mv:false};}else if(press&&nr){r.uiHold=true;sfxTick(.4);}else if(press&&placing)confirmPlace();
     if(trig&&r.rdd)rdDrag(r);
     if(trig&&r.rds&&rh){if(Math.abs(rh.py-r.rds.py)>6)r.rds.mv=true;if(r.rds.mv)rdSet(r.rds.off+(r.rds.py-rh.py));}
     if(trig&&r.slide&&hit)tlFromPx(hit.px);
@@ -2168,7 +2364,7 @@ function uiStep(){
     }
   });
   if(rbHov!==rbHov0)rdD=true;
-  const sig=rig.map(r=>KEYS.indexOf(r.hk)).join(',');if(sig!==hsig){hsig=sig;kDirty=true;}
+  const sig=rig.map(r=>KEYS.indexOf(r.hk)).join(',');if(sig!==hsig){if(sig.split(',').some(x=>x!=='-1'&&x!==''))sfxTick(.35);hsig=sig;kDirty=true;}
 }
 const planeG=new THREE.Group(),planeMap=new Map();dolly.add(planeG);planeG.visible=false;
 const planeMat=new THREE.LineBasicMaterial({color:0x2bd6ff,transparent:true,opacity:.4,depthTest:false});
@@ -2201,6 +2397,7 @@ function syncPlanes(frame,ref){
 }
 function beginPlacing(){
   if(!arMode||!nodes.length)return;
+  seatWanted=false;
   placing=true;lastHit=false;arScale=placedOnce?G.scale.x:null;planeG.visible=true;
   xrNote='Look at a surface and pinch (or trigger) to place the field';hud();
 }
@@ -2214,7 +2411,63 @@ function previewAt(p,n){
   G.scale.setScalar(s);G.position.copy(p).addScaledVector(n,s*1.35+.03);G.quaternion.identity();
   reticle.matrix.copy(hM);reticle.matrixWorldNeedsUpdate=true;rFoot.scale.setScalar(s*1.3);reticle.visible=true;
 }
+
+// ---- Room awareness: detected planes -> table seating (with glow ring) and wall-snapped reading panel ----
+let PLN=[],plT=0,seatWanted=false,seatT0=0,seat=null;
+const _ph=new THREE.Vector3(),_pf=new THREE.Vector3(),_pl=new THREE.Vector3();
+const seatRing=new THREE.Group();seatRing.visible=false;seatRing.renderOrder=5;dolly.add(seatRing);
+[[.97,1,.7],[.8,1,.12],[.6,1,.05]].forEach(([a,b,o])=>seatRing.add(new THREE.Mesh(new THREE.RingGeometry(a,b,96).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0x5df0ff,transparent:true,opacity:o,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending}))));
+function scanPlanes(frame,ref){
+  const set=frame.detectedPlanes;if(!set)return;const out=[];
+  set.forEach(p=>{
+    const pose=frame.getPose(p.planeSpace,ref);if(!pose||!p.polygon||p.polygon.length<3)return;
+    const m=new THREE.Matrix4().fromArray(pose.transform.matrix);let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;
+    p.polygon.forEach(q=>{x0=Math.min(x0,q.x);x1=Math.max(x1,q.x);z0=Math.min(z0,q.z);z1=Math.max(z1,q.z);});
+    out.push({m,inv:m.clone().invert(),b:[x0,x1,z0,z1],area:(x1-x0)*(z1-z0),c:new THREE.Vector3((x0+x1)/2,0,(z0+z1)/2).applyMatrix4(m),n:new THREE.Vector3(0,1,0).transformDirection(m)});
+  });
+  PLN=out;
+}
+function headPose(){const xc=renderer.xr.getCamera();xc.getWorldPosition(_ph);xc.getWorldDirection(_pf);}
+function pickTable(){
+  headPose();_pf.y=0;if(_pf.lengthSq()<1e-4)return null;_pf.normalize();let best=null,bs=1e9;
+  for(const p of PLN){
+    if(p.n.y<.85||p.area<.15||p.c.y<.35||p.c.y>1.25)continue;
+    const dx=p.c.x-_ph.x,dz=p.c.z-_ph.z,d=Math.hypot(dx,dz);if(d>2.5)continue;
+    const sc=d+(d>1e-3&&(dx*_pf.x+dz*_pf.z)/d<0?1.5:0)-Math.min(p.area,1.5)*.2;if(sc<bs){bs=sc;best=p;}
+  }
+  return best;
+}
+function seatOn(p){
+  headPose();const l=_pl.copy(_ph).applyMatrix4(p.inv),cl=(v,a,b)=>b-a<.5?(a+b)/2:Math.max(a+.25,Math.min(b-.25,v));
+  const pt=new THREE.Vector3(cl(l.x,p.b[0],p.b[1]),0,cl(l.z,p.b[2],p.b[3])).applyMatrix4(p.m),s=.22;
+  G.scale.setScalar(s);G.position.copy(pt).addScaledVector(p.n,s*1.35+.03);G.quaternion.identity();
+  seat={g:G.position.clone(),s};seatRing.position.copy(pt).addScaledVector(p.n,.004);seatRing.scale.setScalar(s*1.3);
+  xrNote='Seated on a nearby surface. Press Place to move it';hud();
+}
+function seatStep(now){
+  if(seatWanted&&!needCenter&&!placing&&arRest===0){
+    if(now-seatT0>9000)seatWanted=false;
+    else{const p=pickTable();if(p){seatOn(p);seatWanted=false;}}
+  }
+  const on=!!seat&&!placing&&G.visible&&G.position.distanceTo(seat.g)<.08&&Math.abs(G.scale.x-seat.s)<.02;
+  seatRing.visible=on;if(on)seatRing.children[0].material.opacity=.55+.2*Math.sin(now/600);
+}
+function wallFor(h,f){
+  let best=null,bt=1e9;
+  for(const p of PLN){
+    if(Math.abs(p.n.y)>.25||p.area<.45)continue;
+    const n=p.n.clone();n.y=0;if(n.lengthSq()<1e-4)continue;n.normalize();if(n.dot(_pl.copy(h).sub(p.c))<0)n.negate();
+    const dn=f.dot(n);if(dn>-.2)continue;const t=_pl.copy(p.c).sub(h).dot(n)/dn;if(t<.5||t>2.2||t>=bt)continue;
+    const hp=h.clone().addScaledVector(f,t),l=hp.clone().applyMatrix4(p.inv);
+    if(l.x<p.b[0]+.3||l.x>p.b[1]-.3||l.z<p.b[2]+.2||l.z>p.b[3]-.2)continue;
+    bt=t;best={p:hp.addScaledVector(n,.04),ry:Math.atan2(n.x,n.z)};
+  }
+  return best;
+}
 function arFrame(frame){
+  const now=performance.now();
+  if(now-plT>600){plT=now;try{scanPlanes(frame,renderer.xr.getReferenceSpace());}catch(e){}}
+  seatStep(now);
   if(!placing)return;
   const ref=renderer.xr.getReferenceSpace();
   try{syncPlanes(frame,ref);}catch(e){}
@@ -2418,14 +2671,14 @@ renderer.xr.addEventListener('sessionstart',()=>{
   sessAR=reqLook!==null||envAR;
   const pass=reqLook!==null?reqLook==='mr':envAR;reqLook=null;
   controls.enabled=false;kb.visible=true;kInit=false;kbOpen=false;U.uX.value=1;needCenter=false;lostT=0;arRest=0;arAnchor=null;arLast=null;arDirty=false;arBusy=false;
-  try{renderer.xr.setFoveation(0);}catch(e){}
+  try{renderer.xr.setFoveation(.5);}catch(e){}
   {const bl=s.renderState&&s.renderState.baseLayer;U.uH.value=bl&&bl.framebufferHeight?bl.framebufferHeight:2000;}
   dolly.position.set(0,0,0);dolly.rotation.set(0,0,0);
   rig.forEach(r=>{r.c.userData.vis=false;});resetGestures();
   applyLook(pass);
   xrNote='';
   if(pass){
-    if(nodes.length){setupHit(s);const rest=arBegin();if(!rest){centerS=fitScale(.28);needCenter=true;}xrNote=rest?'Field restored to where you left it. Press Place to move it':'Pinch and drag to move the field. Place snaps it to a surface';}else{xrNote='Load text before entering mixed reality';}
+    if(nodes.length){setupHit(s);const rest=arBegin();if(!rest){centerS=fitScale(.28);needCenter=true;seatWanted=true;seatT0=performance.now();seat=null;}xrNote=rest?'Field restored to where you left it. Press Place to move it':'Pinch and drag to move the field. Place snaps it to a surface';}else{xrNote='Load text before entering mixed reality';}
   }else if(nodes.length){centerS=fitScale(.4);needCenter=true;xrNote='Pinch and drag to move the field. Two hands resize and turn it';}
   watchSession(s);
   hud();
@@ -2437,7 +2690,7 @@ renderer.xr.addEventListener('sessionend',()=>{
   if(arMode){G.position.set(0,1.4,-1.1);G.scale.setScalar(.6);G.quaternion.identity();}
   if(isFinite(G.scale.x+G.position.x)===false||G.scale.x<.05){G.position.set(0,1.4,-1.1);G.scale.setScalar(.6);G.quaternion.identity();}
   U.uG.value=1;U.uX.value=0;arMode=false;sessAR=false;needCenter=false;placing=false;placedOnce=false;xrNote='';reticle.visible=false;planeG.visible=false;
-  clearPlanes();teardownHit();arBtn.textContent='Enter mixed reality';vrB.textContent='Enter VR';
+  clearPlanes();teardownHit();PLN=[];seat=null;seatWanted=false;seatRing.visible=false;arBtn.textContent='Enter mixed reality';vrB.textContent='Enter VR';
   renderer.xr.setReferenceSpaceType('local-floor');
   rig.forEach(r=>{r.hm.visible=true;r.cm.visible=true;r.uiHold=false;});resetGestures();
   dolly.position.set(0,0,0);dolly.rotation.set(0,0,0);camera.position.set(0,1.6,.9);controls.target.copy(G.position);controls.update();hud();
@@ -2465,7 +2718,7 @@ function nearestWorld(p,rad){
 }
 function gestures(dt){
   GDT=dt;
-  const P=rig.map(r=>{const v=handPoint(r);return v&&isFinite(v.x+v.y+v.z)?v:null;});uiStep();const act=[0,1].filter(i=>P[i]&&rig[i].pin&&!rig[i].uiHold&&!placing);
+  const P=rig.map(r=>{const v=handPoint(r);return v&&isFinite(v.x+v.y+v.z)?v:null;});uiStep();const act=[0,1].filter(i=>P[i]&&rig[i].pin&&!rig[i].uiHold&&!placing);if(act.length)seatWanted=false;
   if(act.length===2){
     const a=P[0],b=P[1],d=a.distanceTo(b),M=a.clone().add(b).multiplyScalar(.5),v=b.clone().sub(a);
     const fresh=()=>({d:Math.max(d,.05),v:v.clone(),M,P:G.position.clone(),s:G.scale.x,q:G.quaternion.clone()});
@@ -2950,6 +3203,17 @@ async function brain(){
   paintRd();
 }
 $('#brain').onclick=brain;
+$('#cpbtn').onclick=async()=>{
+  const bt=$('#cpbtn');if(bt.dataset.busy)return;bt.dataset.busy='1';
+  try{
+    const b=await bundle();
+    if(!b){stat('Select concepts or type a query first, then press Copy.');return;}
+    const t=sysP()+'\n\n--- INPUT ---\n'+b.text;
+    try{await navigator.clipboard.writeText(t);}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(_){}ta.remove();}
+    const o=bt.textContent;bt.textContent='Copied';setTimeout(()=>{bt.textContent=o;},1200);
+    stat('Copied the LLM prompt ('+t.length.toLocaleString()+' characters).');
+  }finally{delete bt.dataset.busy;}
+};
 async function follow(){
   const inp=$('#rdq'),q=inp.value.trim();
   if(rdBusy){rdBusy.abort();return;}
@@ -3016,6 +3280,40 @@ function psBody(){
   if(!r.ps.length)return 'No passage contains these words together.';
   return r.ps.slice(0,40).map(p=>p.text.replace(/\s*\n+\s*/g,' ')+'\n\u2014 '+p.doc+(p.pct!=null?' ('+p.pct+'%)':'')).join('\n\n');
 }
+function psSig(){
+  const r=PS.res;if(!r)return 'PS|\u2026';
+  return 'PS|'+psBody()+'|'+r.ps.map(p=>{const m=p.m||[];return m.length+':'+(m.length?m[0][0]+'-'+m[m.length-1][1]:'');}).join(',');
+}
+// Passages as paragraphs of styled word pieces: 0 plain, 1 related (cyan), 2 core (amber), 3 source line.
+function psRuns(){
+  const r=PS.res;
+  if(!r)return [[['Searching passages\u2026',0,false]]];
+  if(!r.ps.length)return [[['No passage contains these words together.',0,false]]];
+  return r.ps.slice(0,40).map(p=>{
+    const t=p.text.replace(/[\r\n\t]/g,' '),st=new Uint8Array(t.length),segs=[];
+    (p.m||[]).forEach(([a,b,k])=>{for(let i=Math.max(0,a);i<b&&i<t.length;i++)st[i]=k?2:1;});
+    const re=/\S+/g;let m;
+    while((m=re.exec(t))){let s0=m.index;const e=s0+m[0].length;
+      while(s0<e){let q=s0;while(q<e&&st[q]===st[s0])q++;segs.push([t.slice(s0,q),st[s0],q===e]);s0=q;}}
+    segs.push(['\u2014 '+p.doc+(p.pct!=null?' ('+p.pct+'%)':''),3,false]);
+    return segs;
+  });
+}
+const PSF=['26px ','26px ','600 26px ','italic 22px '],PSC=['#d6f6ff','#5df0ff','#ffb347','rgba(214,246,255,.55)'];
+function wrapRuns(x,paras,w){
+  const lines=[];x.font=PSF[0]+FNT;const spw=x.measureText(' ').width;
+  paras.forEach((segs,pi)=>{
+    let cur=[],cw=0,word=[],ww=0;
+    const place=sp=>{if(cw+ww>w&&cur.length){lines.push(cur);cur=[];cw=0;}
+      word.forEach((g,i)=>cur.push({t:g[0],s:g[1],sp:sp&&i===word.length-1}));cw+=ww+(sp?spw:0);word=[];ww=0;};
+    segs.forEach(g=>{x.font=PSF[g[1]]+FNT;word.push(g);ww+=x.measureText(g[0]).width;if(g[2])place(true);});
+    if(word.length)place(false);
+    if(cur.length)lines.push(cur);
+    if(pi<paras.length-1)lines.push([]);
+  });
+  return lines;
+}
+function drawRunLine(x,l,px,y){l.forEach(g=>{x.font=PSF[g.s]+FNT;x.fillStyle=PSC[g.s];x.fillText(g.t,px,y);px+=x.measureText(g.t).width;if(g.sp){x.font=PSF[0]+FNT;px+=x.measureText(' ').width;}});}
 function rdDrag(r){
   r.c.getWorldPosition(_o);r.c.getWorldQuaternion(_q);_d.set(0,0,-1).applyQuaternion(_q);
   rb.position.copy(_o).addScaledVector(_d,r.rdd);
@@ -3024,7 +3322,9 @@ function rdDrag(r){
 function drawRdIfDirty(){
   const vis=!$rd.hidden||psXR;rb.visible=vis;if(!vis){rbPlaced=false;return;}
   if(!rbPlaced){const xc=renderer.xr.getCamera();xc.getWorldPosition(_h);xc.getWorldDirection(_f);_f.y=0;_f.normalize();
-    rb.position.set(_h.x+_f.x*.75,_h.y+.05,_h.z+_f.z*.75);rb.rotation.set(0,Math.atan2(_h.x-rb.position.x,_h.z-rb.position.z),0);rb.updateMatrixWorld(true);rbPlaced=true;rdD=true;}
+    rb.position.set(_h.x+_f.x*.75,_h.y+.05,_h.z+_f.z*.75);rb.rotation.set(0,Math.atan2(_h.x-rb.position.x,_h.z-rb.position.z),0);
+    if(arMode&&PLN.length){const w=wallFor(_h,xc.getWorldDirection(_pf));if(w){rb.position.copy(w.p);rb.rotation.set(0,w.ry,0);const t=xrNote='Reading panel snapped to the wall';hud();setTimeout(()=>{if(xrNote===t){xrNote='';hud();}},3500);}}
+    rb.updateMatrixWorld(true);rbPlaced=true;rdD=true;}
   if(!rdD)return;rdD=false;
   const x=rx,h=rdCur,L=reads();x.clearRect(0,0,RW,RH);
   rr(x,0,0,RW,RH,18);x.fillStyle='rgba(3,16,28,.92)';x.fill();rr(x,1.5,1.5,RW-3,RH-3,18);x.strokeStyle='rgba(255,179,71,.7)';x.lineWidth=3;x.stroke();
@@ -3033,12 +3333,12 @@ function drawRdIfDirty(){
     x.fillStyle='#d6fbff';x.font=(k.lab?'600 24px ':'600 30px ')+FNT;x.textAlign='center';if(k.lab)x.fillText(k.lab,k.x+k.w/2,k.y+k.h/2,k.w-12);else x.fillText(k.id==='p'?'\u2039':k.id==='n'?'\u203a':k.id==='u'?'\u25B2':k.id==='d'?'\u25BC':'\u2715',k.x+k.w/2,k.y+k.h/2);});
   x.textAlign='center';x.font='24px '+FNT;x.fillStyle='rgba(214,246,255,.8)';x.fillText(psXR?(PS.res?`${Math.min(PS.res.total,PS.off+PS.res.ps.length)}/${PS.res.total}`:'\u2026'):rdLive?'live':L.length?`${rdIdx+1}/${L.length}`:'0/0',110,33);
   x.textAlign='left';x.font='600 28px '+FNT;x.fillStyle='#ffb347';x.fillText(psXR?(PS.spec?PS.spec.title:'Passages'):h?h.text:'Reading',226,33,RW-310);
-  const body=psXR?psBody():rdParts(h).map(p=>(p.err||p.a||p.note||'Thinking\u2026')).join('\n\n')||'No readings yet. Select concepts and press LLM.';
+  const body=psXR?psSig():rdParts(h).map(p=>(p.err||p.a||p.note||'Thinking\u2026')).join('\n\n')||'No readings yet. Select concepts and press LLM.';
   x.font='26px '+FNT;
-  if(rdBody!==body){rdBody=body;rdLines=wrapT(x,body.replace(/\*\*/g,''),RW-110);if(psXR||(!rdLive&&!rdPend))rdSy=0;}
+  if(rdBody!==body){rdBody=body;rdLines=psXR?wrapRuns(x,psRuns(),RW-110):wrapT(x,body.replace(/\*\*/g,''),RW-110);if(psXR||(!rdLive&&!rdPend))rdSy=0;}
   const LH=36,top=72,vh=RH-top-(CFG.on&&!psXR?118:40);rdMax=Math.max(0,rdLines.length*LH-vh);if(!psXR&&(rdLive||rdPend))rdSy=rdMax;rdSy=Math.min(rdSy,rdMax);
   x.save();x.beginPath();x.rect(0,top,RW,vh);x.clip();x.fillStyle=rdPend&&rdPend.err?'#ff8a8a':'#d6f6ff';
-  rdLines.forEach((l,i)=>{const y=top+i*LH+LH/2-rdSy;if(y>top-LH&&y<top+vh+LH)x.fillText(l,28,y);});x.restore();
+  rdLines.forEach((l,i)=>{const y=top+i*LH+LH/2-rdSy;if(y>top-LH&&y<top+vh+LH){if(Array.isArray(l))drawRunLine(x,l,28,y);else x.fillText(l,28,y);}});x.restore();
   if(rdMax>0){rr(x,RW-14,top,6,vh,3);x.fillStyle='rgba(93,240,255,.15)';x.fill();const bh=Math.max(30,vh*vh/(vh+rdMax));rr(x,RW-14,top+(vh-bh)*rdSy/rdMax,6,bh,3);x.fillStyle='rgba(255,179,71,.9)';x.fill();}
   x.font='18px '+FNT;x.fillStyle='rgba(214,246,255,.6)';x.fillText('Drag the title bar to move. Drag the text or use \u25B2\u25BC to scroll.',28,RH-20,RW-56);
   rtex.needsUpdate=true;
@@ -3296,6 +3596,12 @@ function perfSample(r){
   else pUp=0;
 }
 const clock=new THREE.Clock();
+let pfA=0,pfN=0,pfT=0;
+function xrPerf(raw){
+  if(!/[?&]perf\b/.test(location.search))return;
+  pfA+=raw;pfN++;pfT+=raw;if(pfT<2){return;}
+  const fps=pfN/pfA;xrNote='fps '+fps.toFixed(0)+'  frame '+(1000*pfA/pfN).toFixed(1)+' ms';hud();pfA=0;pfN=0;pfT=0;
+}
 renderer.setAnimationLoop((t,frame)=>{
   const xr=renderer.xr.isPresenting,idle=!xr&&!perfBusy(t);
   if(idle&&t-lastR<33)return;
@@ -3305,7 +3611,7 @@ renderer.setAnimationLoop((t,frame)=>{
   {const tk=thinking()?1:0;if(tk&&!pulseOn)U.uP0.value=U.uT.value;pulseOn=tk;U.uK.value+=(tk-U.uK.value)*Math.min(1,dt*(tk?4:2.5));if(U.uK.value<.005&&!tk)U.uK.value=0;}
   G.updateMatrixWorld(true);tlStep(dt);jStep(dt);platform();lodLabels(dt);colUpdate(dt);
   if(needCenter&&renderer.xr.isPresenting&&frame){const xc=renderer.xr.getCamera(),o=xc.getWorldPosition(new THREE.Vector3()),d=xc.getWorldDirection(new THREE.Vector3());d.y=0;if(d.lengthSq()>1e-4){d.normalize();G.scale.setScalar(centerS);const dist=arMode?.7:.75;G.position.set(o.x+d.x*dist,o.y-.1,o.z+d.z*dist);G.quaternion.identity();needCenter=false;}}
-  if(renderer.xr.isPresenting){xrWatch(dt);placeKB(dt);gestures(dt);sticks(dt);if(arMode&&frame){arPersist(frame,dt);arFrame(frame);}drawKBIfDirty();drawRdIfDirty();}
+  if(renderer.xr.isPresenting){xrPerf(raw);xrWatch(dt);placeKB(dt);gestures(dt);sticks(dt);if(arMode&&frame){arPersist(frame,dt);arFrame(frame);}drawKBIfDirty();drawRdIfDirty();}
   else{
     U.uH.value=renderer.domElement.height;
     const v=new THREE.Vector3(),sp=dt*1.2;
