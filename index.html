@@ -161,6 +161,19 @@ input[type=text],input[type=password],select,textarea{background:rgba(255,255,25
 #infof #clr{white-space:nowrap;margin-left:auto}
 #clr{color:#ff6b6b;background:rgba(255,70,70,.16);border-color:rgba(255,120,120,.7)}
 #clr:hover{background:rgba(255,70,70,.32)}
+/* always-visible scrollbars, pushed to the panel's right edge so they never sit over words */
+#info{padding-right:5px}
+#infob .ih,#infof{margin-right:9px}
+#infob .il{scrollbar-gutter:stable;overscroll-behavior:contain;padding-right:14px;margin-right:0}
+#info li{margin-right:0}
+#docs,#hbody{scrollbar-gutter:stable;overscroll-behavior:contain}
+#hbody{padding-right:16px}
+#docs .dr{padding-right:12px}
+#infob .il::-webkit-scrollbar,#docs::-webkit-scrollbar,#hbody::-webkit-scrollbar{width:14px;height:14px;-webkit-appearance:none}
+#infob .il::-webkit-scrollbar-track,#docs::-webkit-scrollbar-track,#hbody::-webkit-scrollbar-track{background:rgba(93,240,255,.1);border-left:1px solid rgba(93,240,255,.25);border-radius:0}
+#infob .il::-webkit-scrollbar-thumb,#docs::-webkit-scrollbar-thumb,#hbody::-webkit-scrollbar-thumb{background:rgba(93,240,255,.75);border:3px solid transparent;background-clip:padding-box;border-radius:7px;min-height:40px}
+#infob .il::-webkit-scrollbar-thumb:hover,#docs::-webkit-scrollbar-thumb:hover,#hbody::-webkit-scrollbar-thumb:hover{background:rgba(255,179,71,.9);background-clip:padding-box}
+@supports not selector(::-webkit-scrollbar){#infob .il,#docs,#hbody{scrollbar-width:auto;scrollbar-color:rgba(93,240,255,.8) rgba(93,240,255,.12)}}
 </style>
 </head>
 <body>
@@ -1143,8 +1156,10 @@ function saveField(){
     n:nodes.map(n=>[n.word,n.freq,n.score,n.x,n.y,n.z,n.pos]),
     e:edges.map(e=>[e.s,e.t,e.w,e.wn,e.fwd,e.gap,e.g,e.bk]),f:forceWords.slice()});}catch(e){}},50);
 }
-const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
+const COARSE=matchMedia('(pointer:coarse)').matches,LOW=COARSE||(navigator.hardwareConcurrency||8)<=4||(navigator.deviceMemory||8)<=4;
+const PRMAX=Math.min(devicePixelRatio,COARSE?1.75:2),PRMIN=Math.min(PRMAX,.75);let prCur=PRMAX,lastAct=0,lastR=0,lastDown=0;
+const renderer=new THREE.WebGLRenderer({antialias:!(LOW&&devicePixelRatio>=2),alpha:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(prCur);renderer.setSize(innerWidth,innerHeight);
 renderer.xr.enabled=true;renderer.xr.setFramebufferScaleFactor(1.4);renderer.xr.setReferenceSpaceType('local-floor');
 document.body.prepend(renderer.domElement);
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x01040a);
@@ -1175,7 +1190,7 @@ vec2 dd=vb.xy-va.xy;float L=length(dd)+1e-6;vec2 n=dd/L;
 float tr=aW>0.?min(aW*sc/max(abs(n.x),1e-3),.016*sc/max(abs(n.y),1e-3)):0.;
 gl_Position=projectionMatrix*modelViewMatrix*vec4(mix(position,aO,min(tr/L,.48)),1.);}`,
 fragmentShader:`uniform float uG;varying float vA;varying vec3 vC;void main(){gl_FragColor=vec4(vC*vA*uG,1.);}`});
-const TR=7,PN=TR*2;
+const TR=LOW?4:7,PN=TR*2;
 const dotMat=new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,...ADD,
 vertexShader:`attribute vec3 aB;attribute vec3 aCol;attribute float aPh;attribute float aI;attribute float aDir;attribute float aLag;attribute float aK;attribute float aSp;attribute float aWa;attribute float aWb;uniform float uT;uniform float uH;uniform float uX;varying float vI;varying float vH;varying vec3 vC;
 void main(){float len=length(aB-position)+1e-4;float t=fract(uT*.075*aSp/len+aPh);float d=t*len-aLag*.014;float f=d/len;
@@ -1184,8 +1199,8 @@ vec2 dd=vb.xy-va.xy;float L2=length(dd)+1e-6;vec2 nn=dd/L2;float ax=max(abs(nn.x
 float ta=aWa>0.?min(min(aWa*sc/ax,.016*sc/ay)/L2,.48):0.;float tb=aWb>0.?min(min(aWb*sc/ax,.016*sc/ay)/L2,.48):0.;
 float ts=aDir>.5?tb:ta,te=aDir>.5?ta:tb;float fm=ts+(1.-ts-te)*fc;
 vec3 p=mix(position,aB,aDir>.5?1.-fm:fm);vec4 mv=modelViewMatrix*vec4(p,1.);
-float tail=pow(1.-aLag/7.,1.6);float fade=smoothstep(0.,.14,f)*(1.-smoothstep(.86,1.,f));
-gl_PointSize=max(.0078*(.45+.55*tail)*uH*.5*projectionMatrix[1][1]/-mv.z,1.2+.8*uX);vI=on*fade*tail*min(1.,aI+.35);vH=1.-aLag/7.;vC=aCol;
+float tail=pow(1.-aLag/${TR}.,1.6);float fade=smoothstep(0.,.14,f)*(1.-smoothstep(.86,1.,f));
+gl_PointSize=max(.0078*(.45+.55*tail)*uH*.5*projectionMatrix[1][1]/-mv.z,1.2+.8*uX);vI=on*fade*tail*min(1.,aI+.35);vH=1.-aLag/${TR}.;vC=aCol;
 gl_Position=on>0.?projectionMatrix*mv:vec4(2.,2.,2.,1.);}`,
 fragmentShader:`uniform float uG;uniform float uX;varying float vI;varying float vH;varying vec3 vC;void main(){float d=length(gl_PointCoord-.5);if(d>.5)discard;float h=pow(1.-d*2.,2.)*(1.-.4*uX);float c=smoothstep(.2+.12*uX,.0,d);
 gl_FragColor=vec4((vC*h+vec3(1.)*c*vH*vH)*vI*.75*uG,1.);}`});
@@ -1206,7 +1221,7 @@ function refreshWV(){
   edges.forEach((e,k)=>{const x=nHW[e.s],y=nHW[e.t],o=k*PN;aW[k*2]=x;aW[k*2+1]=y;for(let m=0;m<PN;m++){a[o+m]=x;b[o+m]=y;}});
   lines.geometry.attributes.aW.needsUpdate=true;dots.geometry.attributes.aWa.needsUpdate=true;dots.geometry.attributes.aWb.needsUpdate=true;wvPend=false;
 }
-let pts,lines,dots,dI,dD,dC,nA,nS,nC,nF,nP,eI,eC,labelGroup=new THREE.Group();G.add(labelGroup);
+let eRank=[],lIdx,dIdx,lSpec=0,lAmbN=0,dN=0,lastLN=-1,pts,lines,dots,dI,dD,dC,nA,nS,nC,nF,nP,eI,eC,labelGroup=new THREE.Group();G.add(labelGroup);
 const labelCache=new Map();
 function label(i,kind){
   const key=nodes[i].word+kind;let s=labelCache.get(key);
@@ -1243,6 +1258,8 @@ function buildVisuals(){
   const lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.BufferAttribute(ep,3));
   const eO=new Float32Array(E*6);edges.forEach((e,k)=>{const a=nodes[e.s],b=nodes[e.t];eO.set([b.x,b.y,b.z,a.x,a.y,a.z],k*6);});lg.setAttribute('aO',new THREE.BufferAttribute(eO,3));lg.setAttribute('aW',new THREE.BufferAttribute(new Float32Array(E*2),1));lg.setAttribute('aT',new THREE.BufferAttribute(et,1));lg.setAttribute('aPh',new THREE.BufferAttribute(ph,1));
   lg.setAttribute('aI',new THREE.BufferAttribute(eI,1));lg.setAttribute('aCol',new THREE.BufferAttribute(eC,3));
+  lIdx=new Uint32Array(E*2);dIdx=new Uint32Array(E*PN);lg.setIndex(new THREE.BufferAttribute(lIdx,1));dg.setIndex(new THREE.BufferAttribute(dIdx,1));
+  eRank=Array.from({length:E},(_,k)=>k).sort((a,b)=>edges[b].w-edges[a].w);lSpec=0;lAmbN=0;dN=0;lastLN=-1;
   lines=new THREE.LineSegments(lg,edgeMat);lines.frustumCulled=false;
   G.add(lines,pts,dots);SS.clear();selV++;sel=-1;Q=null;RV.cn=-1;RV.playing=false;applyState();
 }
@@ -1480,6 +1497,13 @@ function applyState(quick){
     const bkw=e.bk>.25;
     for(let m=0;m<PN;m++){const q=k*PN+m,rv=m>=TR&&bkw&&!J.on;dI[q]=rv?act*Math.min(1,e.bk*2.2):act;dD[q]=rv?1-dir:dir;dC.set(dc,q*3);}
   });
+  {let n=0;const sp=new Uint8Array(E);
+   for(let k=0;k<E;k++)if(ec[k]>0||ei[k]>.2||J.pe.has(k)){sp[k]=1;lIdx[n++]=k*2;lIdx[n++]=k*2+1;}
+   lSpec=n;let amb=0;
+   for(let r=0;r<E;r++){const k=eRank[r];if(!sp[k]&&ei[k]>0){lIdx[n++]=k*2;lIdx[n++]=k*2+1;amb++;}}
+   lAmbN=amb;lines.geometry.index.needsUpdate=true;
+   let d=0;for(let k=0;k<E;k++){const b=k*PN;for(let m=0;m<PN;m++)if(dI[b+m]>.02)dIdx[d++]=b+m;}
+   dN=d;dots.geometry.index.needsUpdate=true;dots.geometry.setDrawRange(0,dN);lastLN=-1;lastAct=performance.now();edgeBudget();}
   aT.needsUpdate=true;for(const a of ['aI','aDir','aCol'])dots.geometry.attributes[a].needsUpdate=true;
   for(const a of ['aI','aSize','aCol','aF','aP'])pts.geometry.attributes[a].needsUpdate=true;
   lines.geometry.attributes.aI.needsUpdate=true;lines.geometry.attributes.aCol.needsUpdate=true;
@@ -2713,9 +2737,34 @@ function colUpd(dt){
   nodes.forEach(n=>{n.hw=undefined;});wvPend=true;kDirty=true;iDirty=true;rdD=true;
   if(nodes.length&&pts)applyState(true);
 }).catch(()=>{});
+
+const _ev=new THREE.Vector3();
+function edgeBudget(){
+  if(!lines||(!lAmbN&&!lSpec))return;
+  let fr=1;
+  if(!renderer.xr.isPresenting){camera.getWorldPosition(_ev);G.worldToLocal(_ev);fr=Math.max(.15,Math.min(1,1-(_ev.length()-2)*.2125));}
+  else fr=.6;
+  if(LOW)fr*=.65;
+  const na=Math.min(lAmbN,Math.max(Math.ceil(lAmbN*fr),Math.min(lAmbN,300))),cnt=lSpec+na*2;
+  if(cnt!==lastLN){lastLN=cnt;lines.geometry.setDrawRange(0,cnt);}
+}
+['pointerdown','pointermove','wheel','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>{lastAct=performance.now();},{passive:true}));
+const perfBusy=t=>t-lastAct<4000||J.on||RV.playing;
+let pAcc=0,pN=0,pUp=0;
+function perfSample(r){
+  if(r>.25)return;pAcc+=r;pN++;if(pAcc<1.5)return;const avg=pAcc/pN;pAcc=0;pN=0;
+  const now=performance.now();
+  if(avg>.026&&prCur>PRMIN){prCur=Math.max(PRMIN,prCur-.25);lastDown=now;pUp=0;renderer.setPixelRatio(prCur);renderer.setSize(innerWidth,innerHeight);}
+  else if(avg<.0185&&prCur<PRMAX&&now-lastDown>10000){if(++pUp>=4){pUp=0;prCur=Math.min(PRMAX,prCur+.25);renderer.setPixelRatio(prCur);renderer.setSize(innerWidth,innerHeight);}}
+  else pUp=0;
+}
 const clock=new THREE.Clock();
 renderer.setAnimationLoop((t,frame)=>{
-  const dt=Math.min(clock.getDelta(),.05);U.uT.value+=dt;
+  const xr=renderer.xr.isPresenting,idle=!xr&&!perfBusy(t);
+  if(idle&&t-lastR<33)return;
+  lastR=t;
+  const raw=clock.getDelta(),dt=Math.min(raw,.05);
+  if(!xr){if(!idle)perfSample(raw);edgeBudget();}U.uT.value+=dt;
   G.updateMatrixWorld(true);tlStep(dt);jStep(dt);platform();lodLabels(dt);colUpdate(dt);
   if(needCenter&&renderer.xr.isPresenting&&frame){const xc=renderer.xr.getCamera(),o=xc.getWorldPosition(new THREE.Vector3()),d=xc.getWorldDirection(new THREE.Vector3());d.y=0;if(d.lengthSq()>1e-4){d.normalize();G.scale.setScalar(centerS);const dist=arMode?.8:1.1;G.position.set(o.x+d.x*dist,o.y-.1,o.z+d.z*dist);G.quaternion.identity();needCenter=false;}}
   if(renderer.xr.isPresenting){xrWatch(dt);placeKB(dt);gestures(dt);sticks(dt);if(arMode&&frame){arPersist(frame,dt);arFrame(frame);}drawKBIfDirty();drawRdIfDirty();}
