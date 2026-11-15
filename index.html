@@ -191,17 +191,10 @@ input[type=text],input[type=password],select,textarea{background:rgba(255,255,25
 #psth{width:46px;text-align:center;padding:2px 4px}
 body.llmoff #pssv{display:none!important}
 .pc mark.hot{background:rgba(255,179,71,.38);color:#fff}
-#st{left:14px;top:70px;width:min(320px,calc(100vw - 28px));max-height:min(58vh,520px);overflow:auto;z-index:5;font-size:calc(13px*var(--fs,1))}
-.sr{display:flex;align-items:center;gap:8px;padding:4px 6px;cursor:pointer;border:1px solid transparent;border-radius:8px}
-.sr:hover{background:rgba(255,255,255,.1)}.sr.on{border-color:var(--am);color:var(--am)}
-.sr .sl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sr small{opacity:.65;margin-left:6px}
-.sw{width:12px;height:12px;border-radius:50%;flex:none}.sw.br{background:#ffd36b;box-shadow:0 0 8px #ffb347}
-.sh{font-size:calc(12px*var(--fs,1));font-weight:600;margin:10px 0 4px;color:var(--am)}
 #ur{left:50%;top:56px;transform:translateX(-50%);width:min(460px,calc(100vw - 20px));z-index:5;font-size:calc(13px*var(--fs,1))}
 #info li{align-items:center}#info li>span:first-child{flex:1;min-width:0}
 .pg{padding:0 6px;font-size:calc(12px*var(--fs,1));line-height:1.5;color:var(--am);border-color:rgba(255,179,71,.5)}
-#urlbtn,#stbtn{height:38px;padding:0 14px}
-#stbtn.tg{background:rgba(255,179,71,.3);border-color:var(--am)}
+#urlbtn{height:38px;padding:0 14px}
 #addm{left:14px;top:60px;z-index:9;padding:6px;display:flex;flex-direction:column;gap:4px;min-width:230px;border-radius:12px}
 #addm button{text-align:left;width:100%;border-radius:8px}#addm small{opacity:.65;margin-left:6px}
 #hbtn{font-size:calc(19px*var(--fs,1));line-height:1;padding:0;width:38px}
@@ -229,7 +222,7 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
   <div class="row" id="tl" hidden><button id="play" title="With words selected: fly through them in resonant order as the current. Otherwise reveal words one by one.">Play</button><input id="tlr" type="range" min="0" max="0" value="0" step="1" aria-label="Resonance timeline"><span id="tlc">0/0</span><button id="spd" title="Playback speed">1×</button></div>
   <div id="stat"></div>
 </div>
-<div id="addm" class="panel" role="menu" hidden><button data-a="file" role="menuitem">Files <small>text, PDF, Word, HTML</small></button><button data-a="wiki" role="menuitem">Wikipedia pages</button><button data-a="url" role="menuitem">Web page / PDF by URL</button></div>
+<div id="addm" class="panel" role="menu" hidden><button data-a="file" role="menuitem">Files <small>text, PDF, Word, HTML</small></button><button data-a="wiki" role="menuitem">Wikipedia pages</button><button data-a="demo" role="menuitem">Demo text <small>oceans and climate</small></button><button data-a="url" role="menuitem">Web page / PDF by URL</button></div>
 <form id="qf" class="panel"><input id="q" type="text" placeholder="Ask about your text, e.g. how does heat affect the ocean?" autocomplete="off"><button type="submit" id="askb" aria-label="Ask" title="Ask"></button></form>
 <button id="hbtn" title="History" aria-label="History">🌳</button>
 <button id="sbtn" title="Settings" aria-label="Settings">&#9881;</button>
@@ -251,6 +244,7 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
  <div class="hh"><b>Settings</b><button id="sx" title="Close">&#10005;</button></div>
  <label class="f" for="sfs">Font size <b id="sfsv"></b></label><input id="sfs" type="range" min="0.8" max="1.6" step="0.05" style="width:100%;accent-color:var(--am)">
  <label class="f"><input id="srb" type="checkbox"> Rainbow lines by word frequency (off: colour by link strength)</label>
+ <label class="f" for="scut">Query pruning: emerged words and passages must connect the query terms at least this strongly (0 to 1, relative to the best)</label><input id="scut" type="text" inputmode="decimal" autocomplete="off">
  <label class="f"><input id="sllm" type="checkbox"> Enable LLM assistant (adds the Ask LLM button and reading panel)</label>
  <div id="sllmbox" hidden>
  <label class="f" for="sprov">Assistant provider</label>
@@ -274,7 +268,7 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 </div>
 <div id="rd" class="panel" hidden><div id="rdh"><button id="rdp" title="Older reading">&#8249;</button><span id="rdn">0/0</span><button id="rdnx" title="Newer reading">&#8250;</button><span id="rdt"></span><button id="rdst" title="Stop generating" hidden>&#9632; Stop</button><button id="rdx" title="Close">&#10005;</button></div><div id="rdb"></div><div id="rdm"></div><form id="rdf"><input id="rdq" type="text" placeholder="Ask a follow-up within this context" autocomplete="off"><button type="submit" id="rds">Send</button></form></div>
 <button id="helpbtn" aria-label="Help" aria-expanded="false" title="Help">?</button>
-<div id="hint" class="panel" hidden>Desktop: drag to orbit, wheel to zoom, WASD/QE to fly, click concepts to select several (selected words pulse; click again to deselect). With words selected, Play puts you inside the current, flying node to node in resonant order. Every word you type is searched, including common words like the or not; only the drawn field hides them. VR: a query bar, keyboard and a results box float in view (point and pinch or trigger the bar to type). Mixed reality (Quest 3): press Enter mixed reality to see your room through the passthrough cameras. Pinch and drag anywhere to spin the data sphere freely in any direction (press Move to carry it instead; the right stick also spins it), pinch with both hands and spread to resize and twist it, quick pinch on a word to select it (or tap a selected word chip in the list box to deselect it); select several to see how they connect, and pinch a selected word again to deselect it. The field remembers where you put it between mixed-reality sessions. Sticks fly in VR. A adds the selected concept to the query, B clears. Press Place on the panel to snap the field onto a wall, table or floor. Brighter nodes are more frequent words. Zoom out and neighbouring words collapse into the most dominant word of their area (bigger dot, labelled); zoom in and they expand again. The field learns Hebbian-style: words you query or select together are pulled closer and their links glow, and the arrangement is saved per text. Line colour is based on how often the words at each end occur in your text: rare words are violet and blue, then green and yellow, and the most frequent words are orange and red, so each line blends between its two ends. The cog (top right) can switch lines to colour by link strength instead. Once you have a query or selection, a Play button, timeline and speed button appear: words appear one by one, strongest resonance first (the speed button cycles 0.25x to 4x). The results box scrolls: thumbstick while pointing at it, or pinch-drag it; tap a row to select that word. Source passages: select a concept (or click a link line, or press the ¶ button on a row) to see the sentences where the words occur, with the document name; how many are shown adapts to how strongly the words resonate. Attach PDF, Word or HTML files, or fetch URLs.</div>
+<div id="hint" class="panel" hidden>Desktop: drag to orbit, wheel to zoom, WASD/QE to fly, click concepts to select several (selected words pulse; click again to deselect). With words selected, Play puts you inside the current, flying node to node in resonant order. Every word you type is searched, including common words like the or not; only the drawn field hides them. VR: a query bar, keyboard and a results box float in view (point and pinch or trigger the bar to type). Mixed reality (Quest 3): press Enter mixed reality to see your room through the passthrough cameras. Pinch and drag anywhere to spin the data sphere freely in any direction (press Move to carry it instead; the right stick also spins it), pinch with both hands and spread to resize and twist it, quick pinch on a word to select it (or tap a selected word chip in the list box to deselect it); select several to see how they connect, and pinch a selected word again to deselect it. The field remembers where you put it between mixed-reality sessions. Sticks fly in VR. A adds the selected concept to the query, B clears. Press Place on the panel to snap the field onto a wall, table or floor. In VR the top buttons are: + paste copied text, \u21C4 switch saved text, W fetch Wikipedia for the typed topic, \u00B6 source passages, and the gear toggles the LLM. Brighter nodes are more frequent words. Zoom out and neighbouring words collapse into the most dominant word of their area (bigger dot, labelled); zoom in and they expand again. The field learns as you use it: words you query or select together are drawn a little closer each time, and the arrangement is saved per text. Line colour is based on how often the words at each end occur in your text: rare words are violet and blue, then green and yellow, and the most frequent words are orange and red, so each line blends between its two ends. The cog (top right) can switch lines to colour by link strength instead. Once you have a query or selection, a Play button, timeline and speed button appear: words appear one by one, strongest resonance first (the speed button cycles 0.25x to 4x). The results box scrolls: thumbstick while pointing at it, or pinch-drag it; tap a row to select that word. Source passages: select a concept (or click a link line, or press the ¶ button on a row) to see the sentences where the words occur, with the document name; how many are shown adapts to how strongly the words resonate. Attach PDF, Word or HTML files, or fetch URLs.</div>
 <script type="text/plain" id="engine-src">
 // Concept Field analysis engine. Runs in a Web Worker; owns the corpus and all derived state.
 // The main thread talks to it with {t:'ingest'|'query'|'reset', rid, ...} messages.
@@ -1028,7 +1022,7 @@ function edgeSeq(){
 // Repulsion is a 1/r force between every pair. At or above BH_MIN nodes it is evaluated with a
 // Barnes-Hut octree (O(N log N) per iteration); below that the exact all-pairs loop is as fast
 // or faster, because the tree has a large constant factor.
-const BH_MIN=4000,BH_THETA=.6,BH_MAXD=24,BH_LEAF=8;
+const BH_MIN=1500,BH_THETA=.6,BH_MAXD=24,BH_LEAF=8;
 let bhCap=0,bhCh,bhSx,bhSy,bhSz,bhMx,bhMy,bhMz,bhCx,bhCy,bhCz,bhHw,bhCnt,bhHead,bhLeaf,bhNxt;
 function bhAlloc(cap){
   bhCh=new Int32Array(cap*8);bhSx=new Float64Array(cap);bhSy=new Float64Array(cap);bhSz=new Float64Array(cap);
@@ -1186,22 +1180,25 @@ function getPassages(m){
   const wi=new Map(),mustS=new Set(m.must||[]);
   m.ids.forEach((id,i)=>{const o=wi.get(id);if(!o)wi.set(id,{w:m.w[i],must:mustS.has(i)});else{o.w=Math.max(o.w,m.w[i]);o.must=o.must||mustS.has(i);}});
   const mustIds=[...wi].filter(x=>x[1].must).map(x=>x[0]),mustN=mustIds.length,needId=m.need!=null?m.ids[m.need]:null;
+  const qg=(m.qg||[]).map(g=>g.map(id=>FOLDM&&FOLDM[id]!==undefined?FOLDM[id]:id)),nG=qg.length,qmap=new Map();
+  qg.forEach((g,gi)=>g.forEach(id=>{const l=qmap.get(id);l?l.push(gi):qmap.set(id,[gi]);}));
   const cand=new Set();mustIds.forEach(id=>{const l=PIX.get(id);if(l)l.forEach(p=>cand.add(p));});
   // Score = weighted count of distinct emerged words in the passage per unit of text (density).
   const rows=[];let maxmc=0;
-  cand.forEach(p=>{const ps=PASS[p];let mc=0,sc=0,hn=needId==null;
-    for(const id of ps.ids){const o=wi.get(id);if(!o)continue;if(o.must){mc++;sc+=o.w*Math.max(.25,cIdf[id]||0);}if(id===needId)hn=true;}
+  cand.forEach(p=>{const ps=PASS[p];let mc=0,sc=0,hn=needId==null;const qs=nG?new Set():null;
+    for(const id of ps.ids){if(qs){const qq=qmap.get(id);if(qq)qq.forEach(g=>qs.add(g));}const o=wi.get(id);if(!o)continue;if(o.must){mc++;sc+=o.w*Math.max(.25,cIdf[id]||0);}if(id===needId)hn=true;}
     if(!hn||!mc)return;
     if(mc>maxmc)maxmc=mc;
-    rows.push({p,mc,s:sc/Math.max(10,(ps.b-ps.a)/6)});});
+    rows.push({p,mc,qc:qs?qs.size:0,s:sc/Math.max(10,(ps.b-ps.a)/6)*(nG?.4+.6*qs.size/nG:1)});});
   // keep passages holding most of the emerged words that occur together anywhere (all of them for a link)
   const req=m.all?Math.max(1,Math.min(mustN,maxmc)):Math.max(1,Math.ceil(.5*maxmc)),R=Math.max(0,Math.min(1,m.R==null?.5:m.R)),cap=m.cap||20;
-  const ok=rows.filter(r=>r.mc>=req).sort((a,b)=>b.s-a.s||b.mc-a.mc),total=ok.length;
+  const qreq=nG>1?Math.max(1,Math.ceil(.5*rows.reduce((a,r)=>r.qc>a?r.qc:a,0))):0;
+  const ok=rows.filter(r=>r.mc>=req&&r.qc>=qreq).sort((a,b)=>b.s-a.s||b.mc-a.mc),total=ok.length;
   const budget=Math.max(Math.min(2,cap),Math.min(cap,Math.round(1+R*(cap-1)))),frac=m.full?0:.7-.5*R,top=ok[0]?ok[0].s:0;
   if(m.full){const u=[],sn=new Set();
-    for(const r of ok.slice().sort((a,b)=>b.mc-a.mc||b.s-a.s)){const ps=PASS[r.p],key=DOCS[ps.d].text.slice(ps.a,ps.b).trim().toLowerCase().slice(0,100);if(sn.has(key))continue;sn.add(key);u.push(r);}
-    const off=Math.max(0,(m.off|0)),pg=u.slice(off,off+cap).map(r=>{const o=fmtPass(r,PASS[r.p],wi);o.rel=top?Math.min(1,r.s/top):1;return o;});
-    return {ps:pg,total:u.length,off,R,budget,req,mustN};}
+    for(const r of ok.slice().sort((a,b)=>b.mc-a.mc||b.s-a.s)){const ps=PASS[r.p],key=DOCS[ps.d].text.slice(ps.a,ps.b).trim().toLowerCase().slice(0,100);if(sn.has(key))continue;sn.add(key);if(m.cut&&top&&r.s<m.cut*top)continue;u.push(r);}
+    const off=Math.max(0,(m.off|0)),pg=u.slice(off,off+cap).map(r=>{const o=fmtPass(r,PASS[r.p],wi);o.rel=top?Math.min(1,r.s/top):1;o.qc=r.qc;return o;});
+    return {ps:pg,total:u.length,off,R,budget,req,mustN,nq:nG};}
   const out=[],seen=new Set();
   for(const r of ok){
     if(out.length>=(m.full?cap:budget)||r.s<frac*top)break;
@@ -1293,11 +1290,12 @@ let nodes=[],edges=[],word2i=new Map(),sel=-1,Q=null;const SS=new Set();let selV
 let curDocs=[],curCorpus=null,replaying=false,hist=[],corpora=[];
 const col={lv:null,f:0,n:-1,hide:null,cnt:null,t:0};
 const FV=1;var fsT=0,PRE=null;
+let HLOG=[];
 function saveField(){
   clearTimeout(fsT);const id=curCorpus;if(!id||!nodes.length)return;
   fsT=setTimeout(async()=>{try{await dbP;await dbPut('fields',{id,v:FV,ts:Date.now(),
     n:nodes.map(n=>[n.word,n.freq,n.score,n.x,n.y,n.z,n.pos]),
-    e:edges.map(e=>[e.s,e.t,e.w,e.wn,e.fwd,e.gap,e.g,e.bk]),f:forceWords.slice()});}catch(e){}},50);
+    e:edges.map(e=>[e.s,e.t,e.w,e.wn,e.fwd,e.gap,e.g,e.bk]),f:forceWords.slice(),h:HLOG.slice(-200)});}catch(e){}},50);
 }
 const COARSE=matchMedia('(pointer:coarse)').matches,LOW=COARSE||(navigator.hardwareConcurrency||8)<=4||(navigator.deviceMemory||8)<=4;
 const PRMAX=Math.min(devicePixelRatio,COARSE?1.75:2),PRMIN=Math.min(PRMAX,.75);let prCur=PRMAX,lastAct=0,lastR=0,lastDown=0;
@@ -1406,8 +1404,6 @@ function buildVisuals(){
   lines=new THREE.LineSegments(lg,edgeMat);lines.frustumCulled=false;
   G.add(lines,pts,dots);SS.clear();selV++;sel=-1;Q=null;RV.cn=-1;RV.playing=false;pulseKey='';updatePulse(true);applyState();psAuto();
 }
-const ST={on:false,comm:null,clusters:[],bridges:[],hue:[],focus:-1};
-const clGroup=new THREE.Group();G.add(clGroup);
 const RV={on:false,playing:false,order:[],count:0,acc:0,cs:-2,cq:null,cn:-1,speed:1};
 const J={on:false,playing:false,built:false,quiet:false,snap:false,seq:[],count:0,curve:null,len:0,marks:[],u:0,dwell:0,pe:new Set(),pn:new Set(),pd:new Map(),cur:-1,save:null};
 const jOK=()=>SS.size>0&&!renderer.xr.isPresenting;
@@ -1609,12 +1605,6 @@ function applyState(quick){
     SS.forEach(s=>{nI[s]=Math.max(nI[s],1.3);nc[s]=2;ea[s]=1;labs.push([s,1]);});
     if(J.cur>=0)nI[J.cur]=Math.max(nI[J.cur],1.5);
   }
-  const stOn=!!(ST.on&&ST.comm&&ST.comm.length===N&&!hasCtx()&&!J.on);clGroup.visible=stOn;
-  if(stOn){
-    for(let i=0;i<N;i++){const inF=ST.focus<0||ST.comm[i]===ST.focus;nI[i]=inF?Math.max(nI[i],.45+.55*ni[i]):nI[i]*.12;ea[i]=inF?1:.2;}
-    if(ST.focus>=0)for(let e=0;e<E;e++){const x=edges[e];if(ST.comm[x.s]!==ST.focus||ST.comm[x.t]!==ST.focus)ei[e]*=.15;}
-    ST.bridges.forEach(b=>{nI[b.i]=Math.max(nI[b.i],1.25);nc[b.i]=2;ea[b.i]=1;labs.push([b.i,1]);});
-  }
   const hid=new Uint8Array(N);let newest=-1;
   if(RV.on){
     const ord=RV.order;
@@ -1632,7 +1622,7 @@ function applyState(quick){
   for(let i=0;i<N;i++){
     nA[i]=nI[i];nP[i]=SS.has(i)?1:0;nF[i]=(SS.size&&(sm||nc[i]>=2))?(nc[i]>=2?1:0):(Q&&Q.A?(nc[i]===1?1:0):.3+.7*ni[i]);nS[i]=.013+.055*ni[i]+(nc[i]===2?.03:nc[i]===1?.012*nI[i]:0);
     const cc=nc[i]===2?GO:nc[i]===1?mix(CY,AM,Math.min(1,nI[i])):nc[i]===3?WH:(ni[i]<.7?mix(VI,CY,ni[i]/.7):mix(CY,WH,(ni[i]-.7)/.3));
-    nC.set(stOn&&nc[i]<2?stCol(i,cc):cc,i*3);if(!hid[i]&&!(colOn&&col.hide[i])&&(nI[i]>.1||pre[i]>.1))visible.push(i);
+    nC.set(cc,i*3);if(!hid[i]&&!(colOn&&col.hide[i])&&(nI[i]>.1||pre[i]>.1))visible.push(i);
   }
   if(col.hide&&col.hide.length===N&&!hasCtx())for(let i=0;i<N;i++)if(!col.hide[i]&&col.cnt[i]>1)nS[i]*=1+.14*Math.sqrt(col.cnt[i]-1);
   if(newest>=0)nS[newest]*=1.8;
@@ -1666,27 +1656,55 @@ async function runQuery(text,again){
   if(!nodes.length){stat('Build the field first.');return;}
   const words=[...new Set([...text.toLowerCase().replace(/[\u2018\u2019]/g,"'").matchAll(TOKRE)].map(m=>/^\d/.test(m[0])?m[0].replace(/,/g,''):m[0]).filter(w=>/^[\p{L}\p{M}\d]/u.test(w)))];
   if(ingesting){stat('The field is still building. Try again in a moment.');return;}
+  LASTQ=text.trim();
   const my=++qSeq,ep=EPOCH,tm=setTimeout(()=>stat('Searching…'),250);
   pulseKey='';updatePulse(true);let rr;qBusy++;try{rr=await ENG.call({t:'query',words,again:!!again});}catch(err){qBusy--;clearTimeout(tm);stat('Query failed: '+err.message);return;}qBusy--;
   clearTimeout(tm);
   if(my!==qSeq||ep!==EPOCH)return;
-  if(rr.rebuilt){setField(rr.rebuilt);saveField();buildVisuals();}
+  if(rr.rebuilt){setField(rr.rebuilt);replayHebb();saveField();buildVisuals();}
   const res=rr.res;
   if(!res){Q=null;applyState();stat('None of those words occur in your text. Try terms from it.');return;}
   const N=nodes.length,E=edges.length,A=new Float32Array(N),show=new Uint8Array(N),pq=new Array(N);let miss=0,n1=0,n2=0;const seedK=new Set();
   res.seeds.forEach(sd=>sd.ids.forEach(id=>{const k=word2i.get(id);if(k!==undefined){A[k]=1;show[k]=1;pq[k]=new Map([[sd.q,1]]);seedK.add(k);}}));
   res.M.forEach(e=>{const k=word2i.get(e.id);if(k===undefined){miss++;return;}
     A[k]=Math.max(A[k],(e.lp===1?1:.8)*(.25+.75*Math.min(1,e.s)));show[k]=1;pq[k]=e.pq;e.lp===1?n1++:n2++;});
-  const top=[...Array(N).keys()].filter(i=>show[i]).sort((a,b)=>A[b]-A[a]);
+  // How strongly each emerged word connects the query terms: strength across terms, weighted by how many it spans.
+  const nT=res.seeds.length,cv=new Float32Array(N);let cm=1e-9;
+  res.M.forEach(e=>{const k=word2i.get(e.id);if(k===undefined||seedK.has(k))return;let sum=0,hit=0;
+    res.seeds.forEach(sd=>{const v=(e.pq&&e.pq.get&&e.pq.get(sd.q))||0;sum+=v;if(v>0)hit++;});
+    const c=(sum/nT)*(.5+.5*hit/nT);cv[k]=c;if(c>cm)cm=c;});
+  for(let i=0;i<N;i++)cv[i]/=cm;seedK.forEach(k=>{cv[k]=1;});
+  {const cut=cthrOf();res.M.map(e=>word2i.get(e.id)).filter(k=>k!==undefined&&!seedK.has(k)).sort((a,b)=>cv[b]-cv[a])
+    .forEach((k,r)=>{if(r>=3&&cv[k]<cut){show[k]=0;A[k]=0;}});}
+  const top=[...Array(N).keys()].filter(i=>show[i]).sort((a,b)=>cv[b]-cv[a]||A[b]-A[a]);
   const eIv=new Float32Array(E);let mo=1e-6;
   edges.forEach((e,k)=>{if(!show[e.s]||!show[e.t])return;let ov=0;
     pq[e.s].forEach((v,q)=>{ov+=Math.min(v,pq[e.t].get(q)||0);});
     ov=(ov+.25*Math.min(A[e.s],A[e.t]))*(.4+.6*e.wn);eIv[k]=ov;mo=Math.max(mo,ov);});
   for(let k=0;k<E;k++)eIv[k]=eIv[k]>0?.1+.95*Math.pow(eIv[k]/mo,.8):.03;
-  Q={A,show,top,eI:eIv,terms:res.seeds.map(s=>s.q),seed:seedK};SS.clear();selV++;sel=-1;updatePulse(false);applyState();if(!replaying){pushHist(queryEntry(text,top,A,eIv));}
+  if(!replaying)hebbPull([...seedK,...top.slice(0,4)]);
+  Q={A,show,top,eI:eIv,terms:res.seeds.map(s=>s.q),seed:seedK,cv,sg:res.seeds.map(s=>s.ids.slice())};SS.clear();selV++;sel=-1;updatePulse(false);applyState();if(!replaying){pushHist(queryEntry(text,top,A,eIv));}
   psAuto();stat(summary());
 }
-function toggleSel(i){if(SS.has(i))SS.delete(i);else SS.add(i);sel=SS.size?[...SS].pop():-1;selV++;applyState();psAuto();return SS.has(i);}
+function hebbMove(ids){
+  ids=[...new Set(ids)].filter(i=>nodes[i]);if(ids.length<2)return false;
+  let cx=0,cy=0,cz=0;ids.forEach(i=>{cx+=nodes[i].x;cy+=nodes[i].y;cz+=nodes[i].z;});cx/=ids.length;cy/=ids.length;cz/=ids.length;
+  ids.forEach(i=>{const n=nodes[i];if(Math.hypot(cx-n.x,cy-n.y,cz-n.z)<.08)return;n.x+=(cx-n.x)*.07;n.y+=(cy-n.y)*.07;n.z+=(cz-n.z)*.07;});
+  return true;
+}
+function hebbPull(ids){
+  if(!pts||!lines||!dots)return;
+  ids=[...new Set(ids)].filter(i=>nodes[i]);if(!hebbMove(ids))return;
+  HLOG.push(ids.map(i=>nodes[i].word));if(HLOG.length>200)HLOG.shift();
+  try{updateGeom();}catch(e){console.warn(e);}
+  saveField();
+}
+// A rebuild (a rare query word joins the field) re-runs the layout from scratch, so replay what the field had learned.
+function replayHebb(){
+  if(!HLOG.length)return;const ix=new Map(nodes.map((n,i)=>[n.word,i]));
+  HLOG.forEach(g=>hebbMove(g.map(w=>ix.get(w)).filter(i=>i!==undefined)));
+}
+function toggleSel(i){if(SS.has(i))SS.delete(i);else SS.add(i);sel=SS.size?[...SS].pop():-1;selV++;if(SS.has(i)&&SS.size>1&&!replaying)hebbPull([...SS]);applyState();psAuto();return SS.has(i);}
 function select(i){if(i<0)return;const on=toggleSel(i);if(on&&SS.size===1&&!replaying)pushHist(selectEntry(i));}
 function clearAll(){SS.clear();selV++;sel=-1;Q=null;$q.value='';applyState();psAuto();if(nodes.length)stat(summary());}
 const $=s=>document.querySelector(s),$q=$('#q'),$info=$('#info');
@@ -1732,6 +1750,38 @@ docsEl.addEventListener('click',async e=>{
     await ingest(rest);
   }
 });
+// ---- Demo text: lets a first-time visitor (or a headset user with empty storage) start immediately ----
+const DEMO_ID='demo-oceans-v1';
+const DEMO_DOCS=[
+{name:'Demo: The ocean as a heat reservoir',text:`The ocean is the largest heat reservoir at the surface of the Earth. Water absorbs far more heat than air or land for each degree of warming, so the ocean stores most of the extra energy that greenhouse gases trap in the atmosphere. When sunlight reaches the surface of the ocean, the upper layer warms first. Wind mixes that warm water downward, and the heat slowly spreads into deeper layers over decades.
+
+Heat in the ocean does not stay in one place. Currents carry warm water from the tropics toward the poles and return cold water along the bottom. This circulation moves energy around the planet and keeps climates mild in many regions. The Gulf Stream, for example, carries warm water across the Atlantic and warms the climate of western Europe.
+
+As the ocean warms, water expands. This thermal expansion is one of the main causes of sea level rise, together with melting ice from glaciers and ice sheets. Warmer water also holds less dissolved oxygen, which stresses fish and other marine life. Many species move toward cooler water, and fisheries shift with them.
+
+Warm surface water feeds storms. Hurricanes draw energy from the heat of the ocean, and a warmer ocean can make them wetter and more intense. Marine heat waves, long periods of unusually warm water, can bleach coral reefs and damage kelp forests. Because the ocean has such a large capacity to store heat, it responds slowly, and the warming that is already stored will continue to affect the climate for many years.`},
+{name:'Demo: Carbon, acidity and the living ocean',text:`The ocean also absorbs carbon dioxide from the atmosphere. About a quarter of the carbon dioxide released by burning fossil fuels dissolves in seawater. This slows the warming of the atmosphere, but it changes the chemistry of the ocean. Carbon dioxide reacts with water to form carbonic acid, and the acidity of seawater rises. This process is called ocean acidification.
+
+Acidification makes it harder for corals, oysters, snails and tiny plankton to build shells and skeletons from calcium carbonate. Because plankton form the base of the marine food web, changes in their numbers affect fish, seabirds and whales. Cold water dissolves more carbon dioxide than warm water, so a warming ocean absorbs gas less easily, and the ocean can take up less carbon over time.
+
+Life in the ocean also moves carbon. Phytoplankton use sunlight and carbon dioxide to grow, in the same way that plants on land do. When plankton die or are eaten, some of the carbon sinks to the deep ocean and stays there for centuries. This biological pump is a natural way that the ocean stores carbon. Warmer, more stratified water can reduce the mixing that brings nutrients up to the surface, which may weaken the pump.
+
+Coral reefs show how heat and acidity act together. Warm water makes corals expel the algae that feed them, which is called bleaching, while acidic water weakens their skeletons. Healthy reefs protect coasts from waves and support a large share of marine species, so their loss affects food, jobs and safety for people who live near the sea.`},
+{name:'Demo: Weather, ice and the water cycle',text:`The water cycle links the ocean to the weather over land. Heat from the sun makes water evaporate from the surface of the ocean. The vapor rises, cools and condenses into clouds, and rain or snow carries the water back to land and sea. Warmer air can hold more water vapor, so a warmer climate tends to bring heavier rainfall in some regions and stronger drought in others.
+
+Ice is part of the same system. Glaciers and ice sheets store fresh water on land. When they melt, the water flows into the ocean and raises sea level. Sea ice floats on the ocean and reflects sunlight back to space. When sea ice melts, dark ocean water is exposed and absorbs more heat, which warms the region further. This feedback is one reason the Arctic is warming faster than the rest of the planet.
+
+Fresh water from melting ice can also change the circulation of the ocean. Cold, salty water sinks in the North Atlantic and drives the deep currents. If too much fresh water dilutes the surface, the water becomes lighter and sinks less easily, which could slow the circulation and change weather in Europe and the tropics.
+
+Monsoons, droughts and floods all depend on how heat moves between the ocean and the atmosphere. During El Nino, warm water spreads across the tropical Pacific and shifts rainfall patterns around the world. Understanding these links between heat, water, ice and wind is the reason scientists study the ocean and the climate as one connected system.`}
+];
+async function loadDemo(boot){
+  if(ingesting)return false;
+  const ok=await ingest(DEMO_DOCS,{id:DEMO_ID});
+  if(ok)stat(summary()+' Demo text loaded. Try asking: how does heat affect the ocean?');
+  return ok;
+}
+
 async function ingest(docs,opts={}){
   let f;try{await dbP;f=await dbReq('fields','readonly',o=>o.get(opts.id||hashDocs(docs)));}catch(e){}
   PRE=f;return ingest0(docs,opts);
@@ -1745,7 +1795,7 @@ async function ingest0(docs,opts={}){
   catch(err){if(my===EPOCH)ingesting=false;stat('Analysis failed: '+err.message);renderDocs();return false;}
   if(my!==EPOCH)return false;
   ingesting=false;
-  docCount=docs.length;curDocs=docs;setField(r);
+  docCount=docs.length;curDocs=docs;setField(r);HLOG=r.built?[]:((pre&&pre.h)||[]);
   if(r.built)saveField();
   if(nodes.length<3){stat('Not enough repeated concepts. Attach longer text.');renderDocs();return false;}
   buildVisuals();stat(summary());renderDocs();
@@ -1798,19 +1848,21 @@ $('#spd').onclick=tlSpeed;
 $('#helpbtn').onclick=()=>{const h=$('#hint');h.hidden=!h.hidden;$('#helpbtn').setAttribute('aria-expanded',String(!h.hidden));};
 $('#tlr').addEventListener('input',e=>tlSet(+e.target.value));
 $info.addEventListener('click',e=>{const pg=e.target.closest('button.pg');if(pg){e.stopPropagation();PS.auto=true;showPassages(pg.dataset.e!==undefined?specLink(+pg.dataset.e):specWith(+pg.dataset.n));return;}const xb=e.target.closest('button[data-x]');if(xb){e.stopPropagation();toggleSel(+xb.dataset.x);return;}const li=e.target.closest('li[data-i]');if(li)select(+li.dataset.i);});
+function fieldR(){let r=.3;for(const n of nodes){const d=Math.hypot(n.x,n.y,n.z);if(d>r)r=d;}return r;}
+const fitScale=t=>THREE.MathUtils.clamp(t/fieldR(),.08,4);
 let needCenter=false,arMode=false,placing=false,placedOnce=false,arScale=null,lastHit=false,reqLook=null,sessAR=false,centerS=.3,xrNote='';
-let hudA='Concept field',hudB='';
-const KW=1024,KH=532,KEYS=[];
+let hudA='',hudB='';
+const KW=1600,KH=900,KEYS=[];
 const kc=document.createElement('canvas');kc.width=KW;kc.height=KH;
 const kctx=kc.getContext('2d'),ktex=new THREE.CanvasTexture(kc);ktex.colorSpace=THREE.SRGBColorSpace;ktex.anisotropy=4;
-const kb=new THREE.Mesh(new THREE.PlaneGeometry(.64,.64*KH/KW),new THREE.MeshBasicMaterial({map:ktex,transparent:true,depthTest:false}));
+const kb=new THREE.Mesh(new THREE.PlaneGeometry(KW/1000,KH/1000),new THREE.MeshBasicMaterial({map:ktex,transparent:true,depthTest:false}));
 kb.renderOrder=30;kb.visible=false;kb.frustumCulled=false;scene.add(kb);
 const IW=640,IH=600,HEAD=110,ROW=52,VIS=7,FNT='system-ui,-apple-system,sans-serif';
 let HV=110,ibChips=[];const ic=document.createElement('canvas');ic.width=IW;ic.height=IH;
 const ictx=ic.getContext('2d'),itex=new THREE.CanvasTexture(ic);itex.colorSpace=THREE.SRGBColorSpace;itex.anisotropy=4;
 const ib=new THREE.Mesh(new THREE.PlaneGeometry(.4,.4*IH/IW),new THREE.MeshBasicMaterial({map:itex,transparent:true,depthTest:false}));
 ib.renderOrder=30;ib.visible=false;ib.frustumCulled=false;scene.add(ib);
-let kDirty=true,iDirty=true,infoCache=null,kbOpen=false,pressK=null,pressT=0,lastPh=0,hsig='';
+let ibHpx=0,kDirty=true,iDirty=true,infoCache=null,kbOpen=false,pressK=null,pressT=0,lastPh=0,hsig='';
 function infoData(){
   if(SS.size){
     const sl=[...SS];
@@ -1825,7 +1877,7 @@ function infoData(){
     const rows=dr.concat([...m].sort((a,b)=>b[1].c-a[1].c||b[1].v-a[1].v).map(([i,o])=>({i,l:nodes[i].word+(o.c>1?' \u2605':''),v:Math.min(1,o.v+.4*(o.c-1)),n:o.c+'/'+sl.length})));
     return {key:'m'+sl.join(','),t:sl.map(i=>nodes[i].word).join(' + '),s:`${sl.length} selected \u00b7 \u2605 links several`,rows};
   }
-  if(Q&&Q.top)return {key:'q'+Q.terms.join(' '),t:'',s:'',rows:Q.top.filter(i=>!(Q.seed&&Q.seed.has(i))).map(i=>({i,l:nodes[i].word,v:Q.A[i],n:Q.A[i].toFixed(2)}))};
+  if(Q&&Q.top)return {key:'q'+Q.terms.join(' '),t:'',s:'',rows:Q.top.filter(i=>!(Q.seed&&Q.seed.has(i))).map(i=>({i,l:nodes[i].word,v:Q.cv?Q.cv[i]:Q.A[i],n:(Q.cv?Q.cv[i]:Q.A[i]).toFixed(2)}))};
   return null;
 }
 let iScroll=0,ibHot=false;
@@ -1869,81 +1921,103 @@ function drawInfo(){
   if(n>VIS){const th=vis*ROW,bh=Math.max(30,th*VIS/n),by=HV+(th-bh)*(iScroll/(n-VIS));
     rr(x,IW-14,HV,6,th,3);x.fillStyle='rgba(93,240,255,.15)';x.fill();rr(x,IW-14,by,6,bh,3);x.fillStyle='rgba(255,179,71,.9)';x.fill();}
   x.textAlign='left';
+  if(ibHpx!==h){ibHpx=h;relayoutKeys();kDirty=true;}
 }
-const kOff=()=>hasCtx()?0:-76,kExt=()=>kbOpen?KH+kOff():(hasCtx()?214:140);
-function relayoutKeys(){const o=kOff();KEYS.forEach(k=>{k.y=k.y0+(k.kbk?o:0);});}
+function relayoutKeys(){const y=Math.round(98+ibHpx*.625+10);KEYS.forEach(k=>{if(k.ib)k.y=y;});}
 function hud(){
   relayoutKeys();
-  hudA=SS.size>1?SS.size+' selected':sel>=0?nodes[sel].word:(Q&&Q.terms?'Query: '+Q.terms.join(' '):'Concept field');
-  hudB=xrNote||(sel>=0?`${nodes[sel].adj.length} links · A adds to query · B clears`:(nodes.length?nodes.length+' concepts · pinch to select':'Load text before entering VR'));
+  hudA='';
+  hudB=xrNote||(sel>=0?`${nodes[sel].adj.length} links \u00b7 A adds to query \u00b7 B clears`:(nodes.length?nodes.length+' concepts \u00b7 pinch to select':'Load text before entering VR'));
   kDirty=true;iDirty=true;
 }
+// Layout mirrors the desktop screen: + top-left with the timeline under it, history and settings
+// top-right, the info panel on the right, the query bar bottom-centre, ? bottom-left.
 (function buildKeys(){
-  KEYS.push({id:'field',x:12,y:66,w:516,h:70,act:'open'},{label:'',x:538,y:66,w:70,h:70,act:'ask'},
-    {label:'Clear sel.',x:618,y:66,w:106,h:70,act:'clear',ctk:true},{id:'mode',x:734,y:66,w:130,h:70,act:'mode'},{id:'place',x:874,y:66,w:138,h:70,act:'place'},
-    {id:'auto',x:628,y:8,w:104,h:44,act:'auto',ctk:true,llm:true},{id:'brain',x:740,y:8,w:92,h:44,act:'brain',ctk:true,llm:true},{id:'move',x:842,y:8,w:94,h:44,act:'move'},{id:'toggle',x:944,y:8,w:68,h:44,act:'toggle'},
-    {id:'play',x:12,y:146,w:112,h:58,act:'play',tlk:true},{id:'tl',x:134,y:146,w:540,h:58,act:'tl',tlk:true},{id:'spd',x:880,y:146,w:132,h:58,act:'spd',tlk:true});
+  const B=1576;
+  KEYS.push(
+    {id:'plus',x:24,y:24,w:64,h:64,act:'plus'},
+    {id:'corp',x:100,y:24,w:64,h:64,act:'corp'},
+    {id:'wiki',x:176,y:24,w:64,h:64,act:'wiki'},
+    {id:'pass',x:B-64-12-64-12-64,y:24,w:64,h:64,act:'pass'},
+    {id:'hist',x:B-64-12-64,y:24,w:64,h:64,act:'hist'},
+    {id:'set',x:B-64,y:24,w:64,h:64,act:'set'},
+    {id:'play',x:28,y:104,w:120,h:56,act:'play',tlk:true},
+    {id:'tl',x:160,y:104,w:430,h:56,act:'tl',tlk:true},
+    {id:'spd',x:672,y:104,w:110,h:56,act:'spd',tlk:true},
+    {id:'toggle',x:352,y:812,w:68,h:64,act:'toggle'},
+    {id:'field',x:440,y:812,w:640,h:64,act:'open'},
+    {id:'ask',label:'',x:1092,y:812,w:64,h:64,act:'ask'},
+    {id:'help',x:24,y:824,w:52,h:52,act:'help'},
+    {id:'move',x:B-150-10-130-10-104,y:820,w:104,h:56,act:'move'},
+    {id:'mode',x:B-150-10-130,y:820,w:130,h:56,act:'mode'},
+    {id:'place',x:B-150,y:820,w:150,h:56,act:'place'},
+    {id:'clear',label:'Clear',x:B-110,y:108,w:110,h:48,act:'clear',ctk:true,ib:true},
+    {id:'brain',x:B-110-8-120,y:108,w:120,h:48,act:'brain',ctk:true,llm:true,ib:true},
+    {id:'auto',x:B-110-8-120-8-92,y:108,w:92,h:48,act:'auto',ctk:true,llm:true,ib:true});
   const u=78,g=6,rows=[
     [...'1234567890'].map(c=>[c,1]).concat([['\u232b',1.6,'bs']]),
     [...'qwertyuiop'].map(c=>[c,1]),
     [...'asdfghjkl'].map(c=>[c,1]).concat([["'",1]]),
     [...'zxcvbnm'].map(c=>[c,1]).concat([['-',1],[',',1],['.',1]]),
     [['space',7.2,'sp'],['Ask',2.8,'ask']]];
-  rows.forEach((row,ri)=>{const tw=row.reduce((s,k)=>s+k[1]*u,0)+g*(row.length-1);let x=(KW-tw)/2;const y=222+ri*62;
+  rows.forEach((row,ri)=>{const tw=row.reduce((s,k)=>s+k[1]*u,0)+g*(row.length-1);let x=(KW-tw)/2;const y=488+ri*62;
     row.forEach(([l,w,a])=>{KEYS.push({label:l,x,y,w:w*u,h:56,act:a||'ch',kbk:true});x+=w*u+g;});});
-  KEYS.forEach(k=>k.y0=k.y);
 })();
 function rr(x,a,b,w,h,r){x.beginPath();if(x.roundRect)x.roundRect(a,b,w,h,r);else x.rect(a,b,w,h);}
 function drawKB(){
-  const x=kctx,ext=kExt(),F='system-ui,-apple-system,sans-serif';
-  x.clearRect(0,0,KW,KH);
-  rr(x,0,0,KW,ext,16);x.fillStyle='rgba(40,52,72,.72)';x.fill();
-  rr(x,1.5,1.5,KW-3,ext-3,16);x.strokeStyle='rgba(255,255,255,.4)';x.lineWidth=3;x.stroke();
-  x.textBaseline='middle';x.textAlign='left';
-  x.font='600 28px '+F;x.fillStyle=sel>=0?'#ffb347':'#5df0ff';
-  let a=hudA;if(a.length>30)a=a.slice(0,29)+'\u2026';x.fillText(a,20,32);
-  const aw=x.measureText(a).width;x.font='20px '+F;x.fillStyle='rgba(214,246,255,.85)';
-  x.fillText(hudB,36+aw,33,Math.max(60,590-aw-36));
+  const x=kctx,F=FNT,ctx=hasCtx();
+  x.clearRect(0,0,KW,KH);x.textBaseline='middle';x.textAlign='left';
   const hov=new Set(rig.map(r=>r.hk).filter(Boolean)),now=performance.now();
+  const pane=(a,b,w,h,r,al)=>{rr(x,a,b,w,h,r);x.fillStyle='rgba(30,42,60,'+al+')';x.fill();x.strokeStyle='rgba(255,255,255,.4)';x.lineWidth=2.5;x.stroke();};
+  if(ctx)pane(16,96,780,72,16,.55);
+  pane(428,800,740,88,18,.6);
+  if(kbOpen)pane(290,476,1020,318,18,.82);
+  if(hudB){x.font='20px '+F;x.fillStyle='rgba(214,246,255,.8)';x.fillText(hudB,28,ctx?190:116,720);}
   for(const k of KEYS){
     if(k.kbk&&!kbOpen)continue;
-    if((k.tlk||k.ctk)&&!hasCtx())continue;
+    if((k.tlk||k.ctk)&&!ctx)continue;
     if(k.llm&&!CFG.on)continue;
     const on=hov.has(k),fl=pressK===k&&now-pressT<170;
+    if(k.id==='plus'||k.id==='hist'||k.id==='set'||k.id==='help'||k.id==='corp'||k.id==='wiki'||k.id==='pass'){
+      const cx=k.x+k.w/2,cy=k.y+k.h/2;
+      x.beginPath();x.arc(cx,cy,k.w/2,0,6.2832);x.fillStyle=fl?'rgba(255,179,71,.6)':on?'rgba(255,255,255,.3)':'rgba(255,255,255,.12)';x.fill();x.strokeStyle='rgba(255,255,255,.45)';x.lineWidth=2;x.stroke();
+      x.fillStyle='#d6f6ff';x.textAlign='center';x.font=k.id==='plus'?'300 46px '+F:'32px '+F;
+      x.fillText(({plus:'+',hist:'\uD83C\uDF33',set:'\u2699',corp:'\u21C4',wiki:'W',pass:'\u00B6'})[k.id]||'?',cx,cy+(k.id==='plus'?-3:1));x.textAlign='left';continue;
+    }
     if(k.id==='field'){
-      rr(x,k.x,k.y,k.w,k.h,8);x.fillStyle='rgba(0,0,0,.55)';x.fill();x.strokeStyle=on||kbOpen?'#ffb347':'rgba(93,240,255,.5)';x.lineWidth=2;x.stroke();
-      x.font='600 30px '+F;x.textAlign='left';const t=$q.value,mw=k.w-40;let s=t;
+      rr(x,k.x,k.y,k.w,k.h,12);x.fillStyle='rgba(255,255,255,.08)';x.fill();x.strokeStyle=on||kbOpen?'#ffb347':'rgba(255,255,255,.4)';x.lineWidth=2;x.stroke();
+      x.font='600 28px '+F;x.textAlign='left';const t=$q.value,mw=k.w-40;let s=t;
       while(s.length&&x.measureText(s).width>mw)s=s.slice(1);
-      if(!t){x.fillStyle='rgba(214,246,255,.4)';x.fillText('Ask about your text\u2026',k.x+16,k.y+k.h/2+1);}
+      if(!t){x.fillStyle='rgba(214,246,255,.45)';x.fillText('Ask about your text\u2026',k.x+16,k.y+k.h/2+1);}
       else{x.fillStyle='#d6f6ff';x.fillText(s,k.x+16,k.y+k.h/2+1);}
-      if(kbOpen&&Math.floor(now/500)%2===0){const cx=k.x+16+(t?x.measureText(s).width:0)+3;x.fillStyle='#ffb347';x.fillRect(cx,k.y+16,3,k.h-32);}
+      if(kbOpen&&Math.floor(now/500)%2===0){const cx=k.x+16+(t?x.measureText(s).width:0)+3;x.fillStyle='#ffb347';x.fillRect(cx,k.y+14,3,k.h-28);}
       continue;
     }
     if(k.id==='tl'){
       const M=RV.order.length,f=M?RV.count/M:0,cy=k.y+k.h/2,tx=k.x+10,tw=k.w-20,c=ramp(.3+.6*f).map(u=>Math.round(u*255));
-      rr(x,tx,cy-6,tw,12,6);x.fillStyle='rgba(93,240,255,.18)';x.fill();
+      rr(x,tx,cy-6,tw,12,6);x.fillStyle='rgba(255,255,255,.18)';x.fill();
       if(f>0){rr(x,tx,cy-6,Math.max(12,tw*f),12,6);x.fillStyle=`rgb(${c[0]},${c[1]},${c[2]})`;x.fill();}
       x.beginPath();x.arc(tx+tw*f,cy,on?17:14,0,6.2832);x.fillStyle=on?'#ffb347':'#d6fbff';x.fill();
       x.font='600 24px '+F;x.textAlign='left';x.fillStyle='rgba(214,246,255,.9)';x.fillText(M?`${RV.count}/${M}`:'0/0',k.x+k.w+14,cy+1);
       continue;
     }
     if(k.act==='ask'&&!k.kbk){
-      const cx=k.x+k.w/2,cy=k.y+k.h/2,r=Math.min(k.w,k.h)/2-4,g=x.createRadialGradient(cx-r*.3,cy-r*.3,r*.1,cx,cy,r);
+      const cx=k.x+k.w/2,cy=k.y+k.h/2,r=Math.min(k.w,k.h)/2-2,g=x.createRadialGradient(cx-r*.3,cy-r*.3,r*.1,cx,cy,r);
       g.addColorStop(0,'#fff1b8');g.addColorStop(.5,'#ffc94d');g.addColorStop(1,'#d98f12');
-      x.beginPath();x.arc(cx,cy,r+(on?4:0),0,6.2832);x.fillStyle=fl?'#ffffff':g;x.fill();x.strokeStyle='rgba(255,255,255,.7)';x.lineWidth=2;x.stroke();
+      x.beginPath();x.arc(cx,cy,r+(on?3:0),0,6.2832);x.fillStyle=fl?'#ffffff':g;x.fill();x.strokeStyle='rgba(255,255,255,.7)';x.lineWidth=2;x.stroke();
       continue;
     }
-    rr(x,k.x,k.y,k.w,k.h,8);
-    x.fillStyle=(fl||(k.id==='play'&&RV.playing)||(k.id==='move'&&MOVE))?'rgba(255,179,71,.6)':on?'rgba(93,240,255,.4)':'rgba(93,240,255,.1)';x.fill();
-    x.strokeStyle=on?'#5df0ff':'rgba(93,240,255,.4)';x.lineWidth=2;x.stroke();
+    rr(x,k.x,k.y,k.w,k.h,10);
+    x.fillStyle=(fl||(k.id==='play'&&RV.playing)||(k.id==='move'&&MOVE))?'rgba(255,179,71,.6)':on?'rgba(255,255,255,.3)':'rgba(255,255,255,.12)';x.fill();
+    x.strokeStyle=on?'rgba(255,255,255,.8)':'rgba(255,255,255,.42)';x.lineWidth=2;x.stroke();
     x.globalAlpha=(k.id==='mode'&&!sessAR)?.4:1;
-    const lab=k.id==='auto'?'':k.id==='brain'?'Ask LLM':k.id==='mode'?(sessAR?(arMode?'To VR':'To MR'):'VR only'):k.id==='place'?(arMode?'Place':'Recenter'):k.id==='spd'?RV.speed+'\u00d7':k.id==='play'?(RV.playing?'Pause':(RV.count>0&&RV.count<RV.order.length?'Resume':'Play')):k.id==='move'?'Move':k.id==='toggle'?(kbOpen?'hide':'keys'):k.label;
+    const lab=k.id==='auto'?'':k.id==='brain'?'Ask LLM':k.id==='mode'?(sessAR?(arMode?'To VR':'To MR'):'VR only'):k.id==='place'?(arMode?'Place':'Recenter'):k.id==='spd'?RV.speed+'\u00d7':k.id==='play'?(RV.playing?'Pause':(RV.count>0&&RV.count<RV.order.length?'Resume':'Play')):k.id==='move'?(MOVE?'Move':'Spin'):k.id==='toggle'?(kbOpen?'hide':'keys'):k.label;
     x.font=(k.kbk?'600 30px ':'600 24px ')+F;x.fillStyle=k.act==='ask'?'#ffb347':'#d6fbff';x.textAlign='center';
     x.fillText(lab,k.x+k.w/2,k.y+k.h/2+1,k.w-10);
     if(k.id==='auto'){const bx=k.x+12,by=k.y+k.h/2-11;
       rr(x,bx,by,22,22,5);x.fillStyle=AUTO?'rgba(255,179,71,.85)':'rgba(255,255,255,.08)';x.fill();x.strokeStyle=AUTO?'#ffb347':'rgba(255,255,255,.6)';x.lineWidth=2;x.stroke();
       if(AUTO){x.beginPath();x.moveTo(bx+5,by+11);x.lineTo(bx+10,by+16);x.lineTo(bx+17,by+6);x.strokeStyle='#1a1000';x.lineWidth=3;x.stroke();}
-      x.textAlign='left';x.fillStyle='#d6fbff';x.font='600 24px '+F;x.fillText('Auto',bx+32,k.y+k.h/2+1);}
+      x.textAlign='left';x.fillStyle='#d6fbff';x.font='600 22px '+F;x.fillText('Auto',bx+30,k.y+k.h/2+1);}
     x.globalAlpha=1;
   }
 }
@@ -1955,17 +2029,21 @@ function drawKBIfDirty(){
   if(iDirty){iDirty=false;const nd=infoData();if(nd&&(!infoCache||infoCache.key!==nd.key))iScroll=0;infoCache=nd;iScroll=Math.min(iScroll,iMax());ib.visible=!!nd;if(nd){drawInfo();itex.needsUpdate=true;}}
 }
 function keyAt(px,py){
-  if(px<0||px>KW||py<0||py>kExt())return null;
+  if(px<0||px>KW||py<0||py>KH)return null;
   const k=KEYS.find(k=>(!k.kbk||kbOpen)&&(!(k.tlk||k.ctk)||hasCtx())&&(!k.llm||CFG.on)&&px>=k.x-3&&px<=k.x+k.w+3&&py>=k.y-3&&py<=k.y+k.h+3);
   return {k:k||null,px,py};
 }
 const rc=new THREE.Raycaster(),_o=new THREE.Vector3(),_d=new THREE.Vector3(),_q=new THREE.Quaternion();
-function panelHit(c){
+let RAYOV=null;
+function rayOf(c){if(RAYOV&&RAYOV.c===c){_o.copy(RAYOV.o);_q.copy(RAYOV.q);}else{c.getWorldPosition(_o);c.getWorldQuaternion(_q);}}
+function panelHit(c,keep){
   if(!kb.visible)return null;
-  c.getWorldPosition(_o);c.getWorldQuaternion(_q);_d.set(0,0,-1).applyQuaternion(_q);
-  rc.set(_o,_d);rc.far=1.5;
+  rayOf(c);_d.set(0,0,-1).applyQuaternion(_q);
+  rc.set(_o,_d);rc.far=3;
   const h=rc.intersectObject(kb,false)[0];if(!h||!h.uv)return null;
-  return keyAt(h.uv.x*KW,(1-h.uv.y)*KH);
+  const o=keyAt(h.uv.x*KW,(1-h.uv.y)*KH);
+  if(o)o.d=h.distance;
+  return o&&(o.k||keep)?o:null;
 }
 function keyAct(k,r){
   const t=$q.value;
@@ -1977,7 +2055,17 @@ function keyAct(k,r){
   else if(k.act==='ask'){if($q.value.trim()){runQuery($q.value).then(autoBrain);kbOpen=false;}}
   else if(k.act==='clear')clearAll();
   else if(k.act==='auto'){AUTO=!AUTO;try{localStorage.setItem('cf.auto',AUTO?'1':'0');}catch(e){}$('#auto').checked=AUTO;}
-  else if(k.act==='move'){MOVE=!MOVE;xrNote=MOVE?'Move mode: pinch and drag carries the field':'';hud();}
+  else if(k.act==='move'){MOVE=!MOVE;xrNote=MOVE?'Pinch and drag to move the field':'Pinch and drag to spin the field';hud();}
+  else if(k.act==='plus')xrPaste();
+  else if(k.act==='corp')xrCycleCorpus();
+  else if(k.act==='wiki')xrWiki();
+  else if(k.act==='pass'){if(psXR){psXR=false;rdD=true;}else{const sp=SS.size?specSel():specQuery();if(!sp){xrNote='Select a word or ask a question first';hud();}else{psXR=true;PS.auto=true;rdD=true;showPassages(sp);}}}
+  else if(k.act==='set'){
+    CFG.on=!CFG.on;saveCfg();applyLLM();$('#sllm').checked=CFG.on;if(CFG.on){try{sUI();}catch(e){}}
+    const P=PROV[CFG.prov]||{n:CFG.prov},ready=CFG.prov==='webgpu'?!!CFG.wl:!!(CFG.keys[CFG.prov]||CFG.prov==='openrouter');
+    xrNote=CFG.on?'LLM on ('+P.n+')'+(ready?'. Select words, then Ask LLM.':'. Add a key or model once on the flat screen.'):'LLM off';hud();}
+  else if(k.act==='help'){xrNote='Pinch to select. Drag to move the field (Spin turns it). Two hands resize and turn it.';hud();}
+  else if(k.act==='hist'){psXR=false;rdD=true;if(reads().length||!$rd.hidden){$rd.hidden=!$rd.hidden;if(!$rd.hidden){rdLive=null;rdIdx=0;paintRd();}}else{xrNote='No readings yet';hud();}}
   else if(k.act==='brain')brain();
   else if(k.act==='play')tlPlay();
   else if(k.act==='spd')tlSpeed();
@@ -1995,29 +2083,80 @@ function placeKB(dt){
     if(Math.abs(df)>.75)kMove=true;if(Math.abs(df)<.05)kMove=false;
     if(kMove)kYaw+=df*Math.min(1,dt*3);
   }
-  const sy=Math.sin(kYaw),cy=Math.cos(kYaw);
-  _t.set(_h.x-sy*.5,_h.y-.42,_h.z-cy*.5);
-  _t2.set(_h.x-sy*.8+cy*.45,_h.y+.02,_h.z-cy*.8-sy*.45);
+  // One screen-sized layout, 1 m ahead of the head, turning only about the vertical axis.
+  const SC=.78*VS,sy=Math.sin(kYaw),cy=Math.cos(kYaw),D=1.0,lx=((1576-200)/1000-.8)*SC,ly=(.45-(98+187.5)/1000)*SC;kb.scale.setScalar(SC);ib.scale.setScalar(SC);
+  _t.set(_h.x-sy*D,_h.y-.05,_h.z-cy*D);
+  _t2.set(_t.x+cy*lx+sy*.01,_t.y+ly,_t.z-sy*lx+cy*.01);
   if(!kInit){kb.position.copy(_t);ib.position.copy(_t2);}else{const a=Math.min(1,dt*8);kb.position.lerp(_t,a);ib.position.lerp(_t2,a);}
-  kInit=true;kb.rotation.set(-.7,kYaw,0,'YXZ');ib.rotation.set(0,kYaw-.35,0,'YXZ');kb.updateMatrixWorld(true);ib.updateMatrixWorld(true);
+  kInit=true;kb.rotation.set(0,kYaw,0,'YXZ');ib.rotation.set(0,kYaw,0,'YXZ');kb.updateMatrixWorld(true);ib.updateMatrixWorld(true);
+}
+function xrDone(m){xrNote=m;hud();}
+async function xrPaste(){
+  if(ingesting){xrDone('Still building the field\u2026');return;}
+  let t='';try{t=await navigator.clipboard.readText();}catch(e){}
+  if(!t||t.trim().length<200){xrDone('+ pastes copied text (200+ chars). \u21C4 saved texts, W Wikipedia.');return;}
+  const d={name:'Pasted text '+new Date().toLocaleTimeString(),text:t},base=curCorpus===DEMO_ID?[]:curDocs;
+  xrDone('Building field\u2026');
+  const ok=await ingest([...base,d]);
+  if(ok){psXR=false;rdD=true;if(!arMode){try{kInit=false;recoverField(true);}catch(e){}}}
+  xrDone(ok?'Added pasted text':'Not enough repeated concepts in that text');
+}
+function xrCycleCorpus(){
+  if(ingesting){xrDone('Still building the field\u2026');return;}
+  const L=corpora.slice().sort((a,b)=>a.ts-b.ts);
+  if(L.length<2){xrDone('Only one saved text. Type a topic and press W to fetch Wikipedia.');return;}
+  const i=L.findIndex(c=>c.id===curCorpus),nx=L[(i+1)%L.length],nm=nx.name.length>38?nx.name.slice(0,37)+'\u2026':nx.name;
+  xrDone('Loading '+nm+'\u2026');
+  ingest(nx.docs,{id:nx.id,noSave:true}).then(ok=>{if(ok){psXR=false;rdD=true;if(!arMode){try{kInit=false;recoverField(true);}catch(e){}}}xrDone(ok?'Loaded: '+nm:'Could not build that text');});
+}
+async function xrWiki(){
+  const t=$q.value.trim();
+  if(!t){xrDone('Tap the bar, type a topic, then press W');return;}
+  if(ingesting){xrDone('Still building the field\u2026');return;}
+  xrDone('Searching Wikipedia\u2026');
+  try{
+    const sr=await (await fetch(WAPI+'?action=query&list=search&srlimit=1&format=json&origin=*&srsearch='+encodeURIComponent(t))).json();
+    const hit=sr.query.search[0];if(!hit){xrDone('No Wikipedia page found for that');return;}
+    xrDone('Fetching '+hit.title+'\u2026');
+    const r=await fetch(WAPI+'?action=query&prop=extracts&explaintext=1&redirects=1&format=json&origin=*&titles='+encodeURIComponent(hit.title));
+    const pg=Object.values((await r.json()).query.pages)[0],tx=(pg.extract||'').replace(/^=+\s*(.*?)\s*=+\s*$/gm,'$1');
+    if(tx.length<200){xrDone('That page has no readable text');return;}
+    const d={name:'Wikipedia: '+(pg.title||hit.title),text:tx},base=curCorpus===DEMO_ID?[]:curDocs.filter(x=>x.name!==d.name);
+    xrDone('Building field\u2026');
+    const ok=await ingest([...base,d]);
+    if(ok){$q.value='';psXR=false;rdD=true;if(!arMode){try{kInit=false;recoverField(true);}catch(e){}}}
+    xrDone(ok?'Added '+d.name:'Not enough repeated concepts in that page');
+  }catch(e){xrDone('Wikipedia failed: '+(e&&e.message||e));}
 }
 function infoHit(c){
   if(!ib.visible)return null;
-  c.getWorldPosition(_o);c.getWorldQuaternion(_q);_d.set(0,0,-1).applyQuaternion(_q);
+  rayOf(c);_d.set(0,0,-1).applyQuaternion(_q);
   rc.set(_o,_d);rc.far=1.5;
   const h=rc.intersectObject(ib,false)[0];if(!h||!h.uv)return null;
-  return {px:h.uv.x*IW,py:(1-h.uv.y)*IH};
+  return {px:h.uv.x*IW,py:(1-h.uv.y)*IH,d:h.distance};
 }
 function tlFromPx(px){const k=KEYS.find(k=>k.id==='tl'),M=RV.order.length;if(!M)return;tlSet((px-k.x-10)/(k.w-20)*M);}
 function uiStep(){
   ibHot=false;rbHot=false;rbHov0=rbHov;rbHov=null;
   rig.forEach(r=>{
-    const hit=panelHit(r.c),ih=hit?null:infoHit(r.c),rh=(hit||ih)?null:rdHit(r.c);r.hk=hit?hit.k:null;if(ih)ibHot=true;if(rh){rbHot=true;rbHov=rh.k;}
+    // Hand rays wobble as the fingers close. At the moment a pinch starts, aim with the pose from ~80 ms earlier.
+    RAYOV=null;
+    if(r.c.userData.isHand){
+      const nw=performance.now(),H=r.rh||(r.rh=[]);H.push({t:nw,o:r.c.getWorldPosition(new THREE.Vector3()),q:r.c.getWorldQuaternion(new THREE.Quaternion())});
+      while(H.length>2&&nw-H[1].t>260)H.shift();
+      if(r.pin&&!r.tp){let e=null;for(const x of H){if(nw-x.t>=80)e=x;}if(e)RAYOV={c:r.c,o:e.o,q:e.q};}
+    }
+    let hit=panelHit(r.c,r.slide),ih=infoHit(r.c),rh=rdHit(r.c);RAYOV=null;
+    // Whichever panel the ray reaches first wins, so a floating panel in front never clicks keys behind it.
+    if(r.slide&&hit){ih=null;rh=null;}else if(r.ibd&&ih){hit=null;rh=null;}else if(r.rds&&rh){hit=null;ih=null;}
+    else{const dh=hit?hit.d:1e9,di=ih?ih.d:1e9,dr=rh?rh.d:1e9,m=Math.min(dh,di,dr);if(dh>m)hit=null;if(di>m)ih=null;if(dr>m)rh=null;}
+    r.hk=hit?hit.k:null;if(ih)ibHot=true;if(rh){rbHot=true;rbHov=rh.k;}
     const trig=r.c.userData.isHand?r.pin:r.c.userData.tr,press=trig&&!r.tp;r.tp=trig;
     if(press&&hit){r.uiHold=true;if(hit.k){keyAct(hit.k,r);if(hit.k.act==='tl'){r.slide=true;tlFromPx(hit.px);}}}
     else if(press&&ih){r.uiHold=true;r.ibd={px:ih.px,py:ih.py,off:iScroll,mv:false};}
-    else if(press&&rh){r.uiHold=true;if(rh.k)rdAct(rh.k);else r.rdd=rh.d;}else if(press&&placing)confirmPlace();
+    else if(press&&rh){r.uiHold=true;if(rh.k)rdAct(rh.k);else if(rh.py<68)r.rdd=rh.d;else r.rds={py:rh.py,off:rdSy,mv:false};}else if(press&&placing)confirmPlace();
     if(trig&&r.rdd)rdDrag(r);
+    if(trig&&r.rds&&rh){if(Math.abs(rh.py-r.rds.py)>6)r.rds.mv=true;if(r.rds.mv)rdSet(r.rds.off+(r.rds.py-rh.py));}
     if(trig&&r.slide&&hit)tlFromPx(hit.px);
     if(trig&&r.ibd&&ih){if(Math.abs(ih.py-r.ibd.py)>14)r.ibd.mv=true;if(r.ibd.mv)setScroll(r.ibd.off+(r.ibd.py-ih.py)/ROW);}
     if(!trig){
@@ -2025,7 +2164,7 @@ function uiStep(){
         if(py<HV){const c=ibChips.find(c=>px>=c.x-6&&px<=c.x+c.w+6&&py>=c.y-6&&py<=c.y+c.h+6);
           if(c){if(c.i===-2){SS.clear();selV++;sel=-1;applyState();}else toggleSel(c.i);}}
         else{const it=infoCache.rows[Math.floor((py-HV)/ROW+iScroll)];if(it&&it.i>=0)select(it.i);}}
-      r.uiHold=false;r.slide=false;r.ibd=null;r.rdd=null;
+      r.uiHold=false;r.slide=false;r.ibd=null;r.rdd=null;r.rds=null;
     }
   });
   if(rbHov!==rbHov0)rdD=true;
@@ -2190,7 +2329,12 @@ const arBtn=document.querySelector('#ar'),vrB=document.querySelector('#vr');
 if(navigator.xr&&navigator.xr.isSessionSupported)navigator.xr.isSessionSupported('immersive-ar').then(ok=>{arBtn.hidden=!ok;vrB.hidden=!ok;document.body.classList.toggle('arok',ok);}).catch(()=>{});
 async function startXR(look){
   const cur=renderer.xr.getSession();if(cur){cur.end();return;}
-  if(!nodes.length){stat('Attach text files before entering VR or mixed reality.');return;}
+  if(!nodes.length){
+    // Do not await here: the headset needs the click's user gesture to start a session.
+    if(ingesting)stat('Still building the field. Press Enter again in a moment.');
+    else{stat('Loading the demo text. Press Enter again in a moment.');loadDemo();}
+    return;
+  }
   const feats=['hit-test','plane-detection','hand-tracking','anchors'];
   try{
     let sess;
@@ -2200,6 +2344,7 @@ async function startXR(look){
   }catch(e){reqLook=null;stat('Could not start: '+(e&&e.message||e));}
 }
 arBtn.onclick=()=>startXR('mr');vrB.onclick=()=>startXR('vr');
+setInterval(()=>{const ok=nodes.length>0||!!renderer.xr.getSession();for(const b of [arBtn,vrB]){if(b.disabled===ok){b.disabled=!ok;b.title=ok?'':'Building the demo field\u2026 one moment';}}},250);
 const hf=new XRHandModelFactory(),cf=new XRControllerModelFactory(),rig=[];
 for(let i=0;i<2;i++){
   const c=renderer.xr.getController(i),gr=renderer.xr.getControllerGrip(i),h=renderer.xr.getHand(i);
@@ -2209,7 +2354,7 @@ for(let i=0;i<2;i++){
   c.addEventListener('disconnected',()=>c.userData.on=false);
   c.addEventListener('squeezestart',()=>c.userData.sq=true);c.addEventListener('squeezeend',()=>c.userData.sq=false);
   c.addEventListener('selectend',()=>{c.userData.tr=false;});
-  c.addEventListener('selectstart',e=>{if(e.data.hand)return;c.userData.tr=true;if(!nodes.length||placing||panelHit(c)||rdHit(c))return;
+  c.addEventListener('selectstart',e=>{if(e.data.hand)return;c.userData.tr=true;if(!nodes.length||placing||panelHit(c)||infoHit(c)||rdHit(c))return;
     const o=c.getWorldPosition(new THREE.Vector3()),d=new THREE.Vector3(0,0,-1).applyQuaternion(c.getWorldQuaternion(new THREE.Quaternion()));
     const k=pick(o,d,.1);if(k>=0)select(k);});
   h.userData={on:false};h.addEventListener('connected',()=>h.userData.on=true);h.addEventListener('disconnected',()=>h.userData.on=false);
@@ -2228,18 +2373,18 @@ function applyLook(pass){
 function switchLook(pass){
   const s=renderer.xr.getSession();if(!s||!sessAR||pass===arMode)return;
   applyLook(pass);
-  if(pass){dolly.position.set(0,0,0);dolly.rotation.set(0,0,0);if(nodes.length){setupHit(s);if(!arBegin()){centerS=.3;needCenter=true;}}xrNote='Pinch and drag to spin the field. Press Move to carry it, Place to snap it to a surface';}
-  else xrNote='';
+  if(pass){dolly.position.set(0,0,0);dolly.rotation.set(0,0,0);if(nodes.length){setupHit(s);if(!arBegin()){centerS=fitScale(.28);needCenter=true;}}xrNote='Pinch and drag to move the field. Place snaps it to a surface';}
+  else{xrNote='';if(nodes.length){centerS=fitScale(.4);needCenter=true;}}
   resetGestures();hud();
 }
 function fieldBad(){
   if(!nodes.length)return false;
   renderer.xr.getCamera().getWorldPosition(_hv);
-  return !isFinite(G.position.x+G.position.y+G.position.z+G.scale.x)||G.scale.x<.05||G.scale.x>12||G.position.distanceTo(_hv)>10;
+  return !isFinite(G.position.x+G.position.y+G.position.z+G.scale.x)||G.scale.x<.05||G.scale.x>12||G.position.distanceTo(_hv)>4;
 }
 function recoverField(force){
   if(!nodes.length||!(force||fieldBad()))return;
-  centerS=(isFinite(G.scale.x)&&G.scale.x>=.08&&G.scale.x<=4)?G.scale.x:(arMode?.3:.6);needCenter=true;
+  centerS=(isFinite(G.scale.x)&&G.scale.x>=.08&&G.scale.x<=4)?G.scale.x:fitScale(arMode?.28:.4);needCenter=true;
 }
 function resetGestures(){
   mode='none';gi=-1;g0={};g1={};grabbing=false;
@@ -2280,8 +2425,8 @@ renderer.xr.addEventListener('sessionstart',()=>{
   applyLook(pass);
   xrNote='';
   if(pass){
-    if(nodes.length){setupHit(s);const rest=arBegin();if(!rest){centerS=.3;needCenter=true;}xrNote=rest?'Field restored to where you left it. Press Place to move it':'Pinch and drag to spin the field. Press Move to carry it, Place to snap it to a surface';}else{xrNote='Load text before entering mixed reality';}
-  }
+    if(nodes.length){setupHit(s);const rest=arBegin();if(!rest){centerS=fitScale(.28);needCenter=true;}xrNote=rest?'Field restored to where you left it. Press Place to move it':'Pinch and drag to move the field. Place snaps it to a surface';}else{xrNote='Load text before entering mixed reality';}
+  }else if(nodes.length){centerS=fitScale(.4);needCenter=true;xrNote='Pinch and drag to move the field. Two hands resize and turn it';}
   watchSession(s);
   hud();
 });
@@ -2297,7 +2442,7 @@ renderer.xr.addEventListener('sessionend',()=>{
   rig.forEach(r=>{r.hm.visible=true;r.cm.visible=true;r.uiHold=false;});resetGestures();
   dolly.position.set(0,0,0);dolly.rotation.set(0,0,0);camera.position.set(0,1.6,.9);controls.target.copy(G.position);controls.update();hud();
 });
-const Y=new THREE.Vector3(0,1,0);let MOVE=false,GDT=.016;let mode='none',gi=-1,g0={},g1={},grabbing=false,prevBtn={};
+const Y=new THREE.Vector3(0,1,0);let MOVE=true,GDT=.016;let mode='none',gi=-1,g0={},g1={},grabbing=false,prevBtn={};
 function handPoint(r){
   const j=r.h.joints,ti=j['thumb-tip'],ix=j['index-finger-tip'];
   if(r.h.userData.on&&ti&&ix&&ti.jointRadius!==undefined){
@@ -2343,6 +2488,10 @@ function gestures(dt){
         G.updateMatrixWorld(true);
         k=nearestWorld(p,.09);
         if(k<0){const o=rig[i].c.getWorldPosition(new THREE.Vector3()),d=new THREE.Vector3(0,0,-1).applyQuaternion(rig[i].c.getWorldQuaternion(new THREE.Quaternion()));k=pick(o,d,.1);}
+      }
+      if(MOVE&&!wasTwo&&k<0&&renderer.xr.isPresenting){
+        const hd=renderer.xr.getCamera().getWorldPosition(new THREE.Vector3());
+        if(G.position.distanceTo(p)>.9){const dr=p.clone().sub(hd);if(dr.lengthSq()>1e-4){dr.normalize();G.position.copy(hd).addScaledVector(dr,.75);}}
       }
       g1={p:p.clone(),P:G.position.clone(),q:G.quaternion.clone(),k,moved:false};
     }else if(grabbing){
@@ -2510,6 +2659,12 @@ $hb.addEventListener('click',async e=>{
   let id=null;try{id=localStorage.getItem('cf.last');}catch(e){}
   const c=corpora.find(x=>x.id===id);
   if(c&&!nodes.length&&!curCorpus){if(await ingest(c.docs,{id:c.id,noSave:true}))stat(summary()+' Restored from your last session.');}
+  else if(!nodes.length&&!curCorpus&&!ingesting){
+    // First visit (or nothing saved): start with a ready-made text so VR/MR can be entered immediately.
+    const rec=corpora.slice().sort((a,b)=>b.ts-a.ts)[0];
+    if(rec){if(await ingest(rec.docs,{id:rec.id,noSave:true}))stat(summary()+' Restored your most recent text.');}
+    else await loadDemo(true);
+  }
   renderHist();
 })();
 function updateGeom(){
@@ -2560,10 +2715,10 @@ function lodLabels(dt){
 }
 function unloadField(){
   EPOCH++;ingesting=false;ENG.post({t:'reset'});forceWords=[];
-  nodes=[];edges=[];word2i=new Map();SS.clear();selV++;sel=-1;Q=null;visible=[];forcedSet=new Set();docCount=0;curCorpus=null;curDocs=[];renderDocs();
+  nodes=[];edges=[];word2i=new Map();SS.clear();selV++;sel=-1;Q=null;visible=[];forcedSet=new Set();docCount=0;curCorpus=null;curDocs=[];HLOG=[];renderDocs();
   if(pts){G.remove(pts,lines,dots);pts.geometry.dispose();lines.geometry.dispose();dots.geometry.dispose();pts=lines=dots=null;}
   labelGroup.clear();labelCache.forEach(sp=>{sp.material.map.dispose();sp.material.dispose();});labelCache.clear();lodClear();
-  ST.comm=null;ST.clusters=[];ST.bridges=[];ST.focus=-1;clClear();structUI();$ps.hidden=true;PS.seq++;
+  $ps.hidden=true;PS.seq++;
   $q.value='';$('#file').value='';updateInfo();stat('Attach one or more files to build the field.');tlReset();
 }
 async function clearCurrent(){
@@ -2604,7 +2759,7 @@ function sUI(){
   const p=CFG.prov,P=PROV[p];$('#sprov').value=p;
   $('#sweb').hidden=p!=='webgpu';$('#scl').hidden=p==='webgpu';$('#sbw').hidden=!P.oa;
   $('#sbase').value=CFG.bases[p]||P.base||'';$('#skey').value=CFG.keys[p]||'';$('#smod').value=CFG.models[p]||P.model||'';
-  $('#srb').checked=RB;$('#sllm').checked=!!CFG.on;$('#sllmbox').hidden=!CFG.on;$('#sfs').value=FS;$('#sfsv').textContent=Math.round(FS*100)+'%';$('#sthr').value=thrOf().toFixed(2);$('#ssys').value=sysP();$('#smodl').innerHTML='';$('#sst').textContent='';
+  $('#srb').checked=RB;$('#sllm').checked=!!CFG.on;$('#sllmbox').hidden=!CFG.on;$('#sfs').value=FS;$('#sfsv').textContent=Math.round(FS*100)+'%';$('#sthr').value=thrOf().toFixed(2);$('#scut').value=cthrOf().toFixed(2);$('#ssys').value=sysP();$('#smodl').innerHTML='';$('#sst').textContent='';
   if(CFG.on){if(p==='webgpu')wlShow();else if(CFG.keys[p]||p==='openrouter')findModels();}
 }
 async function findModels(){
@@ -2619,6 +2774,8 @@ async function findModels(){
   }catch(e){st.textContent='Could not list models: '+e.message;}
 }
 let WL=null,wlCfg=[],gpuMB=0;
+const HEADSET=/OculusBrowser|Quest|Pico|\bVR\b/i.test(navigator.userAgent);
+const HEADSET_NOTE=' On a headset, large local models can run out of memory and crash the tab: choose one under about 1.5 GB, or use an API provider.';
 async function wlLoad(){
   if(WL)return;
   WL=await import('https://esm.run/@mlc-ai/web-llm');wlCfg=WL.prebuiltAppConfig.model_list;
@@ -2638,7 +2795,7 @@ function wlRender(){
   const H=hfRes.filter(r=>!have.has(r.id.split('/').pop()));
   $('#swl').innerHTML=H.map(r=>`<div class="wm" data-hf="${esc(r.id)}"><span>${esc(r.id)}</span><small>HF \u00b7 ${r.dl.toLocaleString()} downloads \u00b7 tap to add</small></div>`).join('')
     +L.map(m=>`<div class="wm${m.id===CFG.wl?' on':''}" data-m="${esc(m.id)}"><span>${esc(m.id)}</span><small>${m.mb?(m.mb/1024).toFixed(1)+' GB':''} ${m.fit?'fits':'heavy'}</small></div>`).join('')||'<div class="hs">No match.</div>';
-  $('#swst').textContent=`${H.length} Hugging Face + ${L.length} catalog shown. Sorted by what your GPU can likely run (budget ~${gpuMB?Math.round(gpuMB*1.5/1024*10)/10+' GB':'unknown'}). Models download once, then are cached.`;
+  $('#swst').textContent=`${H.length} Hugging Face + ${L.length} catalog shown. Sorted by what your GPU can likely run (budget ~${gpuMB?Math.round(gpuMB*1.5/1024*10)/10+' GB':'unknown'}). Models download once, then are cached.`+(HEADSET?HEADSET_NOTE:'');
 }
 async function hfSearch(){
   const q=$('#smf').value.trim(),st=$('#swst');st.textContent='Searching Hugging Face\u2026';
@@ -2672,6 +2829,7 @@ async function wlEngine(onP){
   if(!navigator.gpu)throw new Error('WebGPU is not available in this browser.');
   await wlLoad();if(!CFG.wl)throw new Error('Pick a WebGPU model in Settings first.');
   if(eng&&engId!==CFG.wl){try{await eng.unload();}catch(e){}eng=null;}
+  if(!eng&&renderer.xr.isPresenting){const m=allM().find(m=>m.model_id===CFG.wl);if(m&&(m.vram_required_MB||0)>1536)throw new Error('This model needs about '+(m.vram_required_MB/1024).toFixed(1)+' GB and could crash the tab inside a headset session. Pick a model under 1.5 GB or use an API provider in Settings.');}
   if(!eng){eng=await WL.CreateMLCEngine(CFG.wl,{initProgressCallback:r=>onP(r.text),appConfig:{...WL.prebuiltAppConfig,model_list:allM()}});engId=CFG.wl;}
   return eng;
 }
@@ -2717,10 +2875,12 @@ $('#auto').onchange=e=>{AUTO=e.target.checked;try{localStorage.setItem('cf.auto'
 function autoBrain(){if(!CFG.on||!AUTO||!nodes.length||!$q.value.trim())return;if(rdBusy)stopAll();setTimeout(brain,80);}
 $('#ssys').onchange=e=>{const v=e.target.value.trim();CFG.sys=v===DEF_SYS?'':v;saveCfg();};
 $('#sthr').onchange=e=>{const v=parseFloat(e.target.value);CFG.thr=isFinite(v)?Math.max(0,Math.min(1,v)):.5;saveCfg();e.target.value=thrOf().toFixed(2);};
+$('#scut').onchange=e=>{const v=parseFloat(e.target.value);CFG.cthr=isFinite(v)?Math.max(0,Math.min(1,v)):.35;saveCfg();e.target.value=cthrOf().toFixed(2);if(Q&&$q.value.trim())runQuery($q.value,true);};
 $('#ssysr').onclick=()=>{CFG.sys='';saveCfg();$('#ssys').value=DEF_SYS;};
 $('#rdst').onclick=stopAll;
 const DEF_SYS=`Input is JSON: {"query":string,"words":string[],"passages":[{"id":string,"source":string,"text":string}]}. The words are concepts extracted from the user's text, most relevant first. The passages are verbatim excerpts from the user's documents that contain those concepts. Answer the query using the passages as your primary evidence and the words as a map of what is related. Cite passages inline like [P2], quote a short phrase when it helps, and name the source document the first time you use it. Do not state anything the passages or words do not support; if they are not enough, say so briefly and answer as far as they allow. If the query is empty, write a coherent reading of what the passages and words express together. Do not simply list the words, show steps, or mention this format. Under 250 words. Follow-ups arrive as {"query":string}; answer them using the same context.`;
 const sysP=()=>(CFG.sys&&CFG.sys.trim())||DEF_SYS;
+const cthrOf=()=>CFG.cthr==null||CFG.cthr===''||!isFinite(+CFG.cthr)?.35:Math.max(0,Math.min(1,+CFG.cthr));
 const thrOf=()=>CFG.thr==null||CFG.thr===''||!isFinite(+CFG.thr)?.5:Math.max(0,Math.min(1,+CFG.thr));
 function relevance(q){
   const N=nodes.length,r=new Float32Array(N),hasQ=!!(q&&Q&&Q.A);
@@ -2737,7 +2897,7 @@ async function bundle(){
   const title=(sl.length?sl.map(i=>nodes[i].word).join(' + '):'')+(q?(sl.length?' | ':'')+q:'');
   let src=[];
   try{const sp=SS.size?specSel():(Q&&Q.top?specQuery():null);
-    if(sp){const loc=CFG.prov==='webgpu',rr=await ENG.call({t:'passages',ids:sp.ids,w:sp.w,must:sp.must,need:sp.need,all:sp.all,R:sp.R,cap:60,full:true});
+    if(sp){const loc=CFG.prov==='webgpu',rr=await ENG.call({t:'passages',ids:sp.ids,w:sp.w,must:sp.must,need:sp.need,all:sp.all,R:sp.R,cap:60,full:true,qg:sp.qg,cut:sp.cut});
       const keep=CFG.psave!==false?rr.ps.filter(p=>p.rel>=pthrOf()):rr.ps;
       rr.ps=keep.slice(0,loc?5:10);
       src=rr.ps.map((p,k)=>({id:'P'+(k+1),source:p.doc,text:loc?p.text.slice(0,800):p.text}));}}catch(err){console.warn(err);}
@@ -2817,7 +2977,8 @@ async function doCopy(b){
   const o=b.innerHTML;b.innerHTML=CHK;setTimeout(()=>{b.innerHTML=o;},1200);
 }
 $('#rdb').addEventListener('click',e=>{const b=e.target.closest('.cp');if(b)doCopy(b);});
-const RW=800,RH=640,RK=[{id:'p',x:14,y:10,w:56,h:46},{id:'n',x:150,y:10,w:56,h:46},{id:'x',x:RW-70,y:10,w:56,h:46}];
+const RW=800,RH=640,RK=[{id:'p',x:14,y:10,w:56,h:46},{id:'n',x:150,y:10,w:56,h:46},{id:'x',x:RW-70,y:10,w:56,h:46},{id:'u',x:RW-70,y:84,w:56,h:46,sc:true},{id:'d',x:RW-70,y:462,w:56,h:46,sc:true},{id:'f',x:14,y:RH-98,w:228,h:46,fu:true,lab:'Ask (type)'},{id:'c1',x:254,y:RH-98,w:236,h:46,fu:true,lab:'Explain more'},{id:'c2',x:502,y:RH-98,w:200,h:46,fu:true,lab:'Example'}];
+let psXR=false;
 const rcv=document.createElement('canvas');rcv.width=RW;rcv.height=RH;
 const rx=rcv.getContext('2d'),rtex=new THREE.CanvasTexture(rcv);rtex.colorSpace=THREE.SRGBColorSpace;rtex.anisotropy=4;
 const rb=new THREE.Mesh(new THREE.PlaneGeometry(.55,.55*RH/RW),new THREE.MeshBasicMaterial({map:rtex,transparent:true,depthTest:false,side:THREE.DoubleSide}));
@@ -2825,39 +2986,61 @@ rb.renderOrder=31;rb.visible=false;rb.frustumCulled=false;scene.add(rb);
 let rdCur=null,rdD=true,rdSy=0,rdMax=0,rdLines=[],rdBody=null,rbHot=false,rbPlaced=false,rbHov=null,rbHov0=null;
 function wrapT(x,t,w){const o=[];t.split('\n').forEach(p=>{let l='';p.split(' ').forEach(wd=>{const s=l?l+' '+wd:wd;if(x.measureText(s).width>w&&l){o.push(l);l=wd;}else l=s;});o.push(l);});return o;}
 function rdSc(v){rdSy=Math.max(0,Math.min(rdMax,rdSy+v));rdD=true;}
+function rdSet(v){rdSy=Math.max(0,Math.min(rdMax,v));rdD=true;}
 function rdHit(c){
   if(!rb.visible)return null;
-  c.getWorldPosition(_o);c.getWorldQuaternion(_q);_d.set(0,0,-1).applyQuaternion(_q);rc.set(_o,_d);rc.far=2;
+  rayOf(c);_d.set(0,0,-1).applyQuaternion(_q);rc.set(_o,_d);rc.far=2;
   const h=rc.intersectObject(rb,false)[0];if(!h||!h.uv)return null;
   const px=h.uv.x*RW,py=(1-h.uv.y)*RH;
-  return {k:RK.find(k=>px>=k.x-4&&px<=k.x+k.w+4&&py>=k.y-4&&py<=k.y+k.h+4)||null,d:h.distance};
+  return {k:RK.find(k=>(!k.sc||rdMax>0)&&(!k.fu||(CFG.on&&!psXR))&&px>=k.x-4&&px<=k.x+k.w+4&&py>=k.y-4&&py<=k.y+k.h+4)||null,d:h.distance,px,py};
 }
-function rdAct(k){$('#rd'+({p:'p',n:'nx',x:'x'})[k.id]).click();rdSy=0;rdD=true;}
+let LASTQ='';
+function xrFollow(t){
+  if(!CFG.on){xrDone('Turn the LLM on with the gear key first');return;}
+  const cur=rdLive||reads()[rdIdx];
+  if(!cur||!cur.turns||!cur.turns.length||!cur.ctx){xrDone('Press Ask LLM on the keyboard first');return;}
+  if(rdBusy){rdBusy.abort();return;}
+  if(!t){t=$q.value.trim();if(!t||t===LASTQ){$q.value='';kbOpen=true;kDirty=true;xrDone('Type your follow-up in the bar, then press Ask (type) again');return;}$q.value='';kDirty=true;}
+  $('#rdq').value=t;follow();
+}
+function rdAct(k){
+  if(k.fu){xrFollow(k.id==='c1'?'Explain this in more depth.':k.id==='c2'?'Give a concrete example from the text.':'');return;}
+  if(k.sc){rdSc(k.id==='u'?-216:216);return;}
+  if(psXR){
+    if(k.id==='x'){psXR=false;rdD=true;kDirty=true;return;}
+    if(PS.spec&&PS.res){if(k.id==='p'&&PS.off>0)showPassages(PS.spec,Math.max(0,PS.off-60));else if(k.id==='n'&&PS.off+60<PS.res.total)showPassages(PS.spec,PS.off+60);}
+    rdSy=0;rdD=true;return;}
+  $('#rd'+({p:'p',n:'nx',x:'x'})[k.id]).click();rdSy=0;rdD=true;}
+function psBody(){
+  const r=PS.res;if(!r)return 'Searching passages\u2026';
+  if(!r.ps.length)return 'No passage contains these words together.';
+  return r.ps.slice(0,40).map(p=>p.text.replace(/\s*\n+\s*/g,' ')+'\n\u2014 '+p.doc+(p.pct!=null?' ('+p.pct+'%)':'')).join('\n\n');
+}
 function rdDrag(r){
   r.c.getWorldPosition(_o);r.c.getWorldQuaternion(_q);_d.set(0,0,-1).applyQuaternion(_q);
   rb.position.copy(_o).addScaledVector(_d,r.rdd);
   renderer.xr.getCamera().getWorldPosition(_h);rb.rotation.set(0,Math.atan2(_h.x-rb.position.x,_h.z-rb.position.z),0);rb.updateMatrixWorld(true);
 }
 function drawRdIfDirty(){
-  const vis=!$rd.hidden;rb.visible=vis;if(!vis){rbPlaced=false;return;}
+  const vis=!$rd.hidden||psXR;rb.visible=vis;if(!vis){rbPlaced=false;return;}
   if(!rbPlaced){const xc=renderer.xr.getCamera();xc.getWorldPosition(_h);xc.getWorldDirection(_f);_f.y=0;_f.normalize();
     rb.position.set(_h.x+_f.x*.75,_h.y+.05,_h.z+_f.z*.75);rb.rotation.set(0,Math.atan2(_h.x-rb.position.x,_h.z-rb.position.z),0);rb.updateMatrixWorld(true);rbPlaced=true;rdD=true;}
   if(!rdD)return;rdD=false;
   const x=rx,h=rdCur,L=reads();x.clearRect(0,0,RW,RH);
   rr(x,0,0,RW,RH,18);x.fillStyle='rgba(3,16,28,.92)';x.fill();rr(x,1.5,1.5,RW-3,RH-3,18);x.strokeStyle='rgba(255,179,71,.7)';x.lineWidth=3;x.stroke();
   x.textBaseline='middle';
-  RK.forEach(k=>{rr(x,k.x,k.y,k.w,k.h,8);x.fillStyle=rbHov===k?'rgba(93,240,255,.4)':'rgba(93,240,255,.1)';x.fill();x.strokeStyle='rgba(93,240,255,.5)';x.lineWidth=2;x.stroke();
-    x.fillStyle='#d6fbff';x.font='600 30px '+FNT;x.textAlign='center';x.fillText(k.id==='p'?'\u2039':k.id==='n'?'\u203a':'\u2715',k.x+k.w/2,k.y+k.h/2);});
-  x.textAlign='center';x.font='24px '+FNT;x.fillStyle='rgba(214,246,255,.8)';x.fillText(rdLive?'live':L.length?`${rdIdx+1}/${L.length}`:'0/0',110,33);
-  x.textAlign='left';x.font='600 28px '+FNT;x.fillStyle='#ffb347';x.fillText(h?h.text:'Reading',226,33,RW-310);
-  const body=rdParts(h).map(p=>(p.err||p.a||p.note||'Thinking\u2026')).join('\n\n')||'No readings yet. Select concepts and press LLM.';
+  RK.forEach(k=>{if((k.sc&&!rdMax)||(k.fu&&(!CFG.on||psXR)))return;rr(x,k.x,k.y,k.w,k.h,8);x.fillStyle=rbHov===k?'rgba(93,240,255,.4)':'rgba(93,240,255,.1)';x.fill();x.strokeStyle='rgba(93,240,255,.5)';x.lineWidth=2;x.stroke();
+    x.fillStyle='#d6fbff';x.font=(k.lab?'600 24px ':'600 30px ')+FNT;x.textAlign='center';if(k.lab)x.fillText(k.lab,k.x+k.w/2,k.y+k.h/2,k.w-12);else x.fillText(k.id==='p'?'\u2039':k.id==='n'?'\u203a':k.id==='u'?'\u25B2':k.id==='d'?'\u25BC':'\u2715',k.x+k.w/2,k.y+k.h/2);});
+  x.textAlign='center';x.font='24px '+FNT;x.fillStyle='rgba(214,246,255,.8)';x.fillText(psXR?(PS.res?`${Math.min(PS.res.total,PS.off+PS.res.ps.length)}/${PS.res.total}`:'\u2026'):rdLive?'live':L.length?`${rdIdx+1}/${L.length}`:'0/0',110,33);
+  x.textAlign='left';x.font='600 28px '+FNT;x.fillStyle='#ffb347';x.fillText(psXR?(PS.spec?PS.spec.title:'Passages'):h?h.text:'Reading',226,33,RW-310);
+  const body=psXR?psBody():rdParts(h).map(p=>(p.err||p.a||p.note||'Thinking\u2026')).join('\n\n')||'No readings yet. Select concepts and press LLM.';
   x.font='26px '+FNT;
-  if(rdBody!==body){rdBody=body;rdLines=wrapT(x,body.replace(/\*\*/g,''),RW-56);if(!rdLive&&!rdPend)rdSy=0;}
-  const LH=36,top=72,vh=RH-top-40;rdMax=Math.max(0,rdLines.length*LH-vh);if(rdLive||rdPend)rdSy=rdMax;rdSy=Math.min(rdSy,rdMax);
+  if(rdBody!==body){rdBody=body;rdLines=wrapT(x,body.replace(/\*\*/g,''),RW-110);if(psXR||(!rdLive&&!rdPend))rdSy=0;}
+  const LH=36,top=72,vh=RH-top-(CFG.on&&!psXR?118:40);rdMax=Math.max(0,rdLines.length*LH-vh);if(!psXR&&(rdLive||rdPend))rdSy=rdMax;rdSy=Math.min(rdSy,rdMax);
   x.save();x.beginPath();x.rect(0,top,RW,vh);x.clip();x.fillStyle=rdPend&&rdPend.err?'#ff8a8a':'#d6f6ff';
   rdLines.forEach((l,i)=>{const y=top+i*LH+LH/2-rdSy;if(y>top-LH&&y<top+vh+LH)x.fillText(l,28,y);});x.restore();
   if(rdMax>0){rr(x,RW-14,top,6,vh,3);x.fillStyle='rgba(93,240,255,.15)';x.fill();const bh=Math.max(30,vh*vh/(vh+rdMax));rr(x,RW-14,top+(vh-bh)*rdSy/rdMax,6,bh,3);x.fillStyle='rgba(255,179,71,.9)';x.fill();}
-  x.font='18px '+FNT;x.fillStyle='rgba(214,246,255,.6)';x.fillText('Grab the panel to move it. Stick scrolls.',28,RH-20,RW-56);
+  x.font='18px '+FNT;x.fillStyle='rgba(214,246,255,.6)';x.fillText('Drag the title bar to move. Drag the text or use \u25B2\u25BC to scroll.',28,RH-20,RW-56);
   rtex.needsUpdate=true;
 }
 function colBuild(size){
@@ -2883,8 +3066,8 @@ function colUpd(dt){
   if(col.lv>=0)colBuild(.12*Math.pow(2,col.lv/2));else col.hide=null;
   applyState(true);
 }
-(()=>{const SKIP='button,input,textarea,select,a,label,summary,.wm,.chip,li,.dn,.lk,pre,.pc,#psb,.sr,#stb';
- ['info','hist','set','wk','hint','qf','tl','ps','st','ur'].forEach(id=>{const el=document.getElementById(id);if(!el)return;let d=null;
+(()=>{const SKIP='button,input,textarea,select,a,label,summary,.wm,.chip,li,.dn,.lk,pre,.pc,#psb,.sr';
+ ['info','hist','set','wk','hint','qf','tl','ps','ur'].forEach(id=>{const el=document.getElementById(id);if(!el)return;let d=null;
   el.addEventListener('pointerdown',e=>{if(e.button||e.target.closest(SKIP))return;const t=e.target;if(t.scrollHeight>t.clientHeight&&e.offsetX>=t.clientWidth)return;
    e.preventDefault();const r=el.getBoundingClientRect();d={x:e.clientX-r.left,y:e.clientY-r.top,w:r.width,h:r.height,on:false,sx:e.clientX,sy:e.clientY};});
   el.addEventListener('pointermove',e=>{if(!d)return;
@@ -2917,23 +3100,23 @@ function specQuery(){
   if(!Q||!Q.top)return null;
   let em=Q.top.filter(i=>!Q.seed.has(i)).slice(0,14);const fb=!em.length;if(fb)em=[...Q.seed];
   const t=em.slice(0,10);
-  return {title:'“'+($q.value.trim()||Q.terms.join(' '))+'”',ids:em.map(i=>nodes[i].id),w:em.map(i=>fb?1:Q.A[i]),must:em.map((_,k)=>k),all:false,R:t.length?t.reduce((x,i)=>x+Q.A[i],0)/t.length:.4};
+  return {title:'“'+($q.value.trim()||Q.terms.join(' '))+'”',ids:em.map(i=>nodes[i].id),w:em.map(i=>fb?1:(Q.cv?Math.max(.15,Q.cv[i]):Q.A[i])),must:em.map((_,k)=>k),all:false,R:t.length?t.reduce((x,i)=>x+Q.A[i],0)/t.length:.4,qg:Q.sg||[],cut:cthrOf()};
 }
 function specWith(j){return {title:nodes[j].word,ids:[nodes[j].id],w:[1],must:[0],all:true,R:Q&&Q.A?Q.A[j]:.5};}
 const pthrOf=()=>CFG.pthr==null||CFG.pthr===''||!isFinite(+CFG.pthr)?.5:Math.max(0,Math.min(1,+CFG.pthr));
 const psSaver=()=>!!CFG.on&&CFG.psave!==false;
 function paintPass(){
-  const r=PS.res;if(!r)return;const L=r.ps,sv=psSaver(),th=pthrOf();
+  const r=PS.res;if(!r)return;rdD=true;const L=r.ps,sv=psSaver(),th=pthrOf();
   const sent=sv?L.filter(p=>p.rel>=th).length:L.length,PG=60,pages=Math.ceil(r.total/PG),pg=Math.floor(r.off/PG);
   $('#pspg').hidden=pages<2;$('#pspn').textContent=`Page ${pg+1} of ${pages}`;$('#pspv').disabled=pg<=0;$('#psnx').disabled=pg>=pages-1;
   $('#psm').textContent=!r.total?'No passage contains these words together.':`${r.total>L.length?(r.off+1)+'\u2013'+(r.off+L.length)+' of '+r.total:L.length+' of '+r.total} passage${r.total>1?'s':''} \u00b7 resonance ${r.R.toFixed(2)}`+(r.mustN>1?` \u00b7 ${r.req>=r.mustN?'all '+r.mustN+' words':'at least '+r.req+' of '+r.mustN+' words'}`:'');
   $('#pssn').textContent=CFG.on&&L.length?(sv?`${sent} of ${L.length} go to the LLM`:`up to ${Math.min(L.length,CFG.prov==='webgpu'?5:10)} go to the LLM`):'';
-  $('#psb').innerHTML=L.map(p=>{const off=sv&&p.rel<th;return `<div class="pc${off?' off':''}"><div class="pd"><b title="${esc(p.doc)}">${esc(p.doc)}</b><span><span class="rel" title="Relevance relative to the best passage">${p.rel.toFixed(2)}</span>${CFG.on?(off?' \u00b7 not sent':' <span class="tag">sent</span>'):''} \u00b7 ${p.pct}%${' \u00b7 '+p.mc+' word'+(p.mc===1?'':'s')}</span></div>${hlText(p.text,p.m)}</div>`;}).join('')||'<div class="hs">Try selecting a single concept.</div>';
+  $('#psb').innerHTML=L.map(p=>{const off=sv&&p.rel<th;return `<div class="pc${off?' off':''}"><div class="pd"><b title="${esc(p.doc)}">${esc(p.doc)}</b><span><span class="rel" title="Relevance relative to the best passage">${p.rel.toFixed(2)}</span>${CFG.on?(off?' \u00b7 not sent':' <span class="tag">sent</span>'):''} \u00b7 ${p.pct}%${' \u00b7 '+p.mc+' word'+(p.mc===1?'':'s')}${r.nq>1?' \u00b7 '+p.qc+'/'+r.nq+' terms':''}</span></div>${hlText(p.text,p.m)}</div>`;}).join('')||'<div class="hs">Try selecting a single concept.</div>';
 }
 async function showPassages(sp,off){
   if(!sp||!nodes.length)return;
   const my=++PS.seq,ep=EPOCH;PS.spec=sp;PS.off=off|0;$ps.hidden=false;placePs();$('#pst').textContent=sp.title;$('#psm').textContent='Searching passages\u2026';
-  let r;try{r=await ENG.call({t:'passages',ids:sp.ids,w:sp.w,must:sp.must,need:sp.need,all:sp.all,R:sp.R,cap:60,full:true,off:off|0});}
+  let r;try{r=await ENG.call({t:'passages',ids:sp.ids,w:sp.w,must:sp.must,need:sp.need,all:sp.all,R:sp.R,cap:60,full:true,off:off|0,qg:sp.qg,cut:sp.cut});}
   catch(e){if(my===PS.seq)$('#psm').textContent='Passage search failed: '+(e&&e.message||e);return;}
   if(my!==PS.seq||ep!==EPOCH)return;
   PS.res=r;paintPass();
@@ -2974,101 +3157,6 @@ function edgePick(cx,cy){
     const d=Math.hypot(cx-(_pa.x+t*dx),cy-(_pa.y+t*dy));if(d<bd){bd=d;best=k;}
   }
   return best;
-}
-// ================= structure: clusters and bridges =================
-function louvain(n,adj){
-  let cur=adj;const map=Int32Array.from({length:n},(_,i)=>i);
-  for(let lvl=0;lvl<4;lvl++){
-    const cn=cur.length,c=Int32Array.from({length:cn},(_,i)=>i),k=new Float64Array(cn),tot=new Float64Array(cn);let m2=0;
-    for(let i=0;i<cn;i++){let x=0;cur[i].forEach(w=>{x+=w;});k[i]=x;tot[i]=x;m2+=x;}
-    if(m2<=0)break;
-    let moved=false;
-    for(let pass=0;pass<20;pass++){
-      let any=false;
-      for(let i=0;i<cn;i++){
-        const ci=c[i],nb=new Map();cur[i].forEach((w,j)=>{if(j!==i)nb.set(c[j],(nb.get(c[j])||0)+w);});
-        tot[ci]-=k[i];let best=ci,bg=(nb.get(ci)||0)-tot[ci]*k[i]/m2;
-        nb.forEach((w,cc)=>{const g=w-tot[cc]*k[i]/m2;if(g>bg+1e-12){bg=g;best=cc;}});
-        tot[best]+=k[i];if(best!==ci){c[i]=best;any=true;moved=true;}
-      }
-      if(!any)break;
-    }
-    if(!moved)break;
-    const ren=new Map();c.forEach(x=>{if(!ren.has(x))ren.set(x,ren.size);});
-    for(let i=0;i<n;i++)map[i]=ren.get(c[map[i]]);
-    if(ren.size===cn)break;
-    const nxt=Array.from({length:ren.size},()=>new Map());
-    for(let i=0;i<cn;i++){const a=ren.get(c[i]);cur[i].forEach((w,j)=>{const b=ren.get(c[j]);nxt[a].set(b,(nxt[a].get(b)||0)+w);});}
-    cur=nxt;
-  }
-  return map;
-}
-function structCompute(){
-  const N=nodes.length;ST.comm=null;ST.clusters=[];ST.bridges=[];ST.hue=[];ST.focus=-1;clClear();
-  if(N>=8&&edges.length){
-    const adj=Array.from({length:N},()=>new Map());
-    edges.forEach(e=>{const w=e.w||1e-6;adj[e.s].set(e.t,(adj[e.s].get(e.t)||0)+w);adj[e.t].set(e.s,(adj[e.t].get(e.s)||0)+w);});
-    const comm=louvain(N,adj),sz=new Map();comm.forEach(c=>sz.set(c,(sz.get(c)||0)+1));
-    const MIN=Math.max(3,Math.round(N*.01));
-    for(let pass=0;pass<3;pass++){
-      const small=[...sz].filter(x=>x[1]<MIN).map(x=>x[0]);if(!small.length)break;
-      const tgt=new Map();small.forEach(c=>tgt.set(c,new Map()));
-      for(let i=0;i<N;i++){const t=tgt.get(comm[i]);if(!t)continue;adj[i].forEach((w,j)=>{const d=comm[j];if(d!==comm[i])t.set(d,(t.get(d)||0)+w);});}
-      let ch=false;
-      tgt.forEach((m,c)=>{let best=-1,bv=0;m.forEach((w,d)=>{if(sz.get(d)>=MIN&&w>bv){bv=w;best=d;}});
-        if(best>=0){for(let i=0;i<N;i++)if(comm[i]===c)comm[i]=best;sz.set(best,sz.get(best)+sz.get(c));sz.delete(c);ch=true;}});
-      if(!ch)break;
-    }
-    const cnt=new Map();comm.forEach(c=>cnt.set(c,(cnt.get(c)||0)+1));
-    const ord=[...cnt].sort((a,b)=>b[1]-a[1]).map(x=>x[0]),ren=new Map(ord.map((c,k)=>[c,k])),K=ord.length,cm=new Int32Array(N);
-    for(let i=0;i<N;i++)cm[i]=ren.get(comm[i]);
-    const ist=new Float64Array(N);for(let i=0;i<N;i++)adj[i].forEach((w,j)=>{if(cm[j]===cm[i])ist[i]+=w;});
-    const mem=Array.from({length:K},()=>[]);for(let i=0;i<N;i++)mem[cm[i]].push(i);
-    ST.hue=mem.map((_,c)=>(c*.381966)%1);
-    ST.clusters=mem.map((m,c)=>{
-      let mx=1e-9;m.forEach(i=>{if(ist[i]>mx)mx=ist[i];});
-      const sc=i=>ist[i]/mx*.7+nodes[i].nf*.3,top=m.slice().sort((a,b)=>sc(b)-sc(a)).slice(0,3);
-      let cx=0,cy=0,cz=0,ws=0;m.forEach(i=>{const w=ist[i]+.01;cx+=nodes[i].x*w;cy+=nodes[i].y*w;cz+=nodes[i].z*w;ws+=w;});
-      const rgb=hsv(ST.hue[c],.6,1).map(v=>Math.round(v*255));
-      return {id:c,label:top.map(i=>nodes[i].word).join(' \u00b7 '),n:m.length,css:`rgb(${rgb[0]},${rgb[1]},${rgb[2]})`,cx:cx/ws,cy:cy/ws,cz:cz/ws};
-    });
-    ST.comm=cm;
-    if(K>=2){
-      const cand=[];
-      for(let i=0;i<N;i++){
-        const s=new Map();let S=0;adj[i].forEach((w,j)=>{s.set(cm[j],(s.get(cm[j])||0)+w);S+=w;});
-        if(s.size<2||S<=0)continue;
-        let P=1,bo=-1,bv=0;s.forEach((v,c)=>{P-=(v/S)*(v/S);if(c!==cm[i]&&v>bv){bv=v;bo=c;}});
-        if(bo<0||bv/S<.2||P<.3)continue;
-        cand.push({i,a:cm[i],b:bo,score:P*(.6+.4*nodes[i].nf)*Math.log(2+adj[i].size)});
-      }
-      cand.sort((x,y)=>y.score-x.score);
-      const nb=Math.max(4,Math.min(16,Math.round(N/60))),pc=new Map();
-      for(const b of cand){if(ST.bridges.length>=nb)break;const k=Math.min(b.a,b.b)+'|'+Math.max(b.a,b.b);if((pc.get(k)||0)>=3)continue;pc.set(k,(pc.get(k)||0)+1);ST.bridges.push(b);}
-    }
-    clBuild();
-  }
-  structUI();
-}
-function clClear(){clGroup.children.slice().forEach(sp=>{clGroup.remove(sp);sp.material.map.dispose();sp.material.dispose();});}
-function clBuild(){
-  clClear();
-  ST.clusters.slice(0,14).forEach(c=>{
-    const cv=document.createElement('canvas');cv.width=1024;cv.height=160;const x=cv.getContext('2d');
-    x.font='600 70px system-ui,-apple-system,sans-serif';x.textAlign='center';x.textBaseline='middle';x.shadowColor=c.css;x.shadowBlur=26;x.fillStyle=c.css;x.fillText(c.label,512,80,980);
-    const tx=new THREE.CanvasTexture(cv);tx.colorSpace=THREE.SRGBColorSpace;tx.minFilter=THREE.LinearMipmapLinearFilter;tx.anisotropy=4;
-    const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false,blending:THREE.AdditiveBlending}));
-    sp.scale.set(.62,.097,1);sp.position.set(c.cx,c.cy,c.cz);sp.renderOrder=9;clGroup.add(sp);
-  });
-}
-function stCol(i,cc){const h=ST.hue[ST.comm[i]];return h===undefined?cc:mix(hsv(h,.7,1),WH,.2*nodes[i].nf);}
-function structUI(){
-  const el=$('#stb');if(!el)return;
-  if(!ST.comm){el.innerHTML='<div class="hs">Load text to see clusters and bridges.</div>';return;}
-  const short=c=>esc(ST.clusters[c].label.split(' \u00b7 ')[0]);
-  el.innerHTML=`<div class="hs">Colours show clusters. Gold words are bridges linking separate clusters. The overlay shows while nothing is selected or queried.</div>
-<div class="sh">Clusters (click to focus)</div>`+ST.clusters.map(c=>`<div class="sr${ST.focus===c.id?' on':''}" data-c="${c.id}"><span class="sw" style="background:${c.css}"></span><span class="sl">${esc(c.label)}</span><span class="w">${c.n}</span></div>`).join('')+
-  `<div class="sh">Bridge concepts (click to select)</div>`+(ST.bridges.length?ST.bridges.map(b=>`<div class="sr" data-b="${b.i}"><span class="sw br"></span><span class="sl"><b>${esc(nodes[b.i].word)}</b><small>${short(b.a)} \u2194 ${short(b.b)}</small></span></div>`).join(''):'<div class="hs">No clear bridges found.</div>');
 }
 // ================= real documents: PDF, Word, HTML, URLs =================
 const PDFV='4.4.168';let pdfjsP=null,mammothP=null;
@@ -3143,7 +3231,7 @@ const $ur=$('#ur');
 const openUrl=()=>{$ur.hidden=false;$('#urt').focus();};
 const $am=$('#addm');
 $('#attl').onclick=e=>{e.stopPropagation();$am.hidden=!$am.hidden;};
-$am.addEventListener('click',e=>{const b=e.target.closest('button[data-a]');if(!b)return;$am.hidden=true;({file:()=>$('#file').click(),wiki:openWiki,url:openUrl})[b.dataset.a]();});
+$am.addEventListener('click',e=>{const b=e.target.closest('button[data-a]');if(!b)return;$am.hidden=true;({file:()=>$('#file').click(),wiki:openWiki,url:openUrl,demo:()=>loadDemo()})[b.dataset.a]();});
 document.addEventListener('click',e=>{if(!$am.hidden&&!e.target.closest('#addm')&&!e.target.closest('#attl'))$am.hidden=true;});
 addEventListener('keydown',e=>{if(e.key==='Escape')$am.hidden=true;});
 $('#urx').onclick=()=>{$ur.hidden=true;};
@@ -3216,7 +3304,7 @@ renderer.setAnimationLoop((t,frame)=>{
   if(!xr){if(!idle)perfSample(raw);edgeBudget();}U.uT.value+=dt;
   {const tk=thinking()?1:0;if(tk&&!pulseOn)U.uP0.value=U.uT.value;pulseOn=tk;U.uK.value+=(tk-U.uK.value)*Math.min(1,dt*(tk?4:2.5));if(U.uK.value<.005&&!tk)U.uK.value=0;}
   G.updateMatrixWorld(true);tlStep(dt);jStep(dt);platform();lodLabels(dt);colUpdate(dt);
-  if(needCenter&&renderer.xr.isPresenting&&frame){const xc=renderer.xr.getCamera(),o=xc.getWorldPosition(new THREE.Vector3()),d=xc.getWorldDirection(new THREE.Vector3());d.y=0;if(d.lengthSq()>1e-4){d.normalize();G.scale.setScalar(centerS);const dist=arMode?.8:1.1;G.position.set(o.x+d.x*dist,o.y-.1,o.z+d.z*dist);G.quaternion.identity();needCenter=false;}}
+  if(needCenter&&renderer.xr.isPresenting&&frame){const xc=renderer.xr.getCamera(),o=xc.getWorldPosition(new THREE.Vector3()),d=xc.getWorldDirection(new THREE.Vector3());d.y=0;if(d.lengthSq()>1e-4){d.normalize();G.scale.setScalar(centerS);const dist=arMode?.7:.75;G.position.set(o.x+d.x*dist,o.y-.1,o.z+d.z*dist);G.quaternion.identity();needCenter=false;}}
   if(renderer.xr.isPresenting){xrWatch(dt);placeKB(dt);gestures(dt);sticks(dt);if(arMode&&frame){arPersist(frame,dt);arFrame(frame);}drawKBIfDirty();drawRdIfDirty();}
   else{
     U.uH.value=renderer.domElement.height;
