@@ -327,39 +327,50 @@ function foldPlurals(){
 // ---- phrase detection ----
 // Adjacent content-word pairs with high PMI and enough mass become one token ("sea level").
 // The second slot becomes a filler so every position, distance and array stays aligned.
-function mergePhrases(){
+const MAXW=5;
+function mergePhrases(){for(let pass=0;pass<4;pass++)if(!mergePass())break;}
+function mergePass(){
   const V=vocab.length,uni=new Uint32Array(V),bi=new Map();let T=0;
   const okTok=x=>x>FILL&&x<V&&vocab[x].charCodeAt(0)>=97&&vocab[x].length>=3&&!STRUCT.has(vocab[x]);
+  const nw=x=>vocab[x].split(' ').length;
+  // next content unit after k, skipping the fillers left behind by earlier merges (pol bit 64)
+  const nxt=(d,k)=>{let j=k+1;const t=d.ids,p=d.pol;while(j<t.length&&t[j]===FILL&&(p[j]&64))j++;return j;};
   corp.forEach(d=>{const t=d.ids;
     for(let k=0;k<t.length;k++){const a=t[k];if(a<=FILL)continue;uni[a]++;T++;
-      const b=t[k+1];
-      if(k+1<t.length&&a!==b&&okTok(a)&&okTok(b)){const key=a*V+b;bi.set(key,(bi.get(key)||0)+1);}}});
-  if(T<400)return;
+      const j=nxt(d,k),b=t[j];
+      if(j<t.length&&a!==b&&okTok(a)&&okTok(b)&&nw(a)+nw(b)<=MAXW){const key=a*V+b;bi.set(key,(bi.get(key)||0)+1);}}});
+  if(T<400)return false;
   const minC=T<1e4?2:3,cand=[];
   bi.forEach((c,key)=>{
     if(c<minC)return;const a=Math.floor(key/V),b=key-a*V;
     const pmi=Math.log(c*T/(uni[a]*uni[b]));
     if(pmi<2.5||c<.25*Math.min(uni[a],uni[b]))return;
     cand.push([key,c*pmi]);});
-  if(!cand.length)return;
+  if(!cand.length)return false;
   cand.sort((x,y)=>y[1]-x[1]);
-  const acc=new Set(cand.slice(0,4000).map(c=>c[0])),pid=new Map();
+  const acc=new Set(cand.slice(0,4000).map(c=>c[0])),pid=new Map();let merged=0;
   corp.forEach(d=>{const t=d.ids;
-    for(let k=0;k+1<t.length;k++){
-      const a=t[k],b=t[k+1];if(a<=FILL||b<=FILL||a>=V||b>=V)continue;
+    for(let k=0;k<t.length;k++){
+      const a=t[k];if(a<=FILL||a>=V)continue;
+      const j=nxt(d,k),b=t[j];if(j>=t.length||b<=FILL||b>=V)continue;
       const key=a*V+b;if(!acc.has(key))continue;
       let p=pid.get(key);
-      if(p===undefined){const w=vocab[a]+' '+vocab[b];p=vocab.length;vocab.push(w);cfreq.push(0);rawId.set(w,p);pid.set(key,p);}
-      t[k]=p;t[k+1]=FILL;d.n--;k++;}});
+      if(p===undefined){const w=vocab[a]+' '+vocab[b];p=rawId.get(w);
+        if(!(p>1)){p=vocab.length;vocab.push(w);cfreq.push(0);rawId.set(w,p);}pid.set(key,p);}
+      t[k]=p;t[j]=FILL;d.pol[j]|=64;d.n--;merged++;k=j;}});
+  return merged>0;
 }
 // Query helper: join adjacent query words into a phrase id when the corpus has that phrase.
 function wid(t){let id=rawId.get(t);if(id>1&&FOLDM&&FOLDM[id]!==undefined)id=FOLDM[id];return id>1?id:0;}
 function mergeQ(seq){
   const o=[];
   for(let i=0;i<seq.length;i++){
-    if(i+1<seq.length){const a=wid(seq[i]),b=wid(seq[i+1]);
-      if(a&&b){const w=vocab[a]+' '+vocab[b],p=rawId.get(w);if(p>1&&cfreq[p]){o.push(w);i++;continue;}}}
-    o.push(seq[i]);}
+    let hit=0,key='';
+    for(let L=Math.min(MAXW,seq.length-i);L>=2&&!hit;L--){
+      const ids=[];let ok=true;for(let q=0;q<L;q++){const x=wid(seq[i+q]);if(!x){ok=false;break;}ids.push(x);}
+      if(!ok)continue;const w=ids.map(x=>vocab[x]).join(' '),p=rawId.get(w);
+      if(p>1&&cfreq[p]){hit=L;key=w;}}
+    if(hit){o.push(key);i+=hit-1;}else o.push(seq[i]);}
   return [...new Set(o)];
 }
 function recount(){
@@ -1265,13 +1276,19 @@ function tokId(e){if(e.charCodeAt(0)<97)return 0;let id=rawId.get(e);if(!(id>1))
 // Tokens of a passage with phrases joined, as {id,s,e[,ph:[id1,id2,end1,start2]]}.
 function rawTok(e){if(e.charCodeAt(0)<97)return 0;let id=rawId.get(e);if(!(id>1))return 0;if(FOLDM&&FOLDM[id]!==undefined)id=FOLDM[id];return id;}
 function passToks(norm){
-  const ms=[...norm.matchAll(TOKRE)],out=[];
+  const ms=[...norm.matchAll(TOKRE)],out=[],rt=ms.map(m=>rawTok(m[0]));
   for(let i=0;i<ms.length;i++){
-    const m=ms[i],r1=rawTok(m[0]);
-    if(r1&&i+1<ms.length){const m2=ms[i+1],r2=rawTok(m2[0]);
-      if(r2){const p=rawId.get(vocab[r1]+' '+vocab[r2]);
-        if(p>1&&cfreq[p]){out.push({id:p,s:m.index,e:m2.index+m2[0].length,ph:[r1,r2,m.index+m[0].length,m2.index]});i++;continue;}}}
-    if(r1&&cfreq[r1]>0)out.push({id:r1,s:m.index,e:m.index+m[0].length});
+    const r1=rt[i];
+    if(r1){let done=false;
+      for(let L=Math.min(MAXW,ms.length-i);L>=2&&!done;L--){
+        let ok=true,key=vocab[r1];
+        for(let q=1;q<L;q++){if(!rt[i+q]){ok=false;break;}key+=' '+vocab[rt[i+q]];}
+        if(!ok)continue;const p=rawId.get(key);
+        if(p>1&&cfreq[p]){const ids=[],st=[],en=[];
+          for(let q=0;q<L;q++){ids.push(rt[i+q]);st.push(ms[i+q].index);en.push(ms[i+q].index+ms[i+q][0].length);}
+          out.push({id:p,s:st[0],e:en[L-1],ph:{ids,st,en}});i+=L-1;done=true;}}
+      if(done)continue;
+      if(cfreq[r1]>0)out.push({id:r1,s:ms[i].index,e:ms[i].index+ms[i][0].length});}
   }
   return out;
 }
@@ -1282,7 +1299,7 @@ function buildPass(){
       const raw=d.text.slice(a,b);if(raw.trim().length<25)continue;
       const set=new Set();
       const alone=new Set(),sub=new Map();
-      for(const k of passToks(normSrc(raw))){set.add(k.id);if(k.ph){set.add(k.ph[0]);set.add(k.ph[1]);for(const c of [k.ph[0],k.ph[1]]){const l=sub.get(c);l?l.push(k.id):sub.set(c,[k.id]);}}else alone.add(k.id);}
+      for(const k of passToks(normSrc(raw))){set.add(k.id);if(k.ph){for(const c of k.ph.ids){set.add(c);const l=sub.get(c);l?l.push(k.id):sub.set(c,[k.id]);}}else alone.add(k.id);}
       alone.forEach(c=>sub.delete(c));
       const ids=Uint32Array.from(set),pi=PASS.length;
       PASS.push({d:di,a,b,ids,sub});
@@ -1296,7 +1313,7 @@ function fmtPass(r,ps,wi){
   for(const k of passToks(normSrc(raw))){
     const o=wi.get(k.id);
     if(o){put(k.s,k.e,o);continue;}
-    if(k.ph){const o1=wi.get(k.ph[0]),o2=wi.get(k.ph[1]);if(o1)put(k.s,k.ph[2],o1);if(o2)put(k.ph[3],k.e,o2);}
+    if(k.ph){k.ph.ids.forEach((c,q)=>{const oq=wi.get(c);if(oq)put(k.ph.st[q],k.ph.en[q],oq);});}
   }
   return {doc:doc.name,pct:Math.round(100*ps.a/Math.max(1,doc.text.length)),text:t,m:mk,mc:r.mc,s:r.s};
 }
@@ -2046,7 +2063,7 @@ let HV=110,ibChips=[];const ic=document.createElement('canvas');ic.width=IW;ic.h
 const ictx=ic.getContext('2d'),itex=new THREE.CanvasTexture(ic);itex.colorSpace=THREE.SRGBColorSpace;itex.anisotropy=4;
 const ib=new THREE.Mesh(new THREE.PlaneGeometry(.4,.4*IH/IW),new THREE.MeshBasicMaterial({map:itex,transparent:true,depthTest:false}));
 ib.renderOrder=30;ib.visible=false;ib.frustumCulled=false;scene.add(ib);
-let ibHpx=0,kDirty=true,iDirty=true,infoCache=null,kbOpen=false,pressK=null,pressT=0,lastPh=0,hsig='';
+let HUIDE=false,ibHpx=0,kDirty=true,iDirty=true,infoCache=null,kbOpen=false,pressK=null,pressT=0,lastPh=0,hsig='';
 function infoData(){
   if(SS.size){
     const sl=[...SS];
@@ -2119,6 +2136,7 @@ function hud(){
 (function buildKeys(){
   const B=1576;
   KEYS.push(
+    {id:'hideui',x:640,y:8,w:320,h:52,act:'hideui'},
     {id:'plus',x:24,y:24,w:64,h:64,act:'plus'},
     {id:'corp',x:100,y:24,w:64,h:64,act:'corp'},
     {id:'wiki',x:176,y:24,w:64,h:64,act:'wiki'},
@@ -2154,11 +2172,12 @@ function drawKB(){
   x.clearRect(0,0,KW,KH);x.textBaseline='middle';x.textAlign='left';
   const hov=new Set(rig.map(r=>r.hk).filter(Boolean)),now=performance.now();
   const pane=(a,b,w,h,r,al)=>{rr(x,a,b,w,h,r);x.fillStyle='rgba(30,42,60,'+al+')';x.fill();x.strokeStyle='rgba(255,255,255,.4)';x.lineWidth=2.5;x.stroke();};
-  if(ctx)pane(16,96,780,72,16,.55);
+  if(!HUIDE){if(ctx)pane(16,96,780,72,16,.55);
   pane(428,800,740,88,18,.6);
-  if(kbOpen)pane(290,476,1020,318,18,.82);
-  if(hudB){x.font='20px '+F;x.fillStyle='rgba(214,246,255,.8)';x.fillText(hudB,28,ctx?190:116,720);}
+  if(kbOpen)pane(290,476,1020,318,18,.82);}
+  if(hudB&&!HUIDE){x.font='20px '+F;x.fillStyle='rgba(214,246,255,.8)';x.fillText(hudB,28,ctx?190:116,720);}
   for(const k of KEYS){
+    if(HUIDE&&k.id!=='hideui'&&!k.ib)continue;
     if(k.kbk&&!kbOpen)continue;
     if((k.tlk||k.ctk)&&!ctx)continue;
     if(k.llm&&!CFG.on)continue;
@@ -2196,7 +2215,7 @@ function drawKB(){
     x.fillStyle=(fl||(k.id==='play'&&RV.playing)||(k.id==='move'&&MOVE))?'rgba(255,179,71,.6)':on?'rgba(255,255,255,.3)':'rgba(255,255,255,.12)';x.fill();
     x.strokeStyle=on?'rgba(255,255,255,.8)':'rgba(255,255,255,.42)';x.lineWidth=2;x.stroke();
     x.globalAlpha=(k.id==='mode'&&!sessAR)?.4:1;
-    const lab=k.id==='auto'?'':k.id==='brain'?'Ask LLM':k.id==='mode'?(sessAR?(arMode?'To VR':'To MR'):'VR only'):k.id==='place'?(arMode?'Place':'Recenter'):k.id==='spd'?RV.speed+'\u00d7':k.id==='play'?(RV.playing?'Pause':(RV.count>0&&RV.count<RV.order.length?'Resume':'Play')):k.id==='move'?(MOVE?'Move':'Spin'):k.id==='toggle'?(kbOpen?'hide':'keys'):k.label;
+    const lab=k.id==='auto'?'':k.id==='brain'?'Ask LLM':k.id==='mode'?(sessAR?(arMode?'To VR':'To MR'):'VR only'):k.id==='place'?(arMode?'Place':'Recenter'):k.id==='spd'?RV.speed+'\u00d7':k.id==='play'?(RV.playing?'Pause':(RV.count>0&&RV.count<RV.order.length?'Resume':'Play')):k.id==='move'?(MOVE?'Move':'Spin'):k.id==='toggle'?(kbOpen?'hide':'keys'):k.id==='hideui'?(HUIDE?'Show UI':'Hide UI'):k.label;
     x.font=(k.kbk?'600 30px ':'600 24px ')+F;x.fillStyle=k.act==='ask'?'#ffb347':'#d6fbff';x.textAlign='center';
     x.fillText(lab,k.x+k.w/2,k.y+k.h/2+1,k.w-10);
     if(k.id==='auto'){const bx=k.x+12,by=k.y+k.h/2-11;
@@ -2215,7 +2234,7 @@ function drawKBIfDirty(){
 }
 function keyAt(px,py){
   if(px<0||px>KW||py<0||py>KH)return null;
-  const k=KEYS.find(k=>(!k.kbk||kbOpen)&&(!(k.tlk||k.ctk)||hasCtx())&&(!k.llm||CFG.on)&&px>=k.x-3&&px<=k.x+k.w+3&&py>=k.y-3&&py<=k.y+k.h+3);
+  const k=KEYS.find(k=>(!HUIDE||k.id==='hideui'||k.ib)&&(!k.kbk||kbOpen)&&(!(k.tlk||k.ctk)||hasCtx())&&(!k.llm||CFG.on)&&px>=k.x-3&&px<=k.x+k.w+3&&py>=k.y-3&&py<=k.y+k.h+3);
   return {k:k||null,px,py};
 }
 const rc=new THREE.Raycaster(),_o=new THREE.Vector3(),_d=new THREE.Vector3(),_q=new THREE.Quaternion();
@@ -2224,7 +2243,7 @@ function panelNear(c){
   rayOf(c);_d.set(0,0,-1).applyQuaternion(_q);rc.set(_o,_d);
   const h=rc.intersectObject(kb,false)[0];if(!h||!h.uv)return false;
   const px=h.uv.x*KW,py=(1-h.uv.y)*KH,m=28;
-  return KEYS.some(k=>(!k.kbk||kbOpen)&&(!(k.tlk||k.ctk)||hasCtx())&&(!k.llm||CFG.on)&&px>=k.x-m&&px<=k.x+k.w+m&&py>=k.y-m&&py<=k.y+k.h+m);
+  return KEYS.some(k=>(!HUIDE||k.id==='hideui'||k.ib)&&(!k.kbk||kbOpen)&&(!(k.tlk||k.ctk)||hasCtx())&&(!k.llm||CFG.on)&&px>=k.x-m&&px<=k.x+k.w+m&&py>=k.y-m&&py<=k.y+k.h+m);
 }
 let RAYOV=null;
 function rayOf(c){if(RAYOV&&RAYOV.c===c){_o.copy(RAYOV.o);_q.copy(RAYOV.q);}else{c.getWorldPosition(_o);c.getWorldQuaternion(_q);}}
@@ -2242,6 +2261,7 @@ function keyAct(k,r){
   if(k.act==='ch'){if(t.length<120)$q.value=t+k.label;}
   else if(k.act==='sp'){if(t.length<120)$q.value=t+' ';}
   else if(k.act==='bs')$q.value=t.slice(0,-1);
+  else if(k.act==='hideui'){HUIDE=!HUIDE;if(HUIDE)kbOpen=false;xrNote='';}
   else if(k.act==='open')kbOpen=true;
   else if(k.act==='toggle')kbOpen=!kbOpen;
   else if(k.act==='ask'){if($q.value.trim()){runQuery($q.value).then(autoBrain);kbOpen=false;}}
@@ -2670,7 +2690,7 @@ renderer.xr.addEventListener('sessionstart',()=>{
   const envAR=!!s.environmentBlendMode&&s.environmentBlendMode!=='opaque';
   sessAR=reqLook!==null||envAR;
   const pass=reqLook!==null?reqLook==='mr':envAR;reqLook=null;
-  controls.enabled=false;kb.visible=true;kInit=false;kbOpen=false;U.uX.value=1;needCenter=false;lostT=0;arRest=0;arAnchor=null;arLast=null;arDirty=false;arBusy=false;
+  controls.enabled=false;kb.visible=true;kInit=false;kbOpen=false;HUIDE=false;U.uX.value=1;needCenter=false;lostT=0;arRest=0;arAnchor=null;arLast=null;arDirty=false;arBusy=false;
   try{renderer.xr.setFoveation(.5);}catch(e){}
   {const bl=s.renderState&&s.renderState.baseLayer;U.uH.value=bl&&bl.framebufferHeight?bl.framebufferHeight:2000;}
   dolly.position.set(0,0,0);dolly.rotation.set(0,0,0);
