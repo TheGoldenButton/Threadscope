@@ -206,6 +206,11 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 #attl,#sbtn,#hbtn,#dcnt{min-width:calc(38px*var(--fs,1));min-height:calc(38px*var(--fs,1))}
 #hbtn{right:calc(14px + 48px*var(--fs,1))!important;width:auto!important}
 #sbtn{width:auto!important;height:auto!important}
+/* selection header never eats the word list: it scrolls inside a fixed-height strip, the list keeps its size */
+#info{max-height:min(calc(320px*var(--fs,1)),55vh)}
+#infob .ih{max-height:calc(76px*var(--fs,1));overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;overscroll-behavior:contain}
+#infob .il{min-height:calc(120px*var(--fs,1))}
+#info h2{font-size:calc(20px*var(--fs,1));line-height:1.25;overflow-wrap:anywhere}
 </style>
 </head>
 <body>
