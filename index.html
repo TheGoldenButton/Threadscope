@@ -271,7 +271,7 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 </div>
 <div id="rd" class="panel" hidden><div id="rdh"><button id="rdp" title="Older reading">&#8249;</button><span id="rdn">0/0</span><button id="rdnx" title="Newer reading">&#8250;</button><span id="rdt"></span><button id="rdst" title="Stop generating" hidden>&#9632; Stop</button><button id="rdx" title="Close">&#10005;</button></div><div id="rdb"></div><div id="rdm"></div><form id="rdf"><input id="rdq" type="text" placeholder="Ask a follow-up within this context" autocomplete="off"><button type="submit" id="rds">Send</button></form></div>
 <button id="helpbtn" aria-label="Help" aria-expanded="false" title="Help">?</button>
-<div id="hint" class="panel" hidden>Desktop: drag to orbit, wheel to zoom, WASD/QE to fly, click concepts to select several (selected words pulse; click again to deselect). With words selected, Play puts you inside the current, flying node to node in resonant order. Every word you type is searched, including common words like the or not; only the drawn field hides them. VR: a query bar, keyboard and a results box float in view (point and pinch or trigger the bar to type). Mixed reality (Quest 3): press Enter mixed reality to see your room through the passthrough cameras. Pinch and drag anywhere to carry the data sphere (the right stick spins it), pinch with both hands and spread to resize and twist it, quick pinch on a word to select it (or tap a selected word chip in the list box to deselect it); select several to see how they connect, and pinch a selected word again to deselect it. The field remembers where you put it between mixed-reality sessions. Sticks fly in VR. A adds the selected concept to the query, B clears. Press Place on the panel to snap the field onto a wall, table or floor. In VR the top buttons are: + paste copied text, \u21C4 switch saved text, W fetch Wikipedia for the typed topic, \u00B6 source passages, and the gear toggles the LLM. Brighter nodes are more frequent words. Zoom out and neighbouring words collapse into the most dominant word of their area (bigger dot, labelled); zoom in and they expand again. The field learns as you use it: words you query or select together are drawn a little closer each time, and the arrangement is saved per text. Line colour is based on how often the words at each end occur in your text: rare words are violet and blue, then green and yellow, and the most frequent words are orange and red, so each line blends between its two ends. The cog (top right) can switch lines to colour by link strength instead. Once you have a query or selection, a Play button, timeline and speed button appear: words appear one by one, strongest resonance first (the speed button cycles 0.25x to 4x). The results box scrolls: thumbstick while pointing at it, or (hand tracking) touch it with your index fingertip and slide up or down like a touchscreen, with a flick for momentum; tap a row to select that word. Source passages: select a concept (or click a link line, or press the ¶ button on a row) to see the sentences where the words occur, with the document name; how many are shown adapts to how strongly the words resonate. Voice: hold out an open palm (palm up or toward you) steadily for about three quarters of a second in mixed reality or VR with hand tracking. An orb appears in your hand with lightning arcing to the network; speak, then close your hand or pull it away to send. Whisper runs in your browser (the first use downloads a small model). On desktop, or with controllers, use the mic button. Attach PDF, Word or HTML files, or fetch URLs.</div>
+<div id="hint" class="panel" hidden>Desktop: drag to orbit, wheel to zoom, WASD/QE to fly, click concepts to select several (selected words pulse; click again to deselect). With words selected, Play puts you inside the current, flying node to node in resonant order. Every word you type is searched, including common words like the or not; only the drawn field hides them. VR: a query bar, keyboard and a results box float in view (point and pinch or trigger the bar to type). The keyboard's mic key dictates into the bar with Whisper: press it, speak, press it again, then press W for Wikipedia or Ask. Mixed reality (Quest 3): press Enter mixed reality to see your room through the passthrough cameras. Pinch and drag anywhere to carry the data sphere (the right stick spins it), pinch with both hands and spread to resize and twist it, quick pinch on a word to select it (or tap a selected word chip in the list box to deselect it); select several to see how they connect, and pinch a selected word again to deselect it. The field remembers where you put it between mixed-reality sessions. Sticks fly in VR. A adds the selected concept to the query, B clears. Press Place on the panel to snap the field onto a wall, table or floor. In VR the top buttons are: + paste copied text, \u21C4 switch saved text, W fetch Wikipedia for the typed topic, \u00B6 source passages, and the gear toggles the LLM. Brighter nodes are more frequent words. Zoom out and neighbouring words collapse into the most dominant word of their area (bigger dot, labelled); zoom in and they expand again. The field learns as you use it: words you query or select together are drawn a little closer each time, and the arrangement is saved per text. Line colour is based on how often the words at each end occur in your text: rare words are violet and blue, then green and yellow, and the most frequent words are orange and red, so each line blends between its two ends. The cog (top right) can switch lines to colour by link strength instead. Once you have a query or selection, a Play button, timeline and speed button appear: words appear one by one, strongest resonance first (the speed button cycles 0.25x to 4x). The results box scrolls: thumbstick while pointing at it, or (hand tracking) touch it with your index fingertip and slide up or down like a touchscreen, with a flick for momentum; tap a row to select that word. Source passages: select a concept (or click a link line, or press the ¶ button on a row) to see the sentences where the words occur, with the document name; how many are shown adapts to how strongly the words resonate. Voice: hold out an open palm (palm up or toward you) steadily for about three quarters of a second in mixed reality or VR with hand tracking. An orb appears in your hand with lightning arcing to the network; speak, then close your hand or pull it away to send. Whisper runs in your browser (the first use downloads a small model). On desktop, or with controllers, use the mic button. Attach PDF, Word or HTML files, or fetch URLs.</div>
 <script type="text/plain" id="engine-src">
 // Concept Field analysis engine. Runs in a Web Worker; owns the corpus and all derived state.
 // The main thread talks to it with {t:'ingest'|'query'|'reset', rid, ...} messages.
@@ -1905,8 +1905,10 @@ function voiceTeardown(){
 }
 async function voiceStart(src){
   if(VOICE.st!=='idle')return;
-  if(!nodes.length){vnote('Load text first, then speak.');return;}
-  VOICE.st='starting';VOICE.want=true;VOICE.chunks=[];VOICE.n=0;VOICE.lvl=0;VOICE.peak=0;VOICE.sess++;VOICE.live='';VOICE.hits=[];VOICE.itT=1.2;$q.value='';voiceUI();voiceWarm();
+  const dict=src==='dict';
+  if(!dict&&!nodes.length){vnote('Load text first, then speak.');return;}
+  VOICE.dict=dict;VOICE.base=dict?$q.value.trim():'';
+  VOICE.st='starting';VOICE.want=true;VOICE.chunks=[];VOICE.n=0;VOICE.lvl=0;VOICE.peak=0;VOICE.sess++;VOICE.live='';VOICE.hits=[];VOICE.itT=1.2;if(!dict)$q.value='';voiceUI();voiceWarm();
   try{
     const stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
     const AC=window.AudioContext||window.webkitAudioContext;let ctx;
@@ -1918,7 +1920,7 @@ async function voiceStart(src){
     Object.assign(VOICE,{stream,ctx,proc,srcN,mute});
     if(ctx.state==='suspended')await ctx.resume();
     if(!VOICE.want){voiceTeardown();VOICE.st='idle';voiceUI();return;}
-    VOICE.st='rec';voiceUI();vnote('Listening… close your hand to send',0);
+    VOICE.st='rec';voiceUI();vnote(VOICE.dict?'Dictating… press the mic key again to finish':'Listening… close your hand to send',0);
   }catch(e){voiceTeardown();VOICE.st='idle';VOICE.want=false;VOICE.hand=-1;voiceUI();vnote('Microphone unavailable: '+(e&&e.message||e),6000);}
 }
 function voiceAudio(chunks,n,rate){
@@ -1931,22 +1933,24 @@ function voiceAudio(chunks,n,rate){
 function voiceStop(send){
   VOICE.want=false;
   if(VOICE.st!=='rec')return;
-  const rate=VOICE.ctx?VOICE.ctx.sampleRate:16000,chunks=VOICE.chunks,n=VOICE.n,pk=VOICE.peak;
+  const rate=VOICE.ctx?VOICE.ctx.sampleRate:16000,chunks=VOICE.chunks,n=VOICE.n,pk=VOICE.peak,dm=VOICE.dict?{base:VOICE.base}:null;
   VOICE.chunks=[];VOICE.n=0;voiceTeardown();VOICE.st='idle';voiceUI();
   if(send)voiceBoom();
   if(!send){vnote('');return;}
-  if(n<rate*.5){vnote('Too short. Open your palm, speak, then close it.');return;}
+  if(n<rate*.5){vnote(dm?'Too short. Press the mic, speak, then press it again.':'Too short. Open your palm, speak, then close it.');return;}
   if(pk<.004){vnote('No sound picked up. Check the microphone.');return;}
   const audio=voiceAudio(chunks,n,rate),g=Math.min(8,.9/Math.max(pk,1e-3));
   if(g>1.2)for(let i=0;i<audio.length;i++)audio[i]*=g;
-  voiceSend(audio);
+  voiceSend(audio,dm);
 }
-async function voiceSend(audio){
+const dictJoin=(b,t)=>((b?b+' ':'')+t.replace(/[.?!,;:\s]+$/,'')).trim();
+async function voiceSend(audio,dm){
   VOICE.busy++;vnote('Transcribing…',0);
   try{
     const r=await WSP.call({t:'run',model:VOICE_MODEL,audio},p=>vnote('Loading Whisper '+p+'%',0),[audio.buffer]);
     const t=voiceClean(r.text);
     if(!t)vnote("Didn't catch that. Try again.");
+    else if(dm){const v=dictJoin(dm.base,t);$q.value=v;kDirty=true;vnote('Heard: '+v+'. Press W for Wikipedia or Ask.',6000);}
     else{vnote('Heard: '+t,5000);$q.value=t;await runQuery(t);if(CFG.on){if(rdBusy)stopAll();setTimeout(brain,80);}}
   }catch(e){vnote('Whisper failed: '+(e&&e.message||e),6000);}
   finally{VOICE.busy--;}
@@ -2025,7 +2029,7 @@ function voiceHits(text){
 }
 function voiceLive(t){
   if(!t)return;
-  VOICE.live=t;$q.value=t;VOICE.hits=voiceHits(t);pulseKey='';try{updatePulse(true);}catch(e){}
+  VOICE.live=t;$q.value=VOICE.dict?dictJoin(VOICE.base,t):t;VOICE.hits=voiceHits(t);pulseKey='';try{updatePulse(true);}catch(e){}
   vnote('"'+t+'"',0);kDirty=true;
 }
 function voiceInterim(){
@@ -2235,7 +2239,7 @@ function hud(){
     [...'qwertyuiop'].map(c=>[c,1]),
     [...'asdfghjkl'].map(c=>[c,1]).concat([["'",1]]),
     [...'zxcvbnm'].map(c=>[c,1]).concat([['-',1],[',',1],['.',1]]),
-    [['space',5.2,'sp'],['Clear text',2,'qclr'],['Ask',2.8,'ask']]];
+    [['space',4,'sp'],['mic',1.2,'kmic'],['Clear text',2,'qclr'],['Ask',2.8,'ask']]];
   rows.forEach((row,ri)=>{const tw=row.reduce((s,k)=>s+k[1]*u,0)+g*(row.length-1);let x=(KW-tw)/2;const y=488+ri*62;
     row.forEach(([l,w,a])=>{KEYS.push({label:l,x,y,w:w*u,h:56,act:a||'ch',kbk:true});x+=w*u+g;});});
 })();
@@ -2277,10 +2281,10 @@ function drawKB(){
       continue;
     }
     rr(x,k.x,k.y,k.w,k.h,10);
-    x.fillStyle=(fl||(k.id==='move'&&MOVE))?'rgba(255,179,71,.6)':on?'rgba(255,255,255,.3)':'rgba(255,255,255,.12)';x.fill();
+    x.fillStyle=(fl||(k.id==='move'&&MOVE)||(k.act==='kmic'&&VOICE.dict&&(VOICE.st==='rec'||VOICE.st==='starting')))?'rgba(255,179,71,.6)':on?'rgba(255,255,255,.3)':'rgba(255,255,255,.12)';x.fill();
     x.strokeStyle=on?'rgba(255,255,255,.8)':'rgba(255,255,255,.42)';x.lineWidth=2;x.stroke();
     x.globalAlpha=(k.id==='mode'&&!sessAR)?.4:1;
-    const lab=k.id==='auto'?'':k.id==='brain'?'Ask LLM':k.id==='mode'?(sessAR?(arMode?'To VR':'To MR'):'VR only'):k.id==='place'?(arMode?'Place':'Recenter'):k.id==='move'?(MOVE?'Move':'Spin'):k.id==='toggle'?(kbOpen?'hide':'keys'):k.id==='hideui'?(HUIDE?'Show UI':'Hide UI'):k.label;
+    const lab=k.id==='auto'?'':k.id==='brain'?'Ask LLM':k.id==='mode'?(sessAR?(arMode?'To VR':'To MR'):'VR only'):k.id==='place'?(arMode?'Place':'Recenter'):k.id==='move'?(MOVE?'Move':'Spin'):k.id==='toggle'?(kbOpen?'hide':'keys'):k.id==='hideui'?(HUIDE?'Show UI':'Hide UI'):k.act==='kmic'?(VOICE.dict&&(VOICE.st==='rec'||VOICE.st==='starting')?'\u25CF':'\uD83C\uDFA4'):k.label;
     x.font=(k.kbk?'600 30px ':'600 24px ')+F;x.fillStyle=k.act==='ask'?'#ffb347':'#d6fbff';x.textAlign='center';
     x.fillText(lab,k.x+k.w/2,k.y+k.h/2+1,k.w-10);
     if(k.id==='auto'){const bx=k.x+12,by=k.y+k.h/2-11;
@@ -2335,6 +2339,7 @@ function keyAct(k,r){
   else if(k.act==='auto'){AUTO=!AUTO;try{localStorage.setItem('cf.auto',AUTO?'1':'0');}catch(e){}$('#auto').checked=AUTO;}
   else if(k.act==='move'){MOVE=!MOVE;xrNote=MOVE?'Pinch and drag to move the field':'Pinch and drag to spin the field';hud();}
   else if(k.act==='mic')voiceToggle();
+  else if(k.act==='kmic'){if(VOICE.st==='rec'||VOICE.st==='starting')voiceStop(true);else if(VOICE.st==='idle')voiceStart('dict');}
   else if(k.act==='plus')xrPaste();
   else if(k.act==='snd'){AU.on=!AU.on;try{localStorage.setItem('cf.snd',AU.on?'1':'0');}catch(e){}kDirty=true;if(AU.on){auCtx();sfxTick(1.5);}xrNote=AU.on?'Sound on':'Sound off';hud();}
   else if(k.act==='corp')xrCycleCorpus();
