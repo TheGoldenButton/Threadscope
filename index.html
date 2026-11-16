@@ -1825,7 +1825,7 @@ const fitScale=t=>THREE.MathUtils.clamp(t/fieldR(),.08,4);
 let needCenter=false,arMode=false,placing=false,placedOnce=false,arScale=null,lastHit=false,reqLook=null,sessAR=false,centerS=.3,xrNote='';
 let hudA='',hudB='';
 // ---- Synthesized audio: harmonic chimes, soft UI ticks, and a wash for queries (no audio files) ----
-const VOICE={st:'idle',want:false,hand:-1,pr:null,lvl:0,lv:0,ap:0,busy:0,chunks:[],n:0,peak:0,cool:0,stream:null,ctx:null,warm:null,lost:0,closeT:0,away:0,fresh:true};
+const VOICE={st:'idle',want:false,hand:-1,pr:null,lvl:0,lv:0,ap:0,busy:0,chunks:[],n:0,peak:0,cool:0,stream:null,ctx:null,warm:null,lost:0,closeT:0,away:0,fresh:true,live:'',hits:[],bhits:[],boom:null,itT:1.2,itBusy:false,sess:0};
 const AU={ctx:null,out:null,on:true,nb:null,last:{c:0,t:0,w:0}};
 try{AU.on=localStorage.getItem('cf.snd')!=='0';}catch(e){}
 function auCtx(){
@@ -1906,7 +1906,7 @@ function voiceTeardown(){
 async function voiceStart(src){
   if(VOICE.st!=='idle')return;
   if(!nodes.length){vnote('Load text first, then speak.');return;}
-  VOICE.st='starting';VOICE.want=true;VOICE.chunks=[];VOICE.n=0;VOICE.lvl=0;VOICE.peak=0;voiceUI();voiceWarm();
+  VOICE.st='starting';VOICE.want=true;VOICE.chunks=[];VOICE.n=0;VOICE.lvl=0;VOICE.peak=0;VOICE.sess++;VOICE.live='';VOICE.hits=[];VOICE.itT=1.2;$q.value='';voiceUI();voiceWarm();
   try{
     const stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
     const AC=window.AudioContext||window.webkitAudioContext;let ctx;
@@ -1933,7 +1933,7 @@ function voiceStop(send){
   if(VOICE.st!=='rec')return;
   const rate=VOICE.ctx?VOICE.ctx.sampleRate:16000,chunks=VOICE.chunks,n=VOICE.n,pk=VOICE.peak;
   VOICE.chunks=[];VOICE.n=0;voiceTeardown();VOICE.st='idle';voiceUI();
-  if(send)VOICE.lv=1;
+  if(send)voiceBoom();
   if(!send){vnote('');return;}
   if(n<rate*.5){vnote('Too short. Open your palm, speak, then close it.');return;}
   if(pk<.004){vnote('No sound picked up. Check the microphone.');return;}
@@ -1945,8 +1945,8 @@ async function voiceSend(audio){
   VOICE.busy++;vnote('Transcribing…',0);
   try{
     const r=await WSP.call({t:'run',model:VOICE_MODEL,audio},p=>vnote('Loading Whisper '+p+'%',0),[audio.buffer]);
-    const t=(r.text||'').replace(/\[[^\]]*\]|\([^)]*\)|[♪♫]+/g,' ').replace(/\s+/g,' ').trim();
-    if(t.length<2||/^(you|thank you\.?|thanks for watching\.?|\.+)$/i.test(t))vnote("Didn't catch that. Try again.");
+    const t=voiceClean(r.text);
+    if(!t)vnote("Didn't catch that. Try again.");
     else{vnote('Heard: '+t,5000);$q.value=t;await runQuery(t);autoBrain();}
   }catch(e){vnote('Whisper failed: '+(e&&e.message||e),6000);}
   finally{VOICE.busy--;}
@@ -2009,30 +2009,56 @@ function orbTarget(){
   cam.getWorldPosition(_vo);cam.getWorldDirection(_vd);_vo.addScaledVector(_vd,xr?.5:.55).addScaledVector(UPV,-.1);
 }
 function nodeWorld(i,o){const n=nodes[i];return o.set(n.x,n.y,n.z).applyMatrix4(G.matrixWorld);}
-function voiceVis(dt){
-  const on=VOICE.want&&(VOICE.st==='rec'||VOICE.st==='starting'),tg=on?1:0;
-  VOICE.ap+=(tg-VOICE.ap)*Math.min(1,dt*(tg?9:5));
-  VOICE.lv+=(Math.min(1,VOICE.lvl*9)*(VOICE.st==='rec'?1:0)-VOICE.lv)*Math.min(1,dt*(VOICE.st==='rec'?12:3));
-  if(VOICE.st==='rec'&&VOICE.n>16000*45)voiceStop(true);
-  const ap=VOICE.ap,vis=ap>.012&&nodes.length>0;
-  ORB.visible=boltLines.visible=boltPts.visible=vis;
-  if(!vis){VOICE.fresh=true;return;}
-  orbTarget();
-  if(VOICE.fresh){ORB.position.copy(_vo);VOICE.fresh=false;}else ORB.position.lerp(_vo,Math.min(1,dt*14));
-  const t=U.uT.value,lv=VOICE.lv,s=.034*ap*(1+.55*lv+.07*Math.sin(t*6));
-  orbMesh.scale.setScalar(s);halo.scale.setScalar(.2*ap*(1+1.2*lv));
-  orbU.uT.value=t;orbU.uL.value=lv;orbU.uA.value=Math.min(1,ap*1.3);
-  boltT-=dt;if(boltT>0)return;boltT=.055;
-  G.updateMatrixWorld();
-  nearT-=.055;
-  if(nearT<=0||!nearList.length){nearT=.3;nearList=[];
-    const d2=[];for(const i of visible){const d=nodeWorld(i,_vb).distanceToSquared(ORB.position);d2.push([d,i]);}
-    d2.sort((a,b)=>a[0]-b[0]);nearList=d2.slice(0,3).map(x=>x[1]);}
-  const pool=SS.size?[...SS]:(Q&&Q.top&&Q.top.length?Q.top:visible),cnt=Math.max(3,Math.min(MAXB,Math.round(3+lv*6))),tg2=nearList.slice(0,Math.min(3,cnt));
-  while(tg2.length<cnt&&pool.length){const i=pool[(Math.random()*pool.length)|0];if(i!==undefined&&nodes[i])tg2.push(i);else break;}
-  const reach=Math.min(1,ap*1.2),A=ORB.position;let nl=0,np=0;
-  tg2.forEach(i=>{
-    nodeWorld(i,_vb);_vd.copy(_vb).sub(A);const L=_vd.length();if(L<1e-4)return;
+function voiceClean(t){
+  t=(t||'').replace(/\[[^\]]*\]|\([^)]*\)|[♪♫]+/g,' ').replace(/\s+/g,' ').trim();
+  return t.length<2||/^(you|thank you\.?|thanks for watching\.?|\.+)$/i.test(t)?'':t;
+}
+const stemW=w=>{w=w.toLowerCase();return w.length>4?w.replace(/(ings?|ed|es|(?<!s)s)$/,''):w;};
+function voiceHits(text){
+  if(!nodes.length)return [];
+  if(VOICE.sf!==nodes){VOICE.sf=nodes;const m=new Map();nodes.forEach((n,i)=>{const k=n.word.split(' ').map(stemW).join(' '),l=m.get(k);l?l.push(i):m.set(k,[i]);});VOICE.six=m;}
+  const w=(text.toLowerCase().match(/[\p{L}\d'-]+/gu)||[]).map(stemW),out=new Set();
+  for(let i=0;i<w.length;i++)for(let L=1;L<=3&&i+L<=w.length;L++){const l=VOICE.six.get(w.slice(i,i+L).join(' '));if(l)l.forEach(x=>out.add(x));}
+  return [...out].filter(i=>nodes[i]);
+}
+function voiceLive(t){
+  if(!t)return;
+  VOICE.live=t;$q.value=t;VOICE.hits=voiceHits(t);pulseKey='';try{updatePulse(true);}catch(e){}
+  vnote('"'+t+'"',0);kDirty=true;
+}
+function voiceInterim(){
+  if(VOICE.itBusy||VOICE.st!=='rec'||!VOICE.ctx)return;
+  const rate=VOICE.ctx.sampleRate;if(VOICE.n<rate*.9||VOICE.peak<.004)return;
+  const audio=voiceAudio(VOICE.chunks,VOICE.n,rate),g=Math.min(8,.9/Math.max(VOICE.peak,1e-3)),sid=VOICE.sess;
+  if(g>1.2)for(let i=0;i<audio.length;i++)audio[i]*=g;
+  VOICE.itBusy=true;
+  WSP.call({t:'run',model:VOICE_MODEL,audio},null,[audio.buffer]).then(r=>{if(VOICE.st==='rec'&&sid===VOICE.sess)voiceLive(voiceClean(r.text));}).catch(()=>{}).finally(()=>{VOICE.itBusy=false;VOICE.itT=1;});
+}
+// explosion
+const NBM=160,bpP=new Float32Array(NBM*3),bpV=new Float32Array(NBM*3),bgB=new THREE.BufferGeometry();
+bgB.setAttribute('position',new THREE.BufferAttribute(bpP,3));
+const boomPts=new THREE.Points(bgB,new THREE.PointsMaterial({color:0xaee8ff,size:.012,sizeAttenuation:true,transparent:true,depthTest:false,depthWrite:false,blending:THREE.AdditiveBlending}));
+boomPts.frustumCulled=false;boomPts.renderOrder=41;boomPts.visible=false;scene.add(boomPts);
+const flash=new THREE.Sprite(halo.material.clone());flash.renderOrder=42;flash.visible=false;scene.add(flash);
+function sfxBoom(){
+  const c=auCtx();if(!c)return;const t=c.currentTime,o=c.createOscillator(),g=c.createGain();
+  o.type='sine';o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(34,t+.4);
+  g.gain.setValueAtTime(.3,t);g.gain.exponentialRampToValueAtTime(.0001,t+.45);o.connect(g);g.connect(AU.out);o.start(t);o.stop(t+.5);
+  sfxWash();
+}
+function voiceBoom(){
+  if(!ORB.visible&&VOICE.ap<.05)return;
+  const p=ORB.position,l=Math.max(.3,VOICE.lv);
+  VOICE.boom={t:0,pos:p.clone()};VOICE.bhits=VOICE.hits.slice();VOICE.ap=0;ORB.visible=false;
+  for(let i=0;i<NBM;i++){const a=Math.random()*6.2832,u=Math.random()*2-1,r=Math.sqrt(1-u*u),sp=.25+Math.random()*.9*(.6+l);
+    bpP[i*3]=p.x;bpP[i*3+1]=p.y;bpP[i*3+2]=p.z;bpV[i*3]=r*Math.cos(a)*sp;bpV[i*3+1]=u*sp;bpV[i*3+2]=r*Math.sin(a)*sp;}
+  bgB.attributes.position.needsUpdate=true;boomPts.visible=true;flash.visible=true;flash.position.copy(p);
+  sfxBoom();
+}
+function zap(A,T,reach,jit){
+  let nl=0,np=0;
+  T.forEach(B0=>{
+    _vd.copy(B0).sub(A);const L=_vd.length();if(L<1e-4)return;
     _vb.copy(A).addScaledVector(_vd,reach);_vd.divideScalar(L);
     _vu.set(_vd.z,0,-_vd.x);if(_vu.lengthSq()<1e-4)_vu.set(1,0,0);_vu.normalize();_vv.crossVectors(_vd,_vu);
     let px=A.x,py=A.y,pz=A.z;
@@ -2040,14 +2066,58 @@ function voiceVis(dt){
       let x,y,z;
       if(k===0){x=A.x;y=A.y;z=A.z;}
       else if(k===SEG){x=_vb.x;y=_vb.y;z=_vb.z;}
-      else{const f=k/SEG,am=L*reach*.07*Math.sin(Math.PI*f)*(.5+Math.random())*(1+lv),an=Math.random()*6.2832,c=Math.cos(an)*am,sn=Math.sin(an)*am;
+      else{const f=k/SEG,am=L*reach*.07*Math.sin(Math.PI*f)*(.5+Math.random())*jit,an=Math.random()*6.2832,c=Math.cos(an)*am,sn=Math.sin(an)*am;
         x=A.x+(_vb.x-A.x)*f+_vu.x*c+_vv.x*sn;y=A.y+(_vb.y-A.y)*f+_vu.y*c+_vv.y*sn;z=A.z+(_vb.z-A.z)*f+_vu.z*c+_vv.z*sn;}
       bP[np++]=x;bP[np++]=y;bP[np++]=z;
       if(k>0){bL[nl++]=px;bL[nl++]=py;bL[nl++]=pz;bL[nl++]=x;bL[nl++]=y;bL[nl++]=z;}
       px=x;py=y;pz=z;}
   });
-  bgL.attributes.position.needsUpdate=true;bgP.attributes.position.needsUpdate=true;
-  bgL.setDrawRange(0,nl/3);bgP.setDrawRange(0,np/3);
+  bgL.attributes.position.needsUpdate=true;bgP.attributes.position.needsUpdate=true;bgL.setDrawRange(0,nl/3);bgP.setDrawRange(0,np/3);
+}
+const hitPick=(a,n)=>{if(a.length<=n)return a;const o=a.slice();for(let i=o.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[o[i],o[j]]=[o[j],o[i]];}return o.slice(0,n);};
+function voiceVis(dt){
+  const on=VOICE.want&&(VOICE.st==='rec'||VOICE.st==='starting'),tg=on?1:0;
+  VOICE.ap+=(tg-VOICE.ap)*Math.min(1,dt*(tg?9:5));
+  VOICE.lv+=(Math.min(1,VOICE.lvl*9)*(VOICE.st==='rec'?1:0)-VOICE.lv)*Math.min(1,dt*(VOICE.st==='rec'?12:3));
+  if(VOICE.st==='rec'){
+    if(VOICE.n>16000*45)voiceStop(true);
+    VOICE.itT-=dt;if(VOICE.itT<=0)voiceInterim();
+  }
+  const bm=VOICE.boom;
+  if(bm){
+    bm.t+=dt;const k=bm.t/1.2;
+    if(k>=1){VOICE.boom=null;boomPts.visible=false;flash.visible=false;}
+    else{
+      for(let i=0;i<NBM;i++){const d=Math.pow(.03,dt);bpV[i*3]*=d;bpV[i*3+1]*=d;bpV[i*3+2]*=d;bpP[i*3]+=bpV[i*3]*dt;bpP[i*3+1]+=bpV[i*3+1]*dt;bpP[i*3+2]+=bpV[i*3+2]*dt;}
+      bgB.attributes.position.needsUpdate=true;boomPts.material.opacity=1-k;boomPts.material.size=.004+.012*(1-k);
+      flash.scale.setScalar(.08+.9*Math.min(1,bm.t*4));flash.material.opacity=Math.max(0,1-bm.t/.45);
+    }
+  }
+  const vis=ap_(),boomOn=!!VOICE.boom;
+  function ap_(){return VOICE.ap>.012&&nodes.length>0;}
+  ORB.visible=vis;boltLines.visible=boltPts.visible=vis||boomOn;
+  if(!vis&&!boomOn){VOICE.fresh=true;return;}
+  const ap=VOICE.ap,lv=VOICE.lv,t=U.uT.value;
+  if(vis){
+    orbTarget();
+    if(VOICE.fresh){ORB.position.copy(_vo);VOICE.fresh=false;}else ORB.position.lerp(_vo,Math.min(1,dt*14));
+    orbMesh.scale.setScalar(.034*ap*(1+.55*lv+.07*Math.sin(t*6)));halo.scale.setScalar(.2*ap*(1+1.2*lv));
+    orbU.uT.value=t;orbU.uL.value=lv;orbU.uA.value=Math.min(1,ap*1.3);
+  }
+  boltT-=dt;if(boltT>0)return;boltT=.055;
+  G.updateMatrixWorld();
+  if(boomOn&&!vis){
+    const f=1-VOICE.boom.t/.7;
+    if(f<=0||!VOICE.bhits.length){bgL.setDrawRange(0,0);bgP.setDrawRange(0,0);return;}
+    const T=hitPick(VOICE.bhits,MAXB).map(i=>nodeWorld(i,new THREE.Vector3()));
+    zap(VOICE.boom.pos,T,Math.min(1,VOICE.boom.t*6),1.8);
+    boltLines.material.opacity=f*(.6+.4*Math.random());boltPts.material.size=.004+.008*f;
+    return;
+  }
+  const A=ORB.position;let T;
+  if(VOICE.hits.length)T=hitPick(VOICE.hits,MAXB).map(i=>nodeWorld(i,new THREE.Vector3()));
+  else{T=[];for(let i=0;i<3;i++){const a=Math.random()*6.2832,u=Math.random()*2-1,r=Math.sqrt(1-u*u),d=.05*(.5+Math.random());T.push(new THREE.Vector3(A.x+r*Math.cos(a)*d,A.y+u*d,A.z+r*Math.sin(a)*d));}}
+  zap(A,T,Math.min(1,ap*1.2),1+lv);
   boltLines.material.opacity=Math.min(1,.45+.55*ap)*(.5+.5*Math.random()+.3*lv);boltPts.material.size=.005+.004*lv;
 }
 {const b=document.getElementById('micb');
