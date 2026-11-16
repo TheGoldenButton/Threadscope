@@ -280,7 +280,7 @@ let CUR=null;
 const PROG=t=>{if(CUR!==null)self.postMessage({rid:CUR,prog:t});};
 const NCAP=3000,K=6,FORCE=new Set();
 let nodes=[],edges=[],word2i=new Map(),FAMH=new Map();
-const FV=3;
+const FV=4;
 
 const STOP=new Set(`the and for with are there was were been has had have did does doing having done you your yours her hers him his she they them their theirs its our ours mine that this per of to in is it be by as at an on am he me my we us if or so do but off out himself herself itself myself yourself ourselves themselves yes no thereby get gets got getting goes going went let lets one ones than then too very just also can could would should might may must shall these those such some any each both either neither other others another about from into onto here while upon up down even yet nor quite whenever wherever whatever whoever whichever what when where which who whom whose why how because since during before after above below between through under again further once`.split(' '));
 
@@ -1217,7 +1217,7 @@ function layout(){
     }else bhRepulse(P,D,N,k*k);
     for(const e of edges){
       const i=e.s,j=e.t,dx=P[i*3]-P[j*3],dy=P[i*3+1]-P[j*3+1],dz=P[i*3+2]-P[j*3+2];
-      const d=Math.sqrt(dx*dx+dy*dy+dz*dz)+1e-4,f=d/k*(.3+.7*e.wn)*(nc>1?(cm[i]===cm[j]?1.8:.25):1);
+      const d=Math.sqrt(dx*dx+dy*dy+dz*dz)+1e-4,f=(.9/k)*(.3+.7*e.wn)*(nc>1?(cm[i]===cm[j]?1.4:.6):1);
       D[i*3]-=dx*f;D[i*3+1]-=dy*f;D[i*3+2]-=dz*f;D[j*3]+=dx*f;D[j*3+1]+=dy*f;D[j*3+2]+=dz*f;
     }
     if(nc>1){
@@ -1227,7 +1227,7 @@ function layout(){
       for(let a=0;a<nc;a++)for(let b=a+1;b<nc;b++){
         const dx=cc[a*3]-cc[b*3],dy=cc[a*3+1]-cc[b*3+1],dz=cc[a*3+2]-cc[b*3+2],f=.35/(dx*dx+dy*dy+dz*dz+.04);
         pv[a*3]+=dx*f;pv[a*3+1]+=dy*f;pv[a*3+2]+=dz*f;pv[b*3]-=dx*f;pv[b*3+1]-=dy*f;pv[b*3+2]-=dz*f;}
-      const coh=1.0*(1-.5*n/it);
+      const coh=.3*(1-.5*n/it);
       for(let i=0;i<N;i++){const c=cm[i];
         D[i*3]+=(cc[c*3]-P[i*3])*coh+pv[c*3];D[i*3+1]+=(cc[c*3+1]-P[i*3+1])*coh+pv[c*3+1];D[i*3+2]+=(cc[c*3+2]-P[i*3+2])*coh+pv[c*3+2];}
     }
@@ -1242,7 +1242,7 @@ function layout(){
   let mx=0;for(let i=0;i<N;i++){P[i*3]-=cx;P[i*3+1]-=cy;P[i*3+2]-=cz;mx=Math.max(mx,Math.hypot(P[i*3],P[i*3+1],P[i*3+2]));}
   for(let i=0;i<N*3;i++)P[i]/=mx;
   const SP=2.1;for(let i=0;i<N*3;i++)P[i]*=SP;
-  const dm=.85*Math.cbrt(4.19*SP*SP*SP/N);
+  const dm=.35*Math.cbrt(4.19*SP*SP*SP/N);   // loose spacing only: a strict one forces uniform density and hides hubs
   for(let it=0;it<80;it++){
     let moved=false;const grid=new Map(),cs=dm;
     const key=(x,y,z)=>(x*73856093)^(y*19349663)^(z*83492791);
@@ -1437,7 +1437,7 @@ let FS=1,VS=1;try{const v=parseFloat(localStorage.getItem('cf.fs'));if(isFinite(
 let nodes=[],edges=[],word2i=new Map(),sel=-1,Q=null;const SS=new Set();let selV=0;
 let curDocs=[],curCorpus=null,replaying=false,hist=[],corpora=[];
 const col={lv:null,f:0,n:-1,hide:null,cnt:null,t:0};
-const FV=3;var fsT=0,PRE=null;
+const FV=4;var fsT=0,PRE=null;
 let HLOG=[];
 function saveField(){
   clearTimeout(fsT);const id=curCorpus;if(!id||!nodes.length)return;
