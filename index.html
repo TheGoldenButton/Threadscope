@@ -277,7 +277,7 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 </div>
 <div id="rd" class="panel" hidden><div id="rdh"><button id="rdp" title="Older reading">&#8249;</button><span id="rdn">0/0</span><button id="rdnx" title="Newer reading">&#8250;</button><span id="rdt"></span><button id="rdst" title="Stop generating" hidden>&#9632; Stop</button><button id="rdx" title="Close">&#10005;</button></div><div id="rdb"></div><div id="rdm"></div><form id="rdf"><input id="rdq" type="text" placeholder="Ask a follow-up within this context" autocomplete="off"><button type="submit" id="rds">Send</button></form></div>
 <button id="helpbtn" aria-label="Help" aria-expanded="false" title="Help">?</button>
-<div id="hint" class="panel" hidden>Desktop: drag to orbit, wheel to zoom, WASD/QE to fly, click concepts to select several (selected words pulse; click again to deselect). With words selected, Play puts you inside the current, flying node to node in resonant order. Every word you type is searched, including common words like the or not; only the drawn field hides them. VR: a query bar, keyboard and a results box float in view (point and pinch or trigger the bar to type). Mixed reality (Quest 3): press Enter mixed reality to see your room through the passthrough cameras. Pinch and drag anywhere to spin the data sphere freely in any direction (press Move to carry it instead; the right stick also spins it), pinch with both hands and spread to resize and twist it, quick pinch on a word to select it (or tap a selected word chip in the list box to deselect it); select several to see how they connect, and pinch a selected word again to deselect it. The field remembers where you put it between mixed-reality sessions. Sticks fly in VR. A adds the selected concept to the query, B clears. Press Place on the panel to snap the field onto a wall, table or floor. In VR the top buttons are: + paste copied text, \u21C4 switch saved text, W fetch Wikipedia for the typed topic, \u00B6 source passages, and the gear toggles the LLM. Brighter nodes are more frequent words. Zoom out and neighbouring words collapse into the most dominant word of their area (bigger dot, labelled); zoom in and they expand again. The field learns as you use it: words you query or select together are drawn a little closer each time, and the arrangement is saved per text. Line colour is based on how often the words at each end occur in your text: rare words are violet and blue, then green and yellow, and the most frequent words are orange and red, so each line blends between its two ends. The cog (top right) can switch lines to colour by link strength instead. Once you have a query or selection, a Play button, timeline and speed button appear: words appear one by one, strongest resonance first (the speed button cycles 0.25x to 4x). The results box scrolls: thumbstick while pointing at it, or pinch-drag it; tap a row to select that word. Source passages: select a concept (or click a link line, or press the ¶ button on a row) to see the sentences where the words occur, with the document name; how many are shown adapts to how strongly the words resonate. Attach PDF, Word or HTML files, or fetch URLs.</div>
+<div id="hint" class="panel" hidden>Desktop: drag to orbit, wheel to zoom, WASD/QE to fly, click concepts to select several (selected words pulse; click again to deselect). With words selected, Play puts you inside the current, flying node to node in resonant order. Every word you type is searched, including common words like the or not; only the drawn field hides them. VR: a query bar, keyboard and a results box float in view (point and pinch or trigger the bar to type). Mixed reality (Quest 3): press Enter mixed reality to see your room through the passthrough cameras. Pinch and drag anywhere to carry the data sphere (the right stick spins it), pinch with both hands and spread to resize and twist it, quick pinch on a word to select it (or tap a selected word chip in the list box to deselect it); select several to see how they connect, and pinch a selected word again to deselect it. The field remembers where you put it between mixed-reality sessions. Sticks fly in VR. A adds the selected concept to the query, B clears. Press Place on the panel to snap the field onto a wall, table or floor. In VR the top buttons are: + paste copied text, \u21C4 switch saved text, W fetch Wikipedia for the typed topic, \u00B6 source passages, and the gear toggles the LLM. Brighter nodes are more frequent words. Zoom out and neighbouring words collapse into the most dominant word of their area (bigger dot, labelled); zoom in and they expand again. The field learns as you use it: words you query or select together are drawn a little closer each time, and the arrangement is saved per text. Line colour is based on how often the words at each end occur in your text: rare words are violet and blue, then green and yellow, and the most frequent words are orange and red, so each line blends between its two ends. The cog (top right) can switch lines to colour by link strength instead. Once you have a query or selection, a Play button, timeline and speed button appear: words appear one by one, strongest resonance first (the speed button cycles 0.25x to 4x). The results box scrolls: thumbstick while pointing at it, or pinch-drag it; tap a row to select that word. Source passages: select a concept (or click a link line, or press the ¶ button on a row) to see the sentences where the words occur, with the document name; how many are shown adapts to how strongly the words resonate. Attach PDF, Word or HTML files, or fetch URLs.</div>
 <script type="text/plain" id="engine-src">
 // Concept Field analysis engine. Runs in a Web Worker; owns the corpus and all derived state.
 // The main thread talks to it with {t:'ingest'|'query'|'reset', rid, ...} messages.
@@ -2152,14 +2152,13 @@ function hud(){
     {id:'snd',x:252,y:24,w:64,h:64,act:'snd'},
     {id:'hist',x:B-64-12-64,y:24,w:64,h:64,act:'hist'},
     {id:'set',x:B-64,y:24,w:64,h:64,act:'set'},
-    {id:'play',x:28,y:108,w:140,h:60,act:'play',tlk:true},
-    {id:'tl',x:184,y:108,w:410,h:60,act:'tl',tlk:true},
-    {id:'spd',x:676,y:108,w:120,h:60,act:'spd',tlk:true},
-    {id:'toggle',x:352,y:812,w:68,h:64,act:'toggle'},
-    {id:'field',x:440,y:812,w:640,h:64,act:'open'},
-    {id:'ask',label:'',x:1092,y:812,w:64,h:64,act:'ask'},
+    {id:'play',x:28,y:182,w:140,h:60,act:'play',tlk:true},
+    {id:'tl',x:184,y:182,w:410,h:60,act:'tl',tlk:true},
+    {id:'spd',x:676,y:182,w:120,h:60,act:'spd',tlk:true},
+    {id:'toggle',x:24,y:100,w:56,h:56,act:'toggle'},
+    {id:'field',x:88,y:100,w:420,h:56,act:'open'},
+    {id:'ask',label:'',x:516,y:100,w:56,h:56,act:'ask'},
     {id:'help',x:24,y:824,w:52,h:52,act:'help'},
-    {id:'move',x:B-150-10-130-10-104,y:820,w:104,h:56,act:'move'},
     {id:'mode',x:B-150-10-130,y:820,w:130,h:56,act:'mode'},
     {id:'place',x:B-150,y:820,w:150,h:56,act:'place'},
     {id:'clear',label:'Clear',x:B-110,y:108,w:110,h:48,act:'clear',ctk:true,ib:true},
@@ -2180,10 +2179,10 @@ function drawKB(){
   x.setTransform(PQ,0,0,PQ,0,0);x.clearRect(0,0,KW,KH);x.textBaseline='middle';x.textAlign='left';
   const hov=new Set(rig.map(r=>r.hk).filter(Boolean)),now=performance.now();
   const pane=(a,b,w,h,r,al)=>{rr(x,a,b,w,h,r);x.fillStyle='rgba(30,42,60,'+al+')';x.fill();x.strokeStyle='rgba(255,255,255,.4)';x.lineWidth=2.5;x.stroke();};
-  if(!HUIDE){if(ctx)pane(16,96,796,84,16,.55);
-  pane(428,800,740,88,18,.6);
+  if(!HUIDE){if(ctx)pane(16,170,796,84,16,.55);
+  pane(16,90,568,76,16,.6);
   if(kbOpen)pane(290,476,1020,318,18,.82);}
-  if(hudB&&!HUIDE){x.font='20px '+F;x.fillStyle='rgba(214,246,255,.8)';x.fillText(hudB,28,ctx?200:116,720);}
+  if(hudB&&!HUIDE){x.font='20px '+F;x.fillStyle='rgba(214,246,255,.8)';x.fillText(hudB,28,ctx?272:178,720);}
   for(const k of KEYS){
     if(HUIDE&&k.id!=='hideui'&&!k.ib)continue;
     if(k.kbk&&!kbOpen)continue;
@@ -2608,9 +2607,10 @@ addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updat
 if(navigator.xr&&navigator.xr.isSessionSupported)navigator.xr.isSessionSupported('immersive-vr').then(ok=>{if(ok)document.body.appendChild(VRButton.createButton(renderer));}).catch(()=>{});
 const arBtn=document.querySelector('#ar'),vrB=document.querySelector('#vr');
 if(navigator.xr&&navigator.xr.isSessionSupported)navigator.xr.isSessionSupported('immersive-ar').then(ok=>{arBtn.hidden=!ok;vrB.hidden=!ok;document.body.classList.toggle('arok',ok);}).catch(()=>{});
-async function startXR(look){
+async function startXR(look,quiet){
   const cur=renderer.xr.getSession();if(cur){cur.end();return;}
   if(!nodes.length){
+    if(quiet)return;
     // Do not await here: the headset needs the click's user gesture to start a session.
     if(ingesting)stat('Still building the field. Press Enter again in a moment.');
     else{stat('Loading the demo text. Press Enter again in a moment.');loadDemo();}
@@ -2622,9 +2622,28 @@ async function startXR(look){
     try{renderer.xr.setReferenceSpaceType('local-floor');sess=await navigator.xr.requestSession('immersive-ar',{requiredFeatures:['local-floor'],optionalFeatures:feats});}
     catch(e){renderer.xr.setReferenceSpaceType('local');sess=await navigator.xr.requestSession('immersive-ar',{optionalFeatures:feats});}
     reqLook=look;await renderer.xr.setSession(sess);
-  }catch(e){reqLook=null;stat('Could not start: '+(e&&e.message||e));}
+  }catch(e){reqLook=null;if(!quiet)stat('Could not start: '+(e&&e.message||e));}
 }
 arBtn.onclick=()=>startXR('mr');vrB.onclick=()=>startXR('vr');
+// Meta Quest: enter mixed reality without pressing the button. Try straight away, then offer the session
+// through the browser's own entry point, and fall back to the first controller click or pinch on the page.
+const QUEST=/OculusBrowser|Quest/i.test(navigator.userAgent);
+async function offerXR(){
+  if(!navigator.xr||!navigator.xr.offerSession||renderer.xr.getSession())return;
+  try{
+    const sess=await navigator.xr.offerSession('immersive-ar',{optionalFeatures:['local-floor','hit-test','plane-detection','hand-tracking','anchors']});
+    reqLook='mr';renderer.xr.setReferenceSpaceType('local-floor');await renderer.xr.setSession(sess);
+  }catch(e){reqLook=null;}
+}
+if(QUEST&&navigator.xr){
+  let tries=0;const wait=setInterval(()=>{
+    if(!nodes.length&&++tries<160)return;clearInterval(wait);
+    if(!nodes.length||renderer.xr.getSession())return;
+    startXR('mr',true).then(()=>{if(!renderer.xr.getSession())offerXR();});
+  },500);
+  const once=()=>{if(!nodes.length)return;removeEventListener('pointerup',once);if(!renderer.xr.getSession())startXR('mr',true);};
+  addEventListener('pointerup',once,{passive:true});
+}
 setInterval(()=>{const ok=nodes.length>0||!!renderer.xr.getSession();for(const b of [arBtn,vrB]){if(b.disabled===ok){b.disabled=!ok;b.title=ok?'':'Building the demo field\u2026 one moment';}}},250);
 const hf=new XRHandModelFactory(),cf=new XRControllerModelFactory(),rig=[];
 for(let i=0;i<2;i++){
