@@ -13,7 +13,7 @@ canvas{display:block}
 [hidden]{display:none!important}
 .vig{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,8,20,.75)),repeating-linear-gradient(0deg,rgba(93,240,255,.03) 0 1px,transparent 1px 3px)}
 .panel{position:fixed;background:rgba(3,16,28,.55);border:1px solid rgba(93,240,255,.28);backdrop-filter:blur(10px);padding:12px 14px;border-radius:2px;box-shadow:0 0 24px rgba(93,240,255,.08) inset}
-#top{top:14px;left:14px;width:min(380px,calc(100vw - 28px))}
+#top{top:4px;left:4px;width:min(380px,calc(100vw - 28px))}
 #top h1{margin:0 0 8px;font-size:calc(18px*var(--fs,1));font-weight:600;letter-spacing:.06em;color:var(--cy);text-shadow:0 0 12px var(--cy)}
 .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 body.arok #VRButton{display:none!important}
@@ -40,7 +40,7 @@ input[type=file]{position:absolute;opacity:0;width:0;height:0}
 #info .sc{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}#info .sp{opacity:.6}
 #info .sx{font-size:calc(13px*var(--fs,1));line-height:1;padding:0 5px 1px;margin-left:2px;border-radius:50%;color:var(--am);border:1px solid rgba(255,179,71,.5);background:rgba(255,179,71,.1);text-shadow:none;vertical-align:middle}
 #info .sx:hover{background:rgba(255,179,71,.35);color:#fff}
-#hint{bottom:58px;left:14px;font-size:calc(12px*var(--fs,1));opacity:.8;max-width:min(520px,calc(100vw - 150px));line-height:1.45}
+#hint{bottom:56px;right:4px;font-size:calc(12px*var(--fs,1));opacity:.8;max-width:min(520px,calc(100vw - 150px));line-height:1.45}
 #VRButton{background:rgba(3,16,28,.8)!important;border:1px solid var(--cy)!important;color:var(--cy)!important;font-family:inherit!important;border-radius:2px!important}
 #hist{z-index:7;left:14px;top:60px;bottom:14px;width:min(380px,calc(100vw - 28px));display:flex;flex-direction:column;padding:0;overflow:hidden}
 body.hopen #hint{display:none}
@@ -71,7 +71,7 @@ body.hopen #hint{display:none}
 .ha button{padding:3px 8px;font-size:calc(12px*var(--fs,1))}
 #wk{left:50%;top:56px;transform:translateX(-50%);width:min(460px,calc(100vw - 20px));max-height:calc(100vh - 80px);overflow:auto;z-index:5;font-size:calc(13px*var(--fs,1))}
 #wk .wm span{min-width:0}#wk .wm small{white-space:normal}
-#helpbtn{position:fixed;left:14px;bottom:14px;width:36px;height:36px;padding:0;border-radius:50%;font-weight:600;font-size:calc(16px*var(--fs,1));background:rgba(3,16,28,.7);backdrop-filter:blur(10px)}
+#helpbtn{position:fixed;right:4px;bottom:4px;width:36px;height:36px;padding:0;border-radius:50%;font-weight:600;font-size:calc(16px*var(--fs,1));background:rgba(3,16,28,.7);backdrop-filter:blur(10px)}
 body.hopen #helpbtn{display:none}
 #spd{min-width:48px;padding:7px 8px}
 #info li{cursor:pointer}
@@ -122,7 +122,7 @@ input[type=text],input[type=password],select,textarea{background:rgba(255,255,25
 #rd{background:rgba(20,28,42,.6);border-radius:16px}
 #helpbtn{background:var(--glass);border-radius:50%}
 #VRButton{background:var(--glass)!important;border:1px solid var(--glass-b)!important;color:var(--ink)!important;border-radius:10px!important}
-#qf{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);width:min(580px,calc(100vw - 130px));margin:0;display:flex;gap:8px;z-index:4}
+#qf{position:fixed;left:4px;bottom:4px;transform:none;width:min(400px,calc(100vw - 60px));margin:0;display:flex;gap:8px;z-index:4}
 #top{position:fixed;background:none;border:0;box-shadow:none;padding:0}
 #attl{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;padding:0;font-size:calc(24px*var(--fs,1));line-height:1;position:relative}
 #wikibtn{height:38px;padding:0 14px}
@@ -137,14 +137,14 @@ input[type=text],input[type=password],select,textarea{background:rgba(255,255,25
 #info h2{top:0}
 #infof{display:flex;align-items:center;gap:12px;flex:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--glass-b)}
 #docs .dh #ctx{height:auto;padding:2px 8px;font-size:calc(11px*var(--fs,1))}
-#tl{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);width:min(620px,calc(100vw - 28px));margin:0;z-index:4}
+#tl{position:fixed;left:50%;bottom:4px;transform:translateX(-50%);width:min(560px,calc(100vw - 520px));min-width:300px;margin:0;z-index:4}@media (max-width:900px){#tl{bottom:64px;width:calc(100vw - 8px);left:4px;transform:none}}
 #tl #clr{white-space:nowrap}
 #act{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:8px 12px;z-index:4}
 #askb{flex:none;width:46px;height:46px;padding:0;border-radius:50%;border:1px solid rgba(255,255,255,.65);background:radial-gradient(circle at 32% 28%,#fff1b8,#ffc94d 50%,#d98f12);box-shadow:0 0 18px rgba(255,190,70,.55),inset 0 1px 2px rgba(255,255,255,.7)}
 #askb:hover{background:radial-gradient(circle at 32% 28%,#fff6cf,#ffd36b 50%,#e6a020);box-shadow:0 0 26px rgba(255,200,80,.85),inset 0 1px 2px rgba(255,255,255,.8)}
-#hbtn{position:fixed;right:62px;top:14px;height:38px;padding:0 14px;z-index:4;background:linear-gradient(135deg,rgba(80,220,140,.42),rgba(40,160,100,.22));border:1px solid rgba(130,255,180,.7);color:#e2ffee;box-shadow:0 0 16px rgba(80,220,140,.25),inset 0 1px 0 rgba(255,255,255,.3)}
+#hbtn{position:fixed;right:52px;top:4px;height:38px;padding:0 14px;z-index:4;background:linear-gradient(135deg,rgba(80,220,140,.42),rgba(40,160,100,.22));border:1px solid rgba(130,255,180,.7);color:#e2ffee;box-shadow:0 0 16px rgba(80,220,140,.25),inset 0 1px 0 rgba(255,255,255,.3)}
 #hbtn:hover{background:rgba(80,220,140,.5)}
-#sbtn{position:fixed;right:14px;top:14px;z-index:4;width:38px;height:38px;padding:0;border-radius:50%;font-size:calc(21px*var(--fs,1));line-height:1}
+#sbtn{position:fixed;right:4px;top:4px;z-index:4;width:38px;height:38px;padding:0;border-radius:50%;font-size:calc(21px*var(--fs,1));line-height:1}
 #autol{display:inline-flex;align-items:center;gap:6px;font-size:calc(13px*var(--fs,1));cursor:pointer;color:var(--ink)}
 #auto{position:static;opacity:1;width:16px;height:16px;accent-color:var(--am);cursor:pointer}
 
@@ -204,7 +204,7 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 #rdm:empty{display:none}
 #dcnt,#hbtn{height:auto!important}
 #attl,#sbtn,#hbtn,#dcnt{min-width:calc(38px*var(--fs,1));min-height:calc(38px*var(--fs,1))}
-#hbtn{right:calc(14px + 48px*var(--fs,1))!important;width:auto!important}
+#hbtn{right:calc(4px + 48px*var(--fs,1))!important;width:auto!important}
 #sbtn{width:auto!important;height:auto!important}
 /* selection header never eats the word list: it scrolls inside a fixed-height strip, the list keeps its size */
 #info{max-height:min(calc(320px*var(--fs,1)),55vh)}
@@ -1455,7 +1455,7 @@ const COARSE=matchMedia('(pointer:coarse)').matches,LOW=COARSE||(navigator.hardw
 const PRMAX=Math.min(Math.max(devicePixelRatio,COARSE?1:1.5),COARSE?1.75:3),PRMIN=Math.min(PRMAX,.75);let prCur=PRMAX,lastAct=0,lastR=0,lastDown=0;
 const renderer=new THREE.WebGLRenderer({antialias:!(LOW&&devicePixelRatio>=2),alpha:true,powerPreference:'high-performance'});
 renderer.setPixelRatio(prCur);renderer.setSize(innerWidth,innerHeight);
-renderer.xr.enabled=true;renderer.xr.setFramebufferScaleFactor(1.5);renderer.xr.setReferenceSpaceType('local-floor');
+renderer.xr.enabled=true;renderer.xr.setFramebufferScaleFactor(2);renderer.xr.setReferenceSpaceType('local-floor');
 document.body.prepend(renderer.domElement);
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x01040a);
 const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.01,200);
@@ -2152,9 +2152,9 @@ function hud(){
     {id:'snd',x:252,y:24,w:64,h:64,act:'snd'},
     {id:'hist',x:B-64-12-64,y:24,w:64,h:64,act:'hist'},
     {id:'set',x:B-64,y:24,w:64,h:64,act:'set'},
-    {id:'play',x:28,y:182,w:140,h:60,act:'play',tlk:true},
-    {id:'tl',x:184,y:182,w:410,h:60,act:'tl',tlk:true},
-    {id:'spd',x:676,y:182,w:120,h:60,act:'spd',tlk:true},
+    {id:'play',x:420,y:820,w:140,h:56,act:'play',tlk:true},
+    {id:'tl',x:570,y:820,w:410,h:56,act:'tl',tlk:true},
+    {id:'spd',x:990,y:820,w:120,h:56,act:'spd',tlk:true},
     {id:'toggle',x:24,y:100,w:56,h:56,act:'toggle'},
     {id:'field',x:88,y:100,w:420,h:56,act:'open'},
     {id:'ask',label:'',x:516,y:100,w:56,h:56,act:'ask'},
@@ -2179,7 +2179,7 @@ function drawKB(){
   x.setTransform(PQ,0,0,PQ,0,0);x.clearRect(0,0,KW,KH);x.textBaseline='middle';x.textAlign='left';
   const hov=new Set(rig.map(r=>r.hk).filter(Boolean)),now=performance.now();
   const pane=(a,b,w,h,r,al)=>{rr(x,a,b,w,h,r);x.fillStyle='rgba(30,42,60,'+al+')';x.fill();x.strokeStyle='rgba(255,255,255,.4)';x.lineWidth=2.5;x.stroke();};
-  if(!HUIDE){if(ctx)pane(16,170,796,84,16,.55);
+  if(!HUIDE){if(ctx)pane(404,808,720,80,16,.55);
   pane(16,90,568,76,16,.6);
   if(kbOpen)pane(290,476,1020,318,18,.82);}
   if(hudB&&!HUIDE){x.font='20px '+F;x.fillStyle='rgba(214,246,255,.8)';x.fillText(hudB,28,ctx?272:178,720);}
@@ -2398,7 +2398,7 @@ const planeMat=new THREE.LineBasicMaterial({color:0x2bd6ff,transparent:true,opac
 const reticle=new THREE.Group();reticle.matrixAutoUpdate=false;reticle.visible=false;dolly.add(reticle);
 const rIn=new THREE.Mesh(new THREE.RingGeometry(.07,.085,40).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0x5df0ff,transparent:true,opacity:.9,side:THREE.DoubleSide,depthTest:false}));
 const rFoot=new THREE.Mesh(new THREE.RingGeometry(.985,1,96).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0x5df0ff,transparent:true,opacity:.4,side:THREE.DoubleSide,depthTest:false}));
-reticle.add(rIn,rFoot);
+reticle.add(rIn,rFoot);rFoot.visible=false;
 const hP=new THREE.Vector3(),hN=new THREE.Vector3(),hM=new THREE.Matrix4();
 let viewerHit=null;
 async function setupHit(s){
@@ -2425,7 +2425,7 @@ function syncPlanes(frame,ref){
 function beginPlacing(){
   if(!arMode||!nodes.length)return;
   seatWanted=false;
-  placing=true;lastHit=false;arScale=placedOnce?G.scale.x:null;planeG.visible=true;
+  placing=true;lastHit=false;arScale=placedOnce?G.scale.x:null;planeG.visible=false;
   xrNote='Look at a surface and pinch (or trigger) to place the field';hud();
 }
 function confirmPlace(){
@@ -2477,7 +2477,7 @@ function seatStep(now){
     else{const p=pickTable();if(p){seatOn(p);seatWanted=false;}}
   }
   const on=!!seat&&!placing&&G.visible&&G.position.distanceTo(seat.g)<.08&&Math.abs(G.scale.x-seat.s)<.02;
-  seatRing.visible=on;if(on)seatRing.children[0].material.opacity=.55+.2*Math.sin(now/600);
+  seatRing.visible=false;
 }
 function wallFor(h,f){
   let best=null,bt=1e9;
@@ -2497,7 +2497,6 @@ function arFrame(frame){
   seatStep(now);
   if(!placing)return;
   const ref=renderer.xr.getReferenceSpace();
-  try{syncPlanes(frame,ref);}catch(e){}
   let hit=null;
   if(viewerHit){const rs=frame.getHitTestResults(viewerHit);if(rs.length)hit=rs[0];}
   const pose=hit&&hit.getPose(ref);
@@ -2616,7 +2615,7 @@ async function startXR(look,quiet){
     else{stat('Loading the demo text. Press Enter again in a moment.');loadDemo();}
     return;
   }
-  const feats=['hit-test','plane-detection','hand-tracking','anchors'];
+  const feats=['hit-test','plane-detection','hand-tracking','anchors'];try{renderer.xr.setFramebufferScaleFactor(2);}catch(e){}
   try{
     let sess;
     try{renderer.xr.setReferenceSpaceType('local-floor');sess=await navigator.xr.requestSession('immersive-ar',{requiredFeatures:['local-floor'],optionalFeatures:feats});}
