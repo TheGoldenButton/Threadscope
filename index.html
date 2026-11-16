@@ -215,6 +215,9 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 #info li.sel .w{opacity:.75;font-weight:400}
 #info .sxb{font-size:calc(13px*var(--fs,1));line-height:1;padding:1px 6px;border-radius:50%;color:#ff6b6b;border:1px solid rgba(255,107,107,.6);background:rgba(255,70,70,.14)}
 #info .sxb:hover{background:rgba(255,70,70,.4);color:#fff}
+#micb{flex:none;width:46px;height:46px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
+#micb svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#micb.on{background:rgba(93,240,255,.35);border-color:#5df0ff;box-shadow:0 0 18px rgba(93,240,255,.7)}
 </style>
 </head>
 <body>
@@ -232,7 +235,7 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
   <div id="stat"></div>
 </div>
 <div id="addm" class="panel" role="menu" hidden><button data-a="file" role="menuitem">Files <small>text, PDF, Word, HTML</small></button><button data-a="wiki" role="menuitem">Wikipedia pages</button><button data-a="demo" role="menuitem">Demo text <small>oceans and climate</small></button><button data-a="url" role="menuitem">Web page / PDF by URL</button></div>
-<form id="qf" class="panel"><input id="q" type="text" placeholder="Ask about your text, e.g. how does heat affect the ocean?" autocomplete="off"><button type="submit" id="askb" aria-label="Ask" title="Ask"></button></form>
+<form id="qf" class="panel"><input id="q" type="text" placeholder="Ask about your text, e.g. how does heat affect the ocean?" autocomplete="off"><button type="button" id="micb" aria-label="Speak" title="Speak a query (Whisper). Click again to send."></button><button type="submit" id="askb" aria-label="Ask" title="Ask"></button></form>
 <button id="hbtn" title="History" aria-label="History">🌳</button>
 <button id="sbtn" title="Settings" aria-label="Settings">&#9881;</button>
 <div id="wk" class="panel" hidden>
@@ -277,7 +280,7 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 </div>
 <div id="rd" class="panel" hidden><div id="rdh"><button id="rdp" title="Older reading">&#8249;</button><span id="rdn">0/0</span><button id="rdnx" title="Newer reading">&#8250;</button><span id="rdt"></span><button id="rdst" title="Stop generating" hidden>&#9632; Stop</button><button id="rdx" title="Close">&#10005;</button></div><div id="rdb"></div><div id="rdm"></div><form id="rdf"><input id="rdq" type="text" placeholder="Ask a follow-up within this context" autocomplete="off"><button type="submit" id="rds">Send</button></form></div>
 <button id="helpbtn" aria-label="Help" aria-expanded="false" title="Help">?</button>
-<div id="hint" class="panel" hidden>Desktop: drag to orbit, wheel to zoom, WASD/QE to fly, click concepts to select several (selected words pulse; click again to deselect). With words selected, Play puts you inside the current, flying node to node in resonant order. Every word you type is searched, including common words like the or not; only the drawn field hides them. VR: a query bar, keyboard and a results box float in view (point and pinch or trigger the bar to type). Mixed reality (Quest 3): press Enter mixed reality to see your room through the passthrough cameras. Pinch and drag anywhere to carry the data sphere (the right stick spins it), pinch with both hands and spread to resize and twist it, quick pinch on a word to select it (or tap a selected word chip in the list box to deselect it); select several to see how they connect, and pinch a selected word again to deselect it. The field remembers where you put it between mixed-reality sessions. Sticks fly in VR. A adds the selected concept to the query, B clears. Press Place on the panel to snap the field onto a wall, table or floor. In VR the top buttons are: + paste copied text, \u21C4 switch saved text, W fetch Wikipedia for the typed topic, \u00B6 source passages, and the gear toggles the LLM. Brighter nodes are more frequent words. Zoom out and neighbouring words collapse into the most dominant word of their area (bigger dot, labelled); zoom in and they expand again. The field learns as you use it: words you query or select together are drawn a little closer each time, and the arrangement is saved per text. Line colour is based on how often the words at each end occur in your text: rare words are violet and blue, then green and yellow, and the most frequent words are orange and red, so each line blends between its two ends. The cog (top right) can switch lines to colour by link strength instead. Once you have a query or selection, a Play button, timeline and speed button appear: words appear one by one, strongest resonance first (the speed button cycles 0.25x to 4x). The results box scrolls: thumbstick while pointing at it, or pinch-drag it; tap a row to select that word. Source passages: select a concept (or click a link line, or press the ¶ button on a row) to see the sentences where the words occur, with the document name; how many are shown adapts to how strongly the words resonate. Attach PDF, Word or HTML files, or fetch URLs.</div>
+<div id="hint" class="panel" hidden>Desktop: drag to orbit, wheel to zoom, WASD/QE to fly, click concepts to select several (selected words pulse; click again to deselect). With words selected, Play puts you inside the current, flying node to node in resonant order. Every word you type is searched, including common words like the or not; only the drawn field hides them. VR: a query bar, keyboard and a results box float in view (point and pinch or trigger the bar to type). Mixed reality (Quest 3): press Enter mixed reality to see your room through the passthrough cameras. Pinch and drag anywhere to carry the data sphere (the right stick spins it), pinch with both hands and spread to resize and twist it, quick pinch on a word to select it (or tap a selected word chip in the list box to deselect it); select several to see how they connect, and pinch a selected word again to deselect it. The field remembers where you put it between mixed-reality sessions. Sticks fly in VR. A adds the selected concept to the query, B clears. Press Place on the panel to snap the field onto a wall, table or floor. In VR the top buttons are: + paste copied text, \u21C4 switch saved text, W fetch Wikipedia for the typed topic, \u00B6 source passages, and the gear toggles the LLM. Brighter nodes are more frequent words. Zoom out and neighbouring words collapse into the most dominant word of their area (bigger dot, labelled); zoom in and they expand again. The field learns as you use it: words you query or select together are drawn a little closer each time, and the arrangement is saved per text. Line colour is based on how often the words at each end occur in your text: rare words are violet and blue, then green and yellow, and the most frequent words are orange and red, so each line blends between its two ends. The cog (top right) can switch lines to colour by link strength instead. Once you have a query or selection, a Play button, timeline and speed button appear: words appear one by one, strongest resonance first (the speed button cycles 0.25x to 4x). The results box scrolls: thumbstick while pointing at it, or pinch-drag it; tap a row to select that word. Source passages: select a concept (or click a link line, or press the ¶ button on a row) to see the sentences where the words occur, with the document name; how many are shown adapts to how strongly the words resonate. Voice: hold out an open palm (palm up or toward you) in mixed reality or VR with hand tracking. An orb appears in your hand with lightning arcing to the network; speak, then close your hand or pull it away to send. Whisper runs in your browser (the first use downloads a small model). On desktop, or with controllers, use the mic button. Attach PDF, Word or HTML files, or fetch URLs.</div>
 <script type="text/plain" id="engine-src">
 // Concept Field analysis engine. Runs in a Web Worker; owns the corpus and all derived state.
 // The main thread talks to it with {t:'ingest'|'query'|'reset', rid, ...} messages.
@@ -1410,7 +1413,7 @@ const ENG=(()=>{
     post(msg){w.postMessage({...msg,rid:++rid});}};
 })();
 let EPOCH=0,ingesting=false,qSeq=0,forceWords=[],qBusy=0;
-const thinking=()=>qBusy>0||ingesting||!!rdBusy;
+const thinking=()=>qBusy>0||ingesting||!!rdBusy||VOICE.st==='rec'||VOICE.busy>0;
 let nD=null,eD=null,pulseKey='',pulseOn=0;
 const txtWords=()=>{const a=$q.value.toLowerCase().match(/[\p{L}\d'-]+/gu)||[],s=new Set(a);for(let i=0;i+1<a.length;i++)s.add(a[i]+' '+a[i+1]);return s;};
 // Distance (along the field's own links) from the input's trigger nodes to every node, so the
@@ -2019,10 +2022,11 @@ const fitScale=t=>THREE.MathUtils.clamp(t/fieldR(),.08,4);
 let needCenter=false,arMode=false,placing=false,placedOnce=false,arScale=null,lastHit=false,reqLook=null,sessAR=false,centerS=.3,xrNote='';
 let hudA='',hudB='';
 // ---- Synthesized audio: harmonic chimes, soft UI ticks, and a wash for queries (no audio files) ----
+const VOICE={st:'idle',want:false,hand:-1,pr:null,lvl:0,lv:0,ap:0,busy:0,chunks:[],n:0,peak:0,cool:0,stream:null,ctx:null,warm:null,lost:0,closeT:0,away:0,fresh:true};
 const AU={ctx:null,out:null,on:true,nb:null,last:{c:0,t:0,w:0}};
 try{AU.on=localStorage.getItem('cf.snd')!=='0';}catch(e){}
 function auCtx(){
-  if(!AU.on)return null;
+  if(!AU.on||VOICE.st==='rec')return null;
   if(!AU.ctx){try{const C=window.AudioContext||window.webkitAudioContext;AU.ctx=new C();const m=AU.ctx.createGain();m.gain.value=.55;const lp=AU.ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3400;m.connect(lp);lp.connect(AU.ctx.destination);AU.out=m;}catch(e){AU.on=false;return null;}}
   if(AU.ctx.state==='suspended')AU.ctx.resume().catch(()=>{});
   return AU.ctx;
@@ -2058,6 +2062,195 @@ function sfxWash(){
   const g=c.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.05,t+.4);g.gain.exponentialRampToValueAtTime(.0001,t+1.4);
   s.connect(f);f.connect(g);g.connect(AU.out);s.start(t);s.stop(t+1.45);
 }
+// ================= voice: Whisper + palm orb =================
+const VOICE_MODEL='Xenova/whisper-tiny.en';
+function whisperWorker(){
+  const LIB='https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js';
+  let asr=null,loading=null,cur=null;
+  async function get(model){
+    if(asr)return asr;
+    if(!loading)loading=(async()=>{const T=await import(LIB);T.env.allowLocalModels=false;T.env.useBrowserCache=true;
+      return asr=await T.pipeline('automatic-speech-recognition',model,{progress_callback:p=>{if(p&&p.status==='progress'&&cur!==null)self.postMessage({id:cur,prog:Math.round(p.progress||0)});}});})().catch(e=>{loading=null;throw e;});
+    return loading;
+  }
+  self.onmessage=async e=>{const m=e.data;cur=m.id;
+    try{const a=await get(m.model);
+      if(m.t==='run'){const o=await a(m.audio,{chunk_length_s:30,stride_length_s:5});self.postMessage({id:m.id,text:(o&&o.text)||''});}
+      else self.postMessage({id:m.id,ready:1});
+    }catch(err){self.postMessage({id:m.id,err:String(err&&err.message||err)});}};
+}
+const WSP=(()=>{let w=null,id=0;const pend=new Map();
+  const W=()=>{if(w)return w;
+    w=new Worker(URL.createObjectURL(new Blob(['('+whisperWorker.toString()+')()'],{type:'text/javascript'})));
+    w.onmessage=e=>{const m=e.data,p=pend.get(m.id);if(!p)return;if(m.prog!==undefined){p.prog&&p.prog(m.prog);return;}pend.delete(m.id);m.err?p.rej(new Error(m.err)):p.res(m);};
+    w.onerror=e=>{pend.forEach(p=>p.rej(new Error(e.message||'Whisper worker failed')));pend.clear();w=null;};
+    return w;};
+  return {call(msg,prog,tr){return new Promise((res,rej)=>{const i=++id;pend.set(i,{res,rej,prog});W().postMessage({...msg,id:i},tr||[]);});}};})();
+let vnT=0;
+function vnote(t,ms){ms=ms===undefined?4000:ms;xrNote=t;stat(t);clearTimeout(vnT);if(ms)vnT=setTimeout(()=>{if(xrNote===t){xrNote='';hud();}},ms);}
+function voiceWarm(){
+  if(VOICE.warm)return;
+  VOICE.warm=WSP.call({t:'load',model:VOICE_MODEL},p=>stat('Loading Whisper '+p+'%')).catch(e=>{VOICE.warm=null;stat('Whisper could not load: '+(e&&e.message||e));});
+  // ask for the microphone once so the first palm gesture does not stall on the permission prompt
+  try{navigator.mediaDevices.getUserMedia({audio:true}).then(s=>s.getTracks().forEach(t=>t.stop())).catch(()=>{});}catch(e){}
+}
+function voiceUI(){const b=document.getElementById('micb');if(b)b.classList.toggle('on',VOICE.st==='rec'||VOICE.st==='starting');kDirty=true;}
+function voiceTeardown(){
+  try{VOICE.stream&&VOICE.stream.getTracks().forEach(t=>t.stop());}catch(e){}
+  try{if(VOICE.proc){VOICE.proc.onaudioprocess=null;VOICE.proc.disconnect();}VOICE.srcN&&VOICE.srcN.disconnect();VOICE.mute&&VOICE.mute.disconnect();VOICE.ctx&&VOICE.ctx.close();}catch(e){}
+  VOICE.stream=VOICE.ctx=VOICE.proc=VOICE.srcN=VOICE.mute=null;
+}
+async function voiceStart(src){
+  if(VOICE.st!=='idle')return;
+  if(!nodes.length){vnote('Load text first, then speak.');return;}
+  VOICE.st='starting';VOICE.want=true;VOICE.chunks=[];VOICE.n=0;VOICE.lvl=0;VOICE.peak=0;voiceUI();voiceWarm();
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+    const AC=window.AudioContext||window.webkitAudioContext;let ctx;
+    try{ctx=new AC({sampleRate:16000});}catch(e){ctx=new AC();}
+    const srcN=ctx.createMediaStreamSource(stream),proc=ctx.createScriptProcessor(4096,1,1),mute=ctx.createGain();mute.gain.value=0;
+    proc.onaudioprocess=e=>{if(VOICE.st!=='rec')return;const d=e.inputBuffer.getChannelData(0);VOICE.chunks.push(new Float32Array(d));VOICE.n+=d.length;
+      let s=0,pk=0;for(let i=0;i<d.length;i++){const v=d[i];s+=v*v;const a=v<0?-v:v;if(a>pk)pk=a;}VOICE.lvl=Math.sqrt(s/d.length);if(pk>VOICE.peak)VOICE.peak=pk;};
+    srcN.connect(proc);proc.connect(mute);mute.connect(ctx.destination);
+    Object.assign(VOICE,{stream,ctx,proc,srcN,mute});
+    if(ctx.state==='suspended')await ctx.resume();
+    if(!VOICE.want){voiceTeardown();VOICE.st='idle';voiceUI();return;}
+    VOICE.st='rec';voiceUI();vnote('Listening… close your hand to send',0);
+  }catch(e){voiceTeardown();VOICE.st='idle';VOICE.want=false;VOICE.hand=-1;voiceUI();vnote('Microphone unavailable: '+(e&&e.message||e),6000);}
+}
+function voiceAudio(chunks,n,rate){
+  const a=new Float32Array(n);let o=0;for(const c of chunks){a.set(c,o);o+=c.length;}
+  let out=a;
+  if(rate!==16000){const ratio=rate/16000,m=Math.floor(n/ratio);out=new Float32Array(m);
+    for(let i=0;i<m;i++){const x=i*ratio,i0=Math.floor(x),f=x-i0,v1=i0+1<n?a[i0+1]:a[i0];out[i]=a[i0]*(1-f)+v1*f;}}
+  return out;
+}
+function voiceStop(send){
+  VOICE.want=false;
+  if(VOICE.st!=='rec')return;
+  const rate=VOICE.ctx?VOICE.ctx.sampleRate:16000,chunks=VOICE.chunks,n=VOICE.n,pk=VOICE.peak;
+  VOICE.chunks=[];VOICE.n=0;voiceTeardown();VOICE.st='idle';voiceUI();
+  if(send)VOICE.lv=1;
+  if(!send){vnote('');return;}
+  if(n<rate*.5){vnote('Too short. Open your palm, speak, then close it.');return;}
+  if(pk<.004){vnote('No sound picked up. Check the microphone.');return;}
+  const audio=voiceAudio(chunks,n,rate),g=Math.min(8,.9/Math.max(pk,1e-3));
+  if(g>1.2)for(let i=0;i<audio.length;i++)audio[i]*=g;
+  voiceSend(audio);
+}
+async function voiceSend(audio){
+  VOICE.busy++;vnote('Transcribing…',0);
+  try{
+    const r=await WSP.call({t:'run',model:VOICE_MODEL,audio},p=>vnote('Loading Whisper '+p+'%',0),[audio.buffer]);
+    const t=(r.text||'').replace(/\[[^\]]*\]|\([^)]*\)|[♪♫]+/g,' ').replace(/\s+/g,' ').trim();
+    if(t.length<2||/^(you|thank you\.?|thanks for watching\.?|\.+)$/i.test(t))vnote("Didn't catch that. Try again.");
+    else{vnote('Heard: '+t,5000);$q.value=t;await runQuery(t);autoBrain();}
+  }catch(e){vnote('Whisper failed: '+(e&&e.message||e),6000);}
+  finally{VOICE.busy--;}
+}
+function voiceToggle(){if(VOICE.st==='rec'||VOICE.st==='starting')voiceStop(true);else voiceStart('key');}
+// ---- palm reading ----
+function palmRead(r,hd){
+  const h=r.h;if(!h||!h.userData.on||h.visible===false)return null;
+  const J=h.joints,g=n=>{const j=J[n];if(!j||j.jointRadius===undefined||j.visible===false)return null;return j.getWorldPosition(new THREE.Vector3());};
+  const w=g('wrist'),mm=g('middle-finger-metacarpal'),mp=g('middle-finger-phalanx-proximal'),im=g('index-finger-metacarpal'),pm=g('pinky-finger-metacarpal');
+  if(!w||!mm||!mp||!im||!pm)return null;
+  let open=0,closed=0,tot=0;
+  for(const f of ['index','middle','ring','pinky']){const t=g(f+'-finger-tip'),k=g(f+'-finger-phalanx-proximal');if(!t||!k)continue;tot++;
+    const q=t.distanceTo(w)/Math.max(.02,k.distanceTo(w));if(q>1.65)open++;if(q<1.4)closed++;}
+  const a=im.clone().sub(w),b=pm.clone().sub(w),right=!(r.c.userData.src&&r.c.userData.src.handedness==='left');
+  const n=(right?a.cross(b):b.cross(a)).normalize(),c=w.clone().add(mm).add(mp).multiplyScalar(1/3);
+  const v=hd.clone().sub(c).normalize(),facing=n.y>.35||n.dot(v)>.55;
+  return {open:open>=3&&tot>=3,closed:closed>=3&&tot>=3,n,c,facing};
+}
+function voiceStep(dt){
+  if(!renderer.xr.isPresenting)return;
+  if(VOICE.cool>0)VOICE.cool-=dt;
+  const hd=renderer.xr.getCamera().getWorldPosition(new THREE.Vector3());
+  if(VOICE.hand<0){
+    if(VOICE.st!=='idle'||VOICE.cool>0||placing){rig.forEach(r=>{r.vo=0;});return;}
+    rig.forEach((r,i)=>{const pr=palmRead(r,hd);
+      if(pr&&pr.open&&pr.facing&&!r.pin&&!r.uiHold)r.vo=(r.vo||0)+dt;else r.vo=0;
+      if(r.vo>.35&&VOICE.hand<0){VOICE.hand=i;VOICE.pr=pr;VOICE.lost=VOICE.closeT=VOICE.away=0;r.vo=0;voiceStart('hand');}});
+    return;
+  }
+  if(VOICE.st==='idle'){VOICE.hand=-1;VOICE.cool=.9;return;}
+  const pr=palmRead(rig[VOICE.hand],hd);
+  if(pr){VOICE.pr=pr;VOICE.lost=0;VOICE.closeT=pr.closed?VOICE.closeT+dt:0;VOICE.away=pr.facing?0:VOICE.away+dt;}
+  else VOICE.lost+=dt;
+  if(VOICE.closeT>.12||VOICE.lost>.45||VOICE.away>.5){voiceStop(true);VOICE.hand=-1;VOICE.cool=.9;}
+}
+// ---- orb and lightning ----
+const ORB=new THREE.Group();ORB.visible=false;scene.add(ORB);
+const orbU={uT:{value:0},uL:{value:0},uA:{value:0}};
+const orbMesh=new THREE.Mesh(new THREE.SphereGeometry(1,32,20),new THREE.ShaderMaterial({uniforms:orbU,transparent:true,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending,
+  vertexShader:'varying vec3 vN;varying vec3 vP;void main(){vN=normalize(normalMatrix*normal);vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+  fragmentShader:'uniform float uT;uniform float uL;uniform float uA;varying vec3 vN;varying vec3 vP;void main(){float f=1.-abs(vN.z);float rim=pow(f,2.2);float sw=.5+.5*sin(vP.x*9.+uT*4.)*sin(vP.y*8.-uT*3.)*sin(vP.z*10.+uT*5.);float core=pow(1.-f,3.);vec3 c=vec3(.35,.85,1.)*(rim*1.6+sw*.45*(1.+uL*3.))+vec3(1.,.95,.8)*core*(.5+uL*2.);gl_FragColor=vec4(c*uA,1.);}'}));
+orbMesh.renderOrder=40;
+const hc=document.createElement('canvas');hc.width=hc.height=128;
+{const hx=hc.getContext('2d'),hg=hx.createRadialGradient(64,64,0,64,64,64);hg.addColorStop(0,'rgba(200,240,255,.9)');hg.addColorStop(.25,'rgba(80,200,255,.45)');hg.addColorStop(1,'rgba(0,120,255,0)');hx.fillStyle=hg;hx.fillRect(0,0,128,128);}
+const haloTex=new THREE.CanvasTexture(hc);haloTex.colorSpace=THREE.SRGBColorSpace;
+const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:haloTex,transparent:true,depthTest:false,depthWrite:false,blending:THREE.AdditiveBlending}));halo.renderOrder=39;
+ORB.add(orbMesh,halo);
+const MAXB=9,SEG=18;
+const bgL=new THREE.BufferGeometry(),bgP=new THREE.BufferGeometry(),bL=new Float32Array(MAXB*SEG*6),bP=new Float32Array(MAXB*(SEG+1)*3);
+bgL.setAttribute('position',new THREE.BufferAttribute(bL,3));bgP.setAttribute('position',new THREE.BufferAttribute(bP,3));
+const boltLines=new THREE.LineSegments(bgL,new THREE.LineBasicMaterial({color:0xcfefff,transparent:true,depthTest:false,depthWrite:false,blending:THREE.AdditiveBlending}));
+const boltPts=new THREE.Points(bgP,new THREE.PointsMaterial({color:0x8fe8ff,size:.006,sizeAttenuation:true,transparent:true,depthTest:false,depthWrite:false,blending:THREE.AdditiveBlending}));
+[boltLines,boltPts].forEach(o=>{o.frustumCulled=false;o.renderOrder=39;o.visible=false;scene.add(o);});
+const _vo=new THREE.Vector3(),_va=new THREE.Vector3(),_vb=new THREE.Vector3(),_vu=new THREE.Vector3(),_vv=new THREE.Vector3(),_vd=new THREE.Vector3(),UPV=new THREE.Vector3(0,1,0);
+let boltT=0,nearT=0,nearList=[];
+function orbTarget(){
+  const xr=renderer.xr.isPresenting,cam=xr?renderer.xr.getCamera():camera;
+  if(xr&&VOICE.hand>=0&&VOICE.pr){_vo.copy(VOICE.pr.c).addScaledVector(VOICE.pr.n,.075);return;}
+  cam.getWorldPosition(_vo);cam.getWorldDirection(_vd);_vo.addScaledVector(_vd,xr?.5:.55).addScaledVector(UPV,-.1);
+}
+function nodeWorld(i,o){const n=nodes[i];return o.set(n.x,n.y,n.z).applyMatrix4(G.matrixWorld);}
+function voiceVis(dt){
+  const on=VOICE.want&&(VOICE.st==='rec'||VOICE.st==='starting'),tg=on?1:0;
+  VOICE.ap+=(tg-VOICE.ap)*Math.min(1,dt*(tg?9:5));
+  VOICE.lv+=(Math.min(1,VOICE.lvl*9)*(VOICE.st==='rec'?1:0)-VOICE.lv)*Math.min(1,dt*(VOICE.st==='rec'?12:3));
+  if(VOICE.st==='rec'&&VOICE.n>16000*45)voiceStop(true);
+  const ap=VOICE.ap,vis=ap>.012&&nodes.length>0;
+  ORB.visible=boltLines.visible=boltPts.visible=vis;
+  if(!vis){VOICE.fresh=true;return;}
+  orbTarget();
+  if(VOICE.fresh){ORB.position.copy(_vo);VOICE.fresh=false;}else ORB.position.lerp(_vo,Math.min(1,dt*14));
+  const t=U.uT.value,lv=VOICE.lv,s=.034*ap*(1+.55*lv+.07*Math.sin(t*6));
+  orbMesh.scale.setScalar(s);halo.scale.setScalar(.2*ap*(1+1.2*lv));
+  orbU.uT.value=t;orbU.uL.value=lv;orbU.uA.value=Math.min(1,ap*1.3);
+  boltT-=dt;if(boltT>0)return;boltT=.055;
+  G.updateMatrixWorld();
+  nearT-=.055;
+  if(nearT<=0||!nearList.length){nearT=.3;nearList=[];
+    const d2=[];for(const i of visible){const d=nodeWorld(i,_vb).distanceToSquared(ORB.position);d2.push([d,i]);}
+    d2.sort((a,b)=>a[0]-b[0]);nearList=d2.slice(0,3).map(x=>x[1]);}
+  const pool=SS.size?[...SS]:(Q&&Q.top&&Q.top.length?Q.top:visible),cnt=Math.max(3,Math.min(MAXB,Math.round(3+lv*6))),tg2=nearList.slice(0,Math.min(3,cnt));
+  while(tg2.length<cnt&&pool.length){const i=pool[(Math.random()*pool.length)|0];if(i!==undefined&&nodes[i])tg2.push(i);else break;}
+  const reach=Math.min(1,ap*1.2),A=ORB.position;let nl=0,np=0;
+  tg2.forEach(i=>{
+    nodeWorld(i,_vb);_vd.copy(_vb).sub(A);const L=_vd.length();if(L<1e-4)return;
+    _vb.copy(A).addScaledVector(_vd,reach);_vd.divideScalar(L);
+    _vu.set(_vd.z,0,-_vd.x);if(_vu.lengthSq()<1e-4)_vu.set(1,0,0);_vu.normalize();_vv.crossVectors(_vd,_vu);
+    let px=A.x,py=A.y,pz=A.z;
+    for(let k=0;k<=SEG;k++){
+      let x,y,z;
+      if(k===0){x=A.x;y=A.y;z=A.z;}
+      else if(k===SEG){x=_vb.x;y=_vb.y;z=_vb.z;}
+      else{const f=k/SEG,am=L*reach*.07*Math.sin(Math.PI*f)*(.5+Math.random())*(1+lv),an=Math.random()*6.2832,c=Math.cos(an)*am,sn=Math.sin(an)*am;
+        x=A.x+(_vb.x-A.x)*f+_vu.x*c+_vv.x*sn;y=A.y+(_vb.y-A.y)*f+_vu.y*c+_vv.y*sn;z=A.z+(_vb.z-A.z)*f+_vu.z*c+_vv.z*sn;}
+      bP[np++]=x;bP[np++]=y;bP[np++]=z;
+      if(k>0){bL[nl++]=px;bL[nl++]=py;bL[nl++]=pz;bL[nl++]=x;bL[nl++]=y;bL[nl++]=z;}
+      px=x;py=y;pz=z;}
+  });
+  bgL.attributes.position.needsUpdate=true;bgP.attributes.position.needsUpdate=true;
+  bgL.setDrawRange(0,nl/3);bgP.setDrawRange(0,np/3);
+  boltLines.material.opacity=Math.min(1,.45+.55*ap)*(.5+.5*Math.random()+.3*lv);boltPts.material.size=.005+.004*lv;
+}
+{const b=document.getElementById('micb');
+ if(b){b.innerHTML='<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+  b.onclick=()=>{if(VOICE.st==='rec'||VOICE.st==='starting')voiceStop(true);else voiceStart('ui');};}}
+
 const KW=1600,KH=900,KEYS=[],PQ=2;
 const kc=document.createElement('canvas');kc.width=KW*PQ;kc.height=KH*PQ;
 const kctx=kc.getContext('2d'),ktex=new THREE.CanvasTexture(kc);ktex.colorSpace=THREE.SRGBColorSpace;ktex.anisotropy=8;
@@ -2150,6 +2343,7 @@ function hud(){
     {id:'wiki',x:176,y:24,w:64,h:64,act:'wiki'},
     {id:'pass',x:B-64-12-64-12-64,y:24,w:64,h:64,act:'pass'},
     {id:'snd',x:252,y:24,w:64,h:64,act:'snd'},
+    {id:'mic',x:328,y:24,w:64,h:64,act:'mic'},
     {id:'hist',x:B-64-12-64,y:24,w:64,h:64,act:'hist'},
     {id:'set',x:B-64,y:24,w:64,h:64,act:'set'},
     {id:'play',x:420,y:820,w:140,h:56,act:'play',tlk:true},
@@ -2189,11 +2383,11 @@ function drawKB(){
     if((k.tlk||k.ctk)&&!ctx)continue;
     if(k.llm&&!CFG.on)continue;
     const on=hov.has(k),fl=pressK===k&&now-pressT<170;
-    if(k.id==='plus'||k.id==='hist'||k.id==='set'||k.id==='help'||k.id==='corp'||k.id==='wiki'||k.id==='pass'||k.id==='snd'){
+    if(k.id==='plus'||k.id==='hist'||k.id==='set'||k.id==='help'||k.id==='corp'||k.id==='wiki'||k.id==='pass'||k.id==='snd'||k.id==='mic'){
       const cx=k.x+k.w/2,cy=k.y+k.h/2;
       x.beginPath();x.arc(cx,cy,k.w/2,0,6.2832);x.fillStyle=fl?'rgba(255,179,71,.6)':on?'rgba(255,255,255,.3)':'rgba(255,255,255,.12)';x.fill();x.strokeStyle='rgba(255,255,255,.45)';x.lineWidth=2;x.stroke();
       x.fillStyle='#d6f6ff';x.textAlign='center';x.font=k.id==='plus'?'300 46px '+F:'32px '+F;
-      x.fillText(({plus:'+',hist:'\uD83C\uDF33',set:'\u2699',corp:'\u21C4',wiki:'W',pass:'\u00B6',snd:AU.on?'\u266A':'\u2715'})[k.id]||'?',cx,cy+(k.id==='plus'?-3:1));x.textAlign='left';continue;
+      x.fillText(({plus:'+',hist:'\uD83C\uDF33',set:'\u2699',corp:'\u21C4',wiki:'W',pass:'\u00B6',snd:AU.on?'\u266A':'\u2715',mic:VOICE.st==='rec'?'\u25CF':'\uD83C\uDFA4'})[k.id]||'?',cx,cy+(k.id==='plus'?-3:1));x.textAlign='left';continue;
     }
     if(k.id==='field'){
       rr(x,k.x,k.y,k.w,k.h,12);x.fillStyle='rgba(255,255,255,.08)';x.fill();x.strokeStyle=on||kbOpen?'#ffb347':'rgba(255,255,255,.4)';x.lineWidth=2;x.stroke();
@@ -2275,6 +2469,7 @@ function keyAct(k,r){
   else if(k.act==='clear')clearAll();
   else if(k.act==='auto'){AUTO=!AUTO;try{localStorage.setItem('cf.auto',AUTO?'1':'0');}catch(e){}$('#auto').checked=AUTO;}
   else if(k.act==='move'){MOVE=!MOVE;xrNote=MOVE?'Pinch and drag to move the field':'Pinch and drag to spin the field';hud();}
+  else if(k.act==='mic')voiceToggle();
   else if(k.act==='plus')xrPaste();
   else if(k.act==='snd'){AU.on=!AU.on;try{localStorage.setItem('cf.snd',AU.on?'1':'0');}catch(e){}kDirty=true;if(AU.on){auCtx();sfxTick(1.5);}xrNote=AU.on?'Sound on':'Sound off';hud();}
   else if(k.act==='corp')xrCycleCorpus();
@@ -2720,7 +2915,7 @@ renderer.xr.addEventListener('sessionstart',()=>{
   try{renderer.xr.setFoveation(0);}catch(e){}
   {const bl=s.renderState&&s.renderState.baseLayer;U.uH.value=bl&&bl.framebufferHeight?bl.framebufferHeight:2000;}
   dolly.position.set(0,0,0);dolly.rotation.set(0,0,0);
-  rig.forEach(r=>{r.c.userData.vis=false;});resetGestures();
+  rig.forEach(r=>{r.c.userData.vis=false;});resetGestures();voiceWarm();
   applyLook(pass);
   xrNote='';
   if(pass){
@@ -2731,6 +2926,7 @@ renderer.xr.addEventListener('sessionstart',()=>{
 });
 renderer.xr.addEventListener('sessionend',()=>{
   if(arMode)arFlush();
+  try{voiceStop(false);}catch(e){}VOICE.hand=-1;
   controls.enabled=true;kb.visible=false;ib.visible=false;rb.visible=false;rbPlaced=false;G.visible=true;arRest=0;arAnchor=null;arBusy=false;
   scene.background=bgColor;renderer.setClearAlpha(1);grid.visible=true;ringsG.visible=true;
   if(arMode){G.position.set(0,1.4,-1.1);G.scale.setScalar(.6);G.quaternion.identity();}
@@ -3663,7 +3859,7 @@ renderer.setAnimationLoop((t,frame)=>{
   const raw=clock.getDelta(),dt=Math.min(raw,.05);
   if(!xr){if(!idle)perfSample(raw);edgeBudget();}U.uT.value+=dt;
   {const tk=thinking()?1:0;if(tk&&!pulseOn)U.uP0.value=U.uT.value;pulseOn=tk;U.uK.value+=(tk-U.uK.value)*Math.min(1,dt*(tk?4:2.5));if(U.uK.value<.005&&!tk)U.uK.value=0;}
-  G.updateMatrixWorld(true);tlStep(dt);jStep(dt);platform();lodLabels(dt);colUpdate(dt);
+  G.updateMatrixWorld(true);voiceStep(dt);voiceVis(dt);tlStep(dt);jStep(dt);platform();lodLabels(dt);colUpdate(dt);
   if(needCenter&&renderer.xr.isPresenting&&frame){const xc=renderer.xr.getCamera(),o=xc.getWorldPosition(new THREE.Vector3()),d=xc.getWorldDirection(new THREE.Vector3());d.y=0;if(d.lengthSq()>1e-4){d.normalize();G.scale.setScalar(centerS);const dist=arMode?.7:.75;G.position.set(o.x+d.x*dist,o.y-.1,o.z+d.z*dist);G.quaternion.identity();needCenter=false;}}
   if(renderer.xr.isPresenting){xrPerf(raw);xrWatch(dt);placeKB(dt);gestures(dt);sticks(dt);if(arMode&&frame){arPersist(frame,dt);arFrame(frame);}drawKBIfDirty();drawRdIfDirty();}
   else{
