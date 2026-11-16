@@ -152,7 +152,7 @@ input[type=text],input[type=password],select,textarea{background:rgba(255,255,25
 #infof #clr{white-space:nowrap;margin-left:auto}
 #clr{color:#ff6b6b;background:rgba(255,70,70,.16);border-color:rgba(255,120,120,.7)}
 #clr:hover{background:rgba(255,70,70,.32)}
-/* always-visible scrollbars, pushed to the panel's right edge so they never sit over words */
+
 #info{padding-right:5px}
 #infob .ih,#infof{margin-right:9px}
 #infob .il{scrollbar-gutter:stable;overscroll-behavior:contain;padding-right:14px;margin-right:0}
@@ -198,7 +198,7 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 #attl,#sbtn,#hbtn,#dcnt{min-width:calc(38px*var(--fs,1));min-height:calc(38px*var(--fs,1))}
 #hbtn{right:calc(4px + 48px*var(--fs,1))!important;width:auto!important}
 #sbtn{width:auto!important;height:auto!important}
-/* selection header never eats the word list: it scrolls inside a fixed-height strip, the list keeps its size */
+
 #info{max-height:min(calc(320px*var(--fs,1)),55vh)}
 #infob .ih{max-height:calc(76px*var(--fs,1));overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;overscroll-behavior:contain}
 #infob .il{min-height:calc(120px*var(--fs,1))}
@@ -211,19 +211,47 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 #micb svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #micb.on{background:rgba(93,240,255,.35);border-color:#5df0ff;box-shadow:0 0 18px rgba(93,240,255,.7)}
 
-/* Field mode segmented pill toggle */
+
 .fmode-pill{display:inline-flex;align-items:center;background:rgba(0,0,0,.45);border:1px solid rgba(93,240,255,.32);border-radius:20px;padding:2px;gap:2px;margin-left:6px;vertical-align:middle}
 .fmode-pill .fm-btn{background:transparent;border:0;color:var(--ink);opacity:.65;padding:4px 10px;font-size:calc(12px*var(--fs,1));border-radius:14px;cursor:pointer;transition:all .18s;line-height:1}
 .fmode-pill .fm-btn:hover{opacity:.95;color:#fff}
 .fmode-pill .fm-btn.active{background:rgba(93,240,255,.24);color:var(--cy);opacity:1;font-weight:600;box-shadow:0 0 10px rgba(93,240,255,.35)}
 
-/* Docs drawer arrangement row */
+
 .fmode-row{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-bottom:1px solid rgba(93,240,255,.14);font-size:calc(12px*var(--fs,1))}
 .fmode-toggle{display:inline-flex;background:rgba(0,0,0,.35);border:1px solid rgba(93,240,255,.25);border-radius:14px;padding:2px;gap:2px}
 .fmode-toggle button{background:transparent;border:0;padding:3px 8px;font-size:calc(11px*var(--fs,1));border-radius:10px;color:var(--ink);opacity:.65;cursor:pointer}
 .fmode-toggle button.active{background:rgba(93,240,255,.24);color:var(--cy);opacity:1;font-weight:600}
 
-/* Cross-field overlap info card */
+
+.dh-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:rgba(1,4,10,.78);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:20px;animation:dhFadeIn .2s ease-out}
+@keyframes dhFadeIn{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
+.dh-card{width:min(1060px,95vw);max-height:88vh;display:flex;flex-direction:column;background:rgba(6,12,22,.96);border:1px solid rgba(93,240,255,.35);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.75),0 0 32px rgba(93,240,255,.16);overflow:hidden;position:relative}
+.dh-header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02)}
+.dh-title{font-size:calc(13px*var(--fs,1));font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;display:flex;align-items:center;gap:8px}
+.dh-close{background:transparent;border:0;color:var(--ink);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:6px;transition:all .15s}
+.dh-close:hover{color:#fff;background:rgba(255,255,255,.1)}
+.dh-body{display:flex;flex:1;min-height:280px;overflow:hidden;position:relative}
+.dh-pane{flex:1;padding:18px 22px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.dh-pane.dh-left{border-right:1px solid rgba(255,255,255,.07)}
+.dh-pane.dh-right{border-left:1px solid rgba(255,255,255,.07)}
+.dh-pane-header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.dh-doc-badge{font-size:calc(11px*var(--fs,1));font-weight:700;padding:3px 9px;border-radius:12px;display:inline-flex;align-items:center;color:#01050a}
+.dh-word-badge{font-size:calc(12px*var(--fs,1));font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.2)}
+.dh-excerpt{font-size:calc(13.5px*var(--fs,1));line-height:1.68;color:#e2f4ff;background:rgba(0,0,0,.38);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px 16px;flex:1;overflow-y:auto;font-family:system-ui,-apple-system,sans-serif}
+.dh-center{width:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 6px;background:rgba(2,6,12,.65);z-index:2;gap:8px;text-align:center}
+.dh-strength-circle{width:68px;height:68px;border-radius:50%;background:radial-gradient(circle,rgba(93,240,255,.22) 0%,rgba(0,0,0,.6) 80%);border:2px solid rgba(93,240,255,.65);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 18px rgba(93,240,255,.3);animation:dhPulse 3s infinite ease-in-out}
+@keyframes dhPulse{0%,100%{transform:scale(1);box-shadow:0 0 14px rgba(93,240,255,.25)}50%{transform:scale(1.05);box-shadow:0 0 24px rgba(93,240,255,.45)}}
+.dh-strength-num{font-size:18px;font-weight:800;color:#fff;line-height:1}
+.dh-strength-sub{font-size:8px;letter-spacing:.08em;color:var(--cy);font-weight:700;margin-top:2px}
+.dh-bridge-symbol{font-size:20px;color:var(--am);line-height:1}
+.dh-bridge-type{font-size:calc(9.5px*var(--fs,1));color:var(--ink);opacity:.8;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.dh-footer{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.45)}
+.dh-tip{font-size:calc(11px*var(--fs,1));color:var(--ink);opacity:.7}
+.dh-synth-btn{background:linear-gradient(135deg,rgba(255,179,71,.25),rgba(93,240,255,.25));border:1px solid rgba(93,240,255,.5);color:#fff;font-size:calc(11.5px*var(--fs,1));font-weight:600;padding:6px 14px;border-radius:8px;cursor:pointer;transition:all .2s}
+.dh-synth-btn:hover{background:linear-gradient(135deg,rgba(255,179,71,.4),rgba(93,240,255,.4));border-color:#fff;box-shadow:0 0 16px rgba(93,240,255,.4)}
+
+
 .xoverlap-box{background:linear-gradient(135deg,rgba(93,240,255,.09),rgba(255,179,71,.09));border:1px solid rgba(93,240,255,.35);border-radius:8px;padding:8px 9px;margin-bottom:8px;box-shadow:0 0 14px rgba(93,240,255,.08) inset}
 .xoverlap-hd{display:flex;align-items:center;gap:6px;font-size:calc(11px*var(--fs,1));color:var(--am);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
 .xoverlap-cnt{margin-left:auto;font-size:calc(10px*var(--fs,1));color:var(--ink);opacity:.7;font-weight:normal;text-transform:none}
@@ -244,10 +272,6 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
   <div class="row" style="margin-top:0;align-items:center">
     <button id="attl" title="Add text to the field" aria-label="Add text" aria-haspopup="menu">+</button><input id="file" type="file" accept=".txt,.md,.text,.csv,.json,.html,.htm,.pdf,.docx,text/*" multiple>
     <button id="dcnt" hidden title="Show or hide the attached texts"></button>
-    <div id="fmode" class="fmode-pill" hidden title="Field arrangement: Unified single orb or Separated orbs per file">
-      <button type="button" id="fm-uni" class="fm-btn active" data-m="unified" title="Unified: single merged conceptual field (default)">Unified</button>
-      <button type="button" id="fm-sep" class="fm-btn" data-m="separated" title="Separated: each file gets its own orb of connections; queries find and draw cross-field overlap lines">Separated</button>
-    </div>
     
     <button id="vr" hidden>Enter VR</button>
     <button id="ar" hidden style="color:var(--am);border-color:var(--am)">Enter mixed reality</button>
@@ -303,8 +327,8 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 <button id="helpbtn" aria-label="Help" aria-expanded="false" title="Help">?</button>
 <div id="hint" class="panel" hidden>Desktop: drag to orbit, wheel to zoom, WASD/QE to fly, click concepts to select several (selected words pulse; click again to deselect). With words selected, Play puts you inside the current, flying node to node in resonant order. Every word you type is searched, including common words like the or not; only the drawn field hides them. VR: a query bar, keyboard and a results box float in view (point and pinch or trigger the bar to type). The keyboard's mic key dictates into the bar with Whisper: press it, speak, press it again, then press W for Wikipedia or Ask. Mixed reality (Quest 3): press Enter mixed reality to see your room through the passthrough cameras. Pinch and drag anywhere to carry the data sphere (the right stick spins it), pinch with both hands and spread to resize and twist it, quick pinch on a word to select it (or tap a selected word chip in the list box to deselect it); select several to see how they connect, and pinch a selected word again to deselect it. The field remembers where you put it between mixed-reality sessions. Sticks fly in VR. A adds the selected concept to the query, B clears. Press Place on the panel to snap the field onto a wall, table or floor. In VR the top buttons are: + paste copied text, \u21C4 switch saved text, W fetch Wikipedia for the typed topic, \u00B6 source passages, and the gear toggles the LLM. Brighter nodes are more frequent words. Zoom out and neighbouring words collapse into the most dominant word of their area (bigger dot, labelled); zoom in and they expand again. The field learns as you use it: words you query or select together are drawn a little closer each time, and the arrangement is saved per text. Line colour is based on how often the words at each end occur in your text: rare words are violet and blue, then green and yellow, and the most frequent words are orange and red, so each line blends between its two ends. The cog (top right) can switch lines to colour by link strength instead. Once you have a query or selection, a Play button, timeline and speed button appear: words appear one by one, strongest resonance first (the speed button cycles 0.25x to 4x). The results box scrolls: thumbstick while pointing at it, or (hand tracking) touch it with your index fingertip and slide up or down like a touchscreen, with a flick for momentum; tap a row to select that word. Source passages: select a concept (or click a link line, or press the ¶ button on a row) to see the sentences where the words occur, with the document name; how many are shown adapts to how strongly the words resonate. Voice: hold out an open palm (palm up or toward you) steadily for about three quarters of a second in mixed reality or VR with hand tracking. An orb appears in your hand with lightning arcing to the network; speak, then close your hand or pull it away to send. Whisper runs in your browser (the first use downloads a small model). On desktop, or with controllers, use the mic button. Attach PDF, Word or HTML files, or fetch URLs.</div>
 <script type="text/plain" id="engine-src">
-// Concept Field analysis engine. Runs in a Web Worker; owns the corpus and all derived state.
-// The main thread talks to it with {t:'ingest'|'query'|'reset', rid, ...} messages.
+
+
 'use strict';
 let CUR=null;
 const PROG=t=>{if(CUR!==null)self.postMessage({rid:CUR,prog:t});};
@@ -357,16 +381,16 @@ function foldPlurals(){
       const j=s&&rawId.get(s);if(j>1&&j!==i){rm[i]=j;any=true;break;}}}
   if(any)corp.forEach(d=>{for(let k=0;k<d.ids.length;k++)d.ids[k]=rm[d.ids[k]];});
 }
-// ---- phrase detection ----
-// Adjacent content-word pairs with high PMI and enough mass become one token ("sea level").
-// The second slot becomes a filler so every position, distance and array stays aligned.
+
+
+
 const MAXW=5;
 function mergePhrases(){for(let pass=0;pass<4;pass++)if(!mergePass())break;}
 function mergePass(){
   const V=vocab.length,uni=new Uint32Array(V),bi=new Map();let T=0;
   const okTok=x=>x>FILL&&x<V&&vocab[x].charCodeAt(0)>=97&&vocab[x].length>=3&&!STRUCT.has(vocab[x]);
   const nw=x=>vocab[x].split(' ').length;
-  // next content unit after k, skipping the fillers left behind by earlier merges (pol bit 64)
+  
   const nxt=(d,k)=>{let j=k+1;const t=d.ids,p=d.pol;while(j<t.length&&t[j]===FILL&&(p[j]&64))j++;return j;};
   corp.forEach(d=>{const t=d.ids;
     for(let k=0;k<t.length;k++){const a=t[k];if(a<=FILL)continue;uni[a]++;T++;
@@ -393,7 +417,7 @@ function mergePass(){
       t[k]=p;t[j]=FILL;d.pol[j]|=64;d.n--;merged++;k=j;}});
   return merged>0;
 }
-// Query helper: join adjacent query words into a phrase id when the corpus has that phrase.
+
 function wid(t){let id=rawId.get(t);if(id>1&&FOLDM&&FOLDM[id]!==undefined)id=FOLDM[id];return id>1?id:0;}
 function mergeQ(seq){
   const o=[];
@@ -430,10 +454,10 @@ function recount(){
   exclC=new Uint8Array(vocab.length);
   for(let e=1;e<vocab.length;e++)if(vocab[e].charCodeAt(0)<58||STRUCT.has(vocab[e]))exclC[e]=1;exclC[FILL]=1;
 }
-// Idea boundaries, ported from symboltransformer so both files cut contexts at the same places:
-// slide two adjacent 100-token windows along the text, compare their idf-weighted word vectors, and
-// cut at the deepest, well-separated similarity valleys (>= 200 tokens apart). Texts under 250
-// tokens are one idea. The scan below never lets a co-occurrence window cross one of these cuts.
+
+
+
+
 function ideaBounds(ids){
   const T=ids.length,W=100;
   if(T<250)return Uint32Array.of(0);
@@ -465,7 +489,7 @@ function eachFwd(l,t,fn,end,pb){const a=Math.min(end-1,t+HZ);let o=0,i=1;
   for(let s=t+1;s<=a;s++){const x=l[s];if(x!==0){if(x>FILL)fn(s,s-t,i);}else{if(++o>MAXBRK)break;const e=pb&&pb.get(s);i*=e===undefined?BRKP:e?.5:0;if(i===0)break;}}}
 function eachBwd(l,t,fn,start,pb){const a=Math.max(start,t-HZ);let o=0,i=1;
   for(let s=t-1;s>=a;s--){const x=l[s];if(x!==0){if(x>FILL)fn(s,t-s,i);}else{if(++o>MAXBRK)break;const e=pb&&pb.get(s);i*=e===undefined?BRKP:e?.5:0;if(i===0)break;}}}
-// Posting lists (token -> positions) per document, built on demand.
+
 function buildPost(d){
   if(d.post)return;
   const l=d.ids,m=new Map();
@@ -478,15 +502,15 @@ function buildSPost(d){
   for(let k=0;k<d.ids.length;k++){const x=d.sw[k];if(x){const q=m.get(x);q?q.push(k):m.set(x,[k]);}}
   d.spost=m;
 }
-// precCount / ctxFP / edgeSeq read d.post directly; leapScan may now be served from cache
-// without touching the corpus, so they make sure the lists exist.
+
+
 function ensurePost(){for(const d of corp)buildPost(d);}
 
-// leapScan cache. One entry per query term (keyed by its effective id set) holding that term's
-// raw neighbour statistics as packed typed arrays, in first-seen order. Entries do not depend on
-// `excl`, which is applied when an entry is read, so a word scanned for the field is reused by
-// every later query and field rebuild. Cleared by resetCorpus(). LRU, bounded by total entries
-// (about 24 bytes each).
+
+
+
+
+
 const LSC=new Map();let lscN=0;const LSC_MAX=4e6;
 function lscGet(k){const v=LSC.get(k);if(v){LSC.delete(k);LSC.set(k,v);}return v;}
 function lscPut(k,v){
@@ -499,12 +523,12 @@ function packScan(w){
   for(const [r,v] of w.acc){ids[i]=r;acc[i]=v;raw[i]=w.raw.get(r);const f=w.fw.get(r);if(f)fw[i]=f;i++;}
   return {hits:w.hits,stride:w.stride,ids,acc,raw,fw};
 }
-// One corpus pass for a batch of terms with disjoint id sets. Always excludes exclC; the caller's
-// own `excl` is applied later, when a packed entry is read.
-// Counting rule (identical to symboltransformer's leapScan): every occurrence of the term adds
-// DEC[distance]*gap-factor for each neighbour inside the same idea (windows stop at idea boundaries
-// d.bnd), acc sums over occurrences, raw counts them, and terms with more than 4e4 occurrences are
-// sampled every `stride`-th occurrence.
+
+
+
+
+
+
 function scanRaw(items){
   const n=vocab.length,s=new Int32Array(n),ss=new Int32Array(svocab.length),SD=new Map();
   let hasS=false,L=null;
@@ -537,11 +561,11 @@ function scanRaw(items){
   return R.map(packScan);
 }
 function leapScan(terms,excl){
-  // `excl` must be a superset of exclC (every caller passes one).
+  
   const T=terms.length,own=new Int32Array(vocab.length).fill(-1),sown=new Int32Array(svocab.length).fill(-1);
   terms.forEach((e,t)=>{e.ids.forEach(x=>{own[x]=t;});(e.sids||[]).forEach(x=>{sown[x]=t;});});
-  // An id listed by several terms belongs to the last of them, as in a joint scan, so each term's
-  // effective id set (and cache key) does not depend on which other terms are in the call.
+  
+  
   const keys=new Array(T),eff=new Array(T);
   terms.forEach((e,t)=>{
     const ids=[...new Set(e.ids)].filter(x=>own[x]===t).sort((a,b)=>a-b),
@@ -552,7 +576,7 @@ function leapScan(terms,excl){
   if(miss.length){
     const at=new Map();keys.forEach((k,t)=>{if(!at.has(k))at.set(k,t);});
     const res=scanRaw(miss.map(k=>eff[at.get(k)]));
-    // lowest-index (highest-ranked) terms go in last, so LRU eviction drops the tail first
+    
     for(let i=miss.length-1;i>=0;i--){ent.set(miss[i],res[i]);lscPut(miss[i],res[i]);}
   }
   const DW=2*DEC.reduce((x,y)=>x+y,0);
@@ -566,7 +590,7 @@ function leapScan(terms,excl){
       const sc=Math.log(1+v)*o*(GEN.get(vocab[r])||1)*Math.log(1+v/(ex+1));
       p.set(r,sc);if(sc>a)a=sc;}
     p.forEach((v,r)=>p.set(r,v/(a||1)));
-    // acc / fw are materialised as Maps only when asked for (buildField) and go with the result.
+    
     return {p,hits,
       get acc(){if(!this._a){const m=new Map();for(let i=0;i<c.ids.length;i++)if(!excl[c.ids[i]])m.set(c.ids[i],c.acc[i]);this._a=m;}return this._a;},
       get fw(){if(!this._f){const m=new Map();for(let i=0;i<c.ids.length;i++)if(c.fw[i]>0&&!excl[c.ids[i]])m.set(c.ids[i],c.fw[i]);this._f=m;}return this._f;}};});
@@ -672,8 +696,8 @@ function coocc(qWords){
     const Lx=M.map((e,i)=>{let aa=0,bb=0;for(let j=0;j<n;j++)if(j!==i){aa+=M[j].s*ov[i*n+j];bb+=M[j].s;}return bb?aa/bb:0;}),
       lmx=Math.max(1e-9,...Lx),Ln=Lx.map(x=>x/lmx),ml=Ln.reduce((x,y)=>x+y,0)/n;
     M.forEach((e,i)=>{e.s*=(Ln[i]+ml)/(1+ml);});
-    // Conceptual clustering: group emerged words by shared context, then keep clusters that link the
-    // query terms together; a cluster reached through only one term (another sense/context) is damped.
+    
+    
     if(a.length>1){
       let pm=1e-9;for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)if(ov[i*n+j]>pm)pm=ov[i*n+j];
       const ord=M.map((_,i)=>i).sort((x,y)=>M[y].s-M[x].s),cl=new Int32Array(n).fill(-1),sd=[];
@@ -865,8 +889,8 @@ function wvec(e){
   m.forEach(q=>{const f=Math.min(1,q.s/top),w=vocab[q.id];t[w]=(t[w]||0)+f;});
   let n=0;for(const k in t)n+=t[k]*t[k];n=Math.sqrt(n)||1;for(const k in t)t[k]/=n;return t;
 }
-// Exact set of (window hash, candidate id, direction) triples for precCount. Open addressing
-// over two Uint32Arrays: no string keys, no boxed numbers.
+
+
 class PairSet{
   constructor(){this.cap=1024;this.n=0;this.H=new Uint32Array(1024);this.C=new Uint32Array(1024);}
   add(h,c,kind){
@@ -1095,7 +1119,7 @@ function buildField(){
   let list=cand.filter(c=>cfreq[c[0]]>=2);if(list.length<30)list=cand;
   list=list.sort((a,b)=>b[1]-a[1]);
   list=list.slice(0,NCAP);
-  // One node per word family (happen / happens / happened): the highest-scoring form stays, the rest map to it.
+  
   FAMH=new Map();
   {const kept=[],byP=new Map(),headOf=id=>{const w=vocab[id],b=byP.get(w.slice(0,2));if(b)for(const j of b)if(famNear(vocab[j],w))return j;return null;};
    for(const c of list){const h=headOf(c[0]);if(h!==null){FAMH.set(c[0],h);continue;}
@@ -1269,10 +1293,10 @@ function edgeSeq(){
   gaps.sort((a,b)=>a-b);const med=gaps.length?gaps[gaps.length>>1]:10;
   edges.forEach(e=>{e.g=Math.max(.4,Math.min(2.5,e.gap/Math.max(1,med)));});
 }
-// ---- layout ---------------------------------------------------------------------------
-// Repulsion is a 1/r force between every pair. At or above BH_MIN nodes it is evaluated with a
-// Barnes-Hut octree (O(N log N) per iteration); below that the exact all-pairs loop is as fast
-// or faster, because the tree has a large constant factor.
+
+
+
+
 const BH_MIN=1500,BH_THETA=.6,BH_MAXD=24,BH_LEAF=8;
 let bhCap=0,bhCh,bhSx,bhSy,bhSz,bhMx,bhMy,bhMz,bhCx,bhCy,bhCz,bhHw,bhCnt,bhHead,bhLeaf,bhNxt;
 function bhAlloc(cap){
@@ -1281,7 +1305,7 @@ function bhAlloc(cap){
   bhCx=new Float64Array(cap);bhCy=new Float64Array(cap);bhCz=new Float64Array(cap);bhHw=new Float64Array(cap);
   bhCnt=new Int32Array(cap);bhHead=new Int32Array(cap);bhLeaf=new Uint8Array(cap);bhCap=cap;
 }
-// Builds the tree; returns the node count, or -1 if the node pool was too small.
+
 function bhBuild(P,N){
   const ch=bhCh,sx=bhSx,sy=bhSy,sz=bhSz,cx=bhCx,cy=bhCy,cz=bhCz,hw=bhHw,cnt=bhCnt,head=bhHead,leaf=bhLeaf,nxt=bhNxt,cap=bhCap;
   let mnx=Infinity,mny=Infinity,mnz=Infinity,mxx=-Infinity,mxy=-Infinity,mxz=-Infinity;
@@ -1301,9 +1325,9 @@ function bhBuild(P,N){
       if(leaf[n]){
         if(cnt[n]<BH_LEAF||depth>=BH_MAXD){
           push(n,i);
-          // ancestors were aggregated on the way down
+          
           break;}
-        // bucket full: redistribute it into children, then carry on down with i
+        
         let b=head[n];head[n]=-1;leaf[n]=0;
         while(b>=0){const nb=nxt[b],oc=(P[b*3]>cx[n]?1:0)|(P[b*3+1]>cy[n]?2:0)|(P[b*3+2]>cz[n]?4:0);
           let c=ch[n*8+oc];if(c===0){c=kid(n,oc);if(c<0)return -1;}push(c,b);b=nb;}
@@ -1332,7 +1356,7 @@ function bhRepulse(P,D,N,k2){
           const dx=px-P[b*3],dy=py-P[b*3+1],dz=pz-P[b*3+2],f=k2/(dx*dx+dy*dy+dz*dz+1e-4);fx+=dx*f;fy+=dy*f;fz+=dz*f;}
         continue;}
       const dx=px-mx[n],dy=py-my[n],dz=pz-mz[n],d2=dx*dx+dy*dy+dz*dz,w=hw[n];
-      // far enough to act as one mass, and i is not inside the cell (its own mass would be in the sum)
+      
       if(4*w*w<th2*d2&&(Math.abs(px-cx[n])>w||Math.abs(py-cy[n])>w||Math.abs(pz-cz[n])>w)){
         const f=cnt[n]*k2/(d2+1e-4);fx+=dx*f;fy+=dy*f;fz+=dz*f;continue;}
       const o=n*8;for(let q=0;q<8;q++){const c=ch[o+q];if(c)stack[sp++]=c;}
@@ -1341,7 +1365,7 @@ function bhRepulse(P,D,N,k2){
   }
 }
 
-// Label propagation on the weighted link graph -> a handful of topic communities.
+
 function communities(subNodes,subEdges,N){
   if(!subNodes)subNodes=nodes;if(!subEdges)subEdges=edges;if(N===undefined)N=subNodes.length;
   const l=Int32Array.from({length:N},(_,i)=>i),order=[...Array(N).keys()];
@@ -1379,7 +1403,7 @@ function layout(subNodes,subEdges,SP){
   const k=Math.cbrt(8/N),it=Math.max(50,Math.min(320,Math.floor(5e8/(N*N))));
   const CMN=N>=12?communities(subNodes,subEdges,N):{l:new Int32Array(N),nc:1},cm=CMN.l,nc=CMN.nc;
   const cc=new Float64Array(nc*3),cn=new Float64Array(nc),pv=new Float64Array(nc*3);
-  if(nc>1){// seed each community in its own region of the ball
+  if(nc>1){
     for(let i=0;i<N;i++){const j=cm[i],y=1-2*(j+.5)/nc,r=Math.sqrt(Math.max(0,1-y*y)),a=j*2.399963;
       P[i*3]=.75*r*Math.cos(a)+.45*P[i*3];P[i*3+1]=.75*y+.45*P[i*3+1];P[i*3+2]=.75*r*Math.sin(a)+.45*P[i*3+2];}}
   for(let n=0;n<it;n++){
@@ -1438,21 +1462,31 @@ function layout(subNodes,subEdges,SP){
   }
   subNodes.forEach((n,i)=>{n.x=P[i*3];n.y=P[i*3+1];n.z=P[i*3+2];});
 }
-// ---- source passages ----
+
 function splitPass(text){
   const sp=[];let s=0;const re=/[.!?]+["'\u2019\u201d)\]]*\s+|\n[ \t\r]*\n\s*/g;let m;
-  while((m=re.exec(text))){const e=m.index+m[0].length;sp.push([s,e]);s=e;}
+  while((m=re.exec(text))){const e=m.index+m[0].length;if(e>s)sp.push([s,e]);s=e;}
   if(s<text.length)sp.push([s,text.length]);
-  const out=[];let cur=null;
-  for(const q of sp){if(!cur)cur=[q[0],q[1]];else cur[1]=q[1];if(cur[1]-cur[0]>=360){out.push(cur);cur=null;}}
-  if(cur){if(out.length&&cur[1]-cur[0]<360)out[out.length-1][1]=cur[1];else out.push(cur);}
-  const fin=[];
-  for(const [a,b] of out){let x=a;while(b-x>1300){let y=x+1000;const k=text.indexOf(' ',y);y=k>0&&k<x+1150?k:x+1100;fin.push([x,y]);x=y;}fin.push([x,b]);}
-  return fin;
+  if(!sp.length)return [[0,text.length]];
+  const out=[];
+  
+  for(let i=0;i<sp.length;i++){
+    const s0=sp[i][0],e0=sp[i][1];
+    if(e0-s0>=35)out.push([s0,e0]);
+    if(i+1<sp.length){
+      const e1=sp[i+1][1];
+      if(e1-s0<=450)out.push([s0,e1]);
+      if(i+2<sp.length){
+        const e2=sp[i+2][1];
+        if(e2-s0<=520)out.push([s0,e2]);
+      }
+    }
+  }
+  return out.length?out:sp;
 }
 const normSrc=r=>r.replace(/[\u2018\u2019]/g,"'").replace(/[\u2010\u2011]/g,'-').toLowerCase();
 function tokId(e){if(e.charCodeAt(0)<97)return 0;let id=rawId.get(e);if(!(id>1))return 0;if(FOLDM&&FOLDM[id]!==undefined)id=FOLDM[id];return cfreq[id]>0?id:0;}
-// Tokens of a passage with phrases joined, as {id,s,e[,ph:[id1,id2,end1,start2]]}.
+
 function rawTok(e){if(e.charCodeAt(0)<97)return 0;let id=rawId.get(e);if(!(id>1))return 0;if(FOLDM&&FOLDM[id]!==undefined)id=FOLDM[id];return id;}
 function passToks(norm){
   const ms=[...norm.matchAll(TOKRE)],out=[],rt=ms.map(m=>rawTok(m[0]));
@@ -1487,18 +1521,40 @@ function buildPass(){
   });
 }
 function fmtPass(r,ps,wi){
-  const doc=DOCS[ps.d],raw=doc.text.slice(ps.a,ps.b),lead=raw.length-raw.trimStart().length,t=raw.trim(),mk=[];
-  const put=(a,b,o)=>{const s0=a-lead,e0=b-lead;if(s0<0||e0>t.length||e0<=s0)return;mk.push([s0,e0,o.must?1:0]);};
-  for(const k of passToks(normSrc(raw))){
+  const doc=DOCS[ps.d],raw=doc.text.slice(ps.a,ps.b);
+  const toks=passToks(normSrc(raw));
+  let minS=Infinity,maxE=-Infinity;
+  for(const k of toks){
+    let matched=!!wi.get(k.id);
+    if(!matched&&k.ph)matched=k.ph.ids.some(c=>wi.has(c));
+    if(matched){
+      if(k.s<minS)minS=k.s;
+      if(k.e>maxE)maxE=k.e;
+    }
+  }
+  let segStart=0,segEnd=raw.length;
+  if(minS<Infinity&&maxE>-Infinity){
+    let s0=0;const reSent=/[.!?]+["'\u2019\u201d)\]]*\s+|\n[ \t\r]*\n\s*/g;let sm;
+    while((sm=reSent.exec(raw))){
+      const b=sm.index+sm[0].length;
+      if(b<=minS)s0=b;
+      if(b>=maxE){segEnd=b;break;}
+    }
+    segStart=s0;
+  }
+  const denseRaw=raw.slice(segStart,segEnd);
+  const lead=denseRaw.length-denseRaw.trimStart().length,t=denseRaw.trim(),mk=[];
+  const put=(a,b,o)=>{const s0=a-segStart-lead,e0=b-segStart-lead;if(s0<0||e0>t.length||e0<=s0)return;mk.push([s0,e0,o.must?1:0]);};
+  for(const k of toks){
     const o=wi.get(k.id);
     if(o){put(k.s,k.e,o);continue;}
     if(k.ph){k.ph.ids.forEach((c,q)=>{const oq=wi.get(c);if(oq)put(k.ph.st[q],k.ph.en[q],oq);});}
   }
-  return {doc:doc.name,pct:Math.round(100*ps.a/Math.max(1,doc.text.length)),text:t,m:mk,mc:r.mc,s:r.s};
+  return {doc:doc.name,pct:Math.round(100*(ps.a+segStart)/Math.max(1,doc.text.length)),text:t,m:mk,mc:r.mc,s:r.s};
 }
-// m: {ids, w, must:[indices into ids], need?:index, all, R (resonance 0..1), cap}
-// The number of passages returned adapts to R: strongly resonant words get a larger budget and a
-// lower relevance cut-off; weakly resonant words get only the few best passages.
+
+
+
 function getPassages(m){
   if(!PASS)buildPass();
   const wi=new Map(),mustS=new Set(m.must||[]);
@@ -1507,14 +1563,16 @@ function getPassages(m){
   const qg=(m.qg||[]).map(g=>g.map(id=>FOLDM&&FOLDM[id]!==undefined?FOLDM[id]:id)),nG=qg.length,qmap=new Map();
   qg.forEach((g,gi)=>g.forEach(id=>{const l=qmap.get(id);l?l.push(gi):qmap.set(id,[gi]);}));
   const cand=new Set();mustIds.forEach(id=>{const l=PIX.get(id);if(l)l.forEach(p=>cand.add(p));});
-  // Score = weighted count of distinct emerged words in the passage per unit of text (density).
+  
   const rows=[];let maxmc=0;
   cand.forEach(p=>{const ps=PASS[p];let mc=0,sc=0,hn=needId==null;const qs=nG?new Set():null;
     for(const id of ps.ids){if(qs){const qq=qmap.get(id);if(qq)qq.forEach(g=>qs.add(g));}const o=wi.get(id);if(!o)continue;const sb=ps.sub&&ps.sub.get(id);if(sb&&sb.some(q=>wi.has(q)))continue;if(o.must){mc++;sc+=o.w*Math.max(.25,cIdf[id]||0);}if(id===needId)hn=true;}
     if(!hn||!mc)return;
     if(mc>maxmc)maxmc=mc;
-    rows.push({p,mc,qc:qs?qs.size:0,s:sc/Math.max(10,(ps.b-ps.a)/6)*(nG?.4+.6*qs.size/nG:1)});});
-  // keep passages holding most of the emerged words that occur together anywhere (all of them for a link)
+    const len=Math.max(10,(ps.b-ps.a)/6);
+    const densityBonus=mc>1?1.45:1.0;
+    rows.push({p,mc,qc:qs?qs.size:0,s:(sc/len)*densityBonus*(nG?.4+.6*qs.size/nG:1)});});
+  
   const req=m.all?Math.max(1,Math.min(mustN,maxmc)):Math.max(1,Math.ceil(.5*maxmc)),R=Math.max(0,Math.min(1,m.R==null?.5:m.R)),cap=m.cap||20;
   const qreq=nG>1?Math.max(1,Math.ceil(.5*rows.reduce((a,r)=>r.qc>a?r.qc:a,0))):0;
   const ok=rows.filter(r=>r.mc>=req&&r.qc>=qreq).sort((a,b)=>b.s-a.s||b.mc-a.mc),total=ok.length;
@@ -1582,7 +1640,7 @@ import {XRHandModelFactory} from 'three/addons/webxr/XRHandModelFactory.js';
 import {XRControllerModelFactory} from 'three/addons/webxr/XRControllerModelFactory.js';
 const TOKRE=/[\p{L}\p{M}]+(?:['-][\p{L}\p{M}]+)*|\d+(?:[.,]\d+)*|[.!?;:()\u2014\u2013]+|,|\n[ \t\r]*\n/gu;
 
-// ---- analysis worker host ----
+
 const ENG=(()=>{
   const w=new Worker(URL.createObjectURL(new Blob([document.getElementById('engine-src').textContent],{type:'text/javascript'})));
   let rid=0;const pend=new Map();
@@ -1597,8 +1655,8 @@ let EPOCH=0,ingesting=false,qSeq=0,forceWords=[],qBusy=0;
 const thinking=()=>qBusy>0||ingesting||!!rdBusy||VOICE.st==='rec'||VOICE.busy>0;
 let nD=null,eD=null,pulseKey='',pulseOn=0;
 const txtWords=()=>{const a=$q.value.toLowerCase().match(/[\p{L}\d'-]+/gu)||[],s=new Set(a);for(let i=0;i+1<a.length;i++)s.add(a[i]+' '+a[i+1]);return s;};
-// Distance (along the field's own links) from the input's trigger nodes to every node, so the
-// pulse travels outward from where the input actually lands.
+
+
 function updatePulse(textOnly){
   if(!nD||!nodes.length||nD.length!==nodes.length)return;
   let src=[];
@@ -1621,38 +1679,34 @@ function updatePulse(textOnly){
   edges.forEach((e,k)=>{eD[k*2]=nD[e.s];eD[k*2+1]=nD[e.t];});
   pts.geometry.attributes.aD.needsUpdate=true;lines.geometry.attributes.aDv.needsUpdate=true;
 }
-let fieldMode='unified',orbs=[],word2all=new Map();
+let fieldMode=(()=>{try{const s=localStorage.getItem('cf.fieldMode');if(s==='separated'||s==='unified')return s;}catch(e){}return 'unified';})(),orbs=[],word2all=new Map();
 const setField=r=>{
   nodes=r.nodes;edges=r.edges;orbs=r.orbs||[];
   fieldMode=r.mode||fieldMode||'unified';
+  try{localStorage.setItem('cf.fieldMode',fieldMode);}catch(e){}
   word2i=new Map(nodes.map((n,i)=>[n.id,i]));
   word2all=new Map();
   nodes.forEach((n,i)=>{const l=word2all.get(n.id)||[];l.push(i);word2all.set(n.id,l);});
   forceWords=r.force;
-  updateModeUI();
+  renderDocs();
 };
 function updateModeUI(){
-  const fm=$('#fmode');
-  if(fm){
-    fm.hidden=!(curDocs&&curDocs.length>1);
-    const bu=$('#fm-uni'),bs=$('#fm-sep');
-    if(bu)bu.classList.toggle('active',fieldMode==='unified');
-    if(bs)bs.classList.toggle('active',fieldMode==='separated');
-  }
+  renderDocs();
 }
 async function setFieldMode(mode){
   if(mode===fieldMode)return;
-  if(curDocs.length<2)return;
   fieldMode=mode;
+  try{localStorage.setItem('cf.fieldMode',fieldMode);}catch(e){}
   stat(mode==='separated'?'Separating into file orbs\u2026':'Unifying file fields\u2026');
-  updateModeUI();
+  renderDocs();
+  if(curDocs.length<2)return;
   try{
     const r=await ENG.call({t:'setMode',mode});
     setField(r);
     buildVisuals();
     if(LASTQ&&LASTQ.trim()){await runQuery(LASTQ,true);}
     else applyState();
-    stat(mode==='separated'?`Separated into ${orbs.length} file orbs. Query to reveal cross-field overlap.`:'Unified into a single conceptual field.');
+    stat(mode==='separated'?`Separated into ${orbs.length} file orbs. Threads show overlap; red panels highlight divergence blind spots.`:'Unified into a single conceptual field.');
   }catch(e){stat('Mode switch failed: '+e.message);}
 }
 
@@ -1720,6 +1774,20 @@ const CY=[.36,.94,1],VI=[.6,.48,1],AM=[1,.7,.28],WH=[.92,1,1],GO=[1,.84,.45];
 const mix=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
 const RAMP=[[0,[.42,.3,1]],[.3,CY],[.55,[.45,1,.72]],[.78,AM],[1,[1,.96,.86]]];
 function ramp(t){t=Math.max(0,Math.min(1,t));for(let i=1;i<RAMP.length;i++)if(t<=RAMP[i][0]){const a=RAMP[i-1],b=RAMP[i];return mix(a[1],b[1],(t-a[0])/(b[0]-a[0]));}return RAMP[RAMP.length-1][1];}
+
+
+const DOC_PALETTE = [
+  { name: 'Amber',   rgb: [1.0, 0.76, 0.28], hex: '#ffc247' },  
+  { name: 'Cyan',    rgb: [0.36, 0.94, 1.0], hex: '#5df0ff' },  
+  { name: 'Violet',  rgb: [0.82, 0.45, 1.0], hex: '#d273ff' },  
+  { name: 'Emerald', rgb: [0.30, 0.96, 0.62], hex: '#4ef59e' },  
+  { name: 'Coral',   rgb: [1.0, 0.42, 0.52], hex: '#ff6b85' },  
+  { name: 'Azure',   rgb: [0.35, 0.65, 1.0], hex: '#59a6ff' }   
+];
+function getDocRgb(d){ return DOC_PALETTE[(d||0)%DOC_PALETTE.length].rgb; }
+function getDocHex(d){ return DOC_PALETTE[(d||0)%DOC_PALETTE.length].hex; }
+function getDocColor(d){ return DOC_PALETTE[(d||0)%DOC_PALETTE.length]; }
+
 let nL=null,nHW=null,wvPend=false,wvT=0;
 const _mc=document.createElement('canvas').getContext('2d');
 function wordHW(n){if(n.hw===undefined){_mc.font='600 100px system-ui,-apple-system,sans-serif';n.hw=Math.min(768,_mc.measureText(n.word).width)/768*.2*FS/2+.008;}return n.hw;}
@@ -1737,6 +1805,11 @@ let eRank=[],lIdx,dIdx,lSpec=0,lAmbN=0,dN=0,lastLN=-1,pts,lines,dots,dI,dD,dC,nA
 const crossGroup=new THREE.Group();G.add(crossGroup);
 const crossLabelsGroup=new THREE.Group();crossGroup.add(crossLabelsGroup);
 const orbHaloGroup=new THREE.Group();G.add(orbHaloGroup);
+const divergenceGroup=new THREE.Group();G.add(divergenceGroup);
+const dualJuxtapositionGroup=new THREE.Group();scene.add(dualJuxtapositionGroup);
+
+let crossMode='overlap'; 
+
 const crossLineMat=new THREE.ShaderMaterial({
   uniforms:U,transparent:true,depthWrite:false,...ADD,
   vertexShader:`attribute vec3 aCol;attribute float aI;attribute float aPh;attribute float aKind;uniform float uT;varying vec3 vC;varying float vI;varying float vKind;varying float vPh;void main(){vC=aCol;vI=aI;vKind=aKind;vPh=aPh;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
@@ -1744,7 +1817,7 @@ const crossLineMat=new THREE.ShaderMaterial({
 });
 const crossDotMat=new THREE.ShaderMaterial({
   uniforms:U,transparent:true,depthWrite:false,...ADD,
-  vertexShader:`attribute vec3 aB;attribute vec3 aCol;attribute float aPh;attribute float aI;uniform float uT;varying vec3 vC;varying float vI;void main(){float t=fract(uT*.22+aPh);vec3 pos=mix(position,aB,t);vec4 mv=modelViewMatrix*vec4(pos,1.);gl_PointSize=clamp(26.*aI/-mv.z,6.,64.);vC=aCol;vI=aI*(.8+.2*sin(uT*5.+aPh*6.28));gl_Position=projectionMatrix*mv;}`,
+  vertexShader:`attribute vec3 aB;attribute vec3 aCol;attribute vec3 aColB;attribute float aPh;attribute float aI;uniform float uT;varying vec3 vC;varying float vI;void main(){float t=fract(uT*.22+aPh);vec3 pos=mix(position,aB,t);vec4 mv=modelViewMatrix*vec4(pos,1.);gl_PointSize=clamp(26.*aI/-mv.z,6.,64.);vC=mix(aCol,aColB,t);vI=aI*(.8+.2*sin(uT*5.+aPh*6.28));gl_Position=projectionMatrix*mv;}`,
   fragmentShader:`uniform float uG;varying vec3 vC;varying float vI;void main(){float d=length(gl_PointCoord-.5);if(d>.5)discard;float glow=pow(1.-d*2.,1.8);gl_FragColor=vec4(vC*glow*vI*1.5*uG,1.);}`
 });
 let crossLinesMesh=null,crossDotsMesh=null;
@@ -1806,18 +1879,21 @@ function updateCrossVisuals(){
   crossGroup.visible=true;orbHaloGroup.visible=true;
   const bridges=Q.crossBridges,M=bridges.length;
   const pos=new Float32Array(M*6),col=new Float32Array(M*6),aI=new Float32Array(M*2),aPh=new Float32Array(M*2),aKind=new Float32Array(M*2);
-  const dPos=new Float32Array(M*2*3),dB=new Float32Array(M*2*3),dCol=new Float32Array(M*2*3),dPh=new Float32Array(M*2),dI=new Float32Array(M*2);
+  const dPos=new Float32Array(M*2*3),dB=new Float32Array(M*2*3),dCol=new Float32Array(M*2*3),dColB=new Float32Array(M*2*3),dPh=new Float32Array(M*2),dI=new Float32Array(M*2);
   bridges.forEach((b,k)=>{
     const u=nodes[b.u],v=nodes[b.v];
     pos.set([u.x,u.y,u.z,v.x,v.y,v.z],k*6);
-    const isDirect=b.kind==='direct',c=isDirect?[1.,.82,.35]:[.25,.95,1.];
-    col.set([c[0],c[1],c[2],c[0],c[1],c[2]],k*6);
-    const intens=.55+.45*b.normScore;
+    
+    const colA=getDocRgb(b.docA),colB=getDocRgb(b.docB);
+    col.set([colA[0],colA[1],colA[2],colB[0],colB[1],colB[2]],k*6);
+    const intens=.58+.42*b.normScore;
     aI[k*2]=intens;aI[k*2+1]=intens;
     const ph=(k*.17)%1.;aPh[k*2]=ph;aPh[k*2+1]=ph;
-    const kd=isDirect?1.:0.;aKind[k*2]=kd;aKind[k*2+1]=kd;
+    const kd=b.kind==='direct'?1.:0.;aKind[k*2]=kd;aKind[k*2+1]=kd;
     for(let m=0;m<2;m++){
-      const q=k*2+m;dPos.set([u.x,u.y,u.z],q*3);dB.set([v.x,v.y,v.z],q*3);dCol.set(c,q*3);dPh[q]=ph+m*.5;dI[q]=intens*1.2;
+      const q=k*2+m;dPos.set([u.x,u.y,u.z],q*3);dB.set([v.x,v.y,v.z],q*3);
+      dCol.set(colA,q*3);dColB.set(colB,q*3);
+      dPh[q]=ph+m*.5;dI[q]=intens*1.2;
     }
   });
   const lg=new THREE.BufferGeometry();
@@ -1826,30 +1902,35 @@ function updateCrossVisuals(){
   crossLinesMesh=new THREE.LineSegments(lg,crossLineMat);crossLinesMesh.frustumCulled=false;crossGroup.add(crossLinesMesh);
   const dg=new THREE.BufferGeometry();
   dg.setAttribute('position',new THREE.BufferAttribute(dPos,3));dg.setAttribute('aB',new THREE.BufferAttribute(dB,3));
-  dg.setAttribute('aCol',new THREE.BufferAttribute(dCol,3));dg.setAttribute('aPh',new THREE.BufferAttribute(dPh,1));dg.setAttribute('aI',new THREE.BufferAttribute(dI,1));
+  dg.setAttribute('aCol',new THREE.BufferAttribute(dCol,3));dg.setAttribute('aColB',new THREE.BufferAttribute(dColB,3));
+  dg.setAttribute('aPh',new THREE.BufferAttribute(dPh,1));dg.setAttribute('aI',new THREE.BufferAttribute(dI,1));
   crossDotsMesh=new THREE.Points(dg,crossDotMat);crossDotsMesh.frustumCulled=false;crossGroup.add(crossDotsMesh);
 
-  // Floating word badges directly on the golden thread / cross bridges
+  
   const topB=bridges.slice(0,16);
   topB.forEach(b=>{
     const u=nodes[b.u],v=nodes[b.v];
     const mx=(u.x+v.x)*.5,my=(u.y+v.y)*.5+.045,mz=(u.z+v.z)*.5;
     const c=document.createElement('canvas');c.width=1024;c.height=256;const ctx=c.getContext('2d');
     const isDirect=b.kind==='direct';
-    ctx.fillStyle=isDirect?'rgba(20,15,5,.85)':'rgba(4,18,30,.85)';
-    ctx.strokeStyle=isDirect?'rgba(255,179,71,.88)':'rgba(93,240,255,.88)';
+    const hexA=getDocHex(b.docA),hexB=getDocHex(b.docB);
+    ctx.fillStyle='rgba(6,12,22,.88)';
+    const grad=ctx.createLinearGradient(40,0,984,0);
+    grad.addColorStop(0,hexA);grad.addColorStop(1,hexB);
+    ctx.strokeStyle=grad;
     ctx.lineWidth=14;
     ctx.beginPath();
     ctx.roundRect(40,28,944,200,100);
     ctx.fill();
     ctx.stroke();
-    ctx.shadowColor=isDirect?'#ffb347':'#5df0ff';
+    ctx.shadowColor=hexA;
     ctx.shadowBlur=26;
-    ctx.fillStyle=isDirect?'#ffe2a8':'#d6fbff';
+    ctx.fillStyle=isDirect?'#ffffff':'#e6fbff';
     ctx.textAlign='center';
     ctx.textBaseline='middle';
-    const labelText=isDirect?`✨ ${b.wordA}`:`${b.wordA} \u2194 ${b.wordB}`;
-    ctx.font=isDirect?'700 96px system-ui,-apple-system,sans-serif':'700 76px system-ui,-apple-system,sans-serif';
+    
+    const labelText=isDirect?b.wordA:`${b.wordA} \u2194 ${b.wordB}`;
+    ctx.font=isDirect?'700 92px system-ui,-apple-system,sans-serif':'700 76px system-ui,-apple-system,sans-serif';
     ctx.fillText(labelText,512,128);
     const tx=new THREE.CanvasTexture(c);tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
     const sm=new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false,blending:THREE.AdditiveBlending});
@@ -1857,31 +1938,282 @@ function updateCrossVisuals(){
     sp.userData={isBridge:true,bridge:b};
     crossLabelsGroup.add(sp);
   });
+  updateDivergenceVisuals();
 }
 
 function updateOrbHalos(){
   orbHaloGroup.clear();
   if(fieldMode!=='separated'||orbs.length<2){orbHaloGroup.visible=false;return;}
   orbHaloGroup.visible=true;
-  const ringMat=new THREE.LineBasicMaterial({color:0x5df0ff,transparent:true,opacity:.3,blending:THREE.AdditiveBlending});
   orbs.forEach((orb,d)=>{
     const C=orb.center,R=orb.radius||1.25;
+    const orbColor=getDocColor(d);
+    const ringMat=new THREE.LineBasicMaterial({color:new THREE.Color(...orbColor.rgb),transparent:true,opacity:.35,blending:THREE.AdditiveBlending});
     const pts=[];for(let i=0;i<=64;i++){const a=(i/64)*6.28318;pts.push(new THREE.Vector3(C[0]+Math.cos(a)*R,C[1],C[2]+Math.sin(a)*R));}
     orbHaloGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),ringMat));
     const pts2=[];for(let i=0;i<=64;i++){const a=(i/64)*6.28318;pts2.push(new THREE.Vector3(C[0]+Math.cos(a)*R,C[1]+Math.sin(a)*R*.35,C[2]+Math.cos(a)*R*.35));}
     orbHaloGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts2),ringMat));
     const c=document.createElement('canvas');c.width=1024;c.height=256;const ctx=c.getContext('2d');
     ctx.font='600 70px system-ui,-apple-system,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.shadowColor='#5df0ff';ctx.shadowBlur=24;ctx.fillStyle='#ffffff';
+    ctx.shadowColor=orbColor.hex;ctx.shadowBlur=24;ctx.fillStyle='#ffffff';
     let lt=(orb.name||('File '+(d+1))).replace(/^Demo:\s*/i,'');if(lt.length>28)lt=lt.slice(0,26)+'\u2026';
     ctx.fillText('📄 '+lt,512,100);
-    ctx.font='400 50px system-ui,-apple-system,sans-serif';ctx.fillStyle='#5df0ff';
+    ctx.font='600 52px system-ui,-apple-system,sans-serif';ctx.fillStyle=orbColor.hex;
     ctx.fillText(`${orb.nodeCount} concepts \u00b7 Field ${d+1}`,512,180);
     const tx=new THREE.CanvasTexture(c);tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
     const sm=new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false,blending:THREE.AdditiveBlending});
     const sp=new THREE.Sprite(sm);sp.position.set(C[0],C[1]+R+.45,C[2]);sp.scale.set(.7*FS,.175*FS,1);sp.renderOrder=15;
     orbHaloGroup.add(sp);
   });
+}
+
+
+function computeDivergence(){
+  if(fieldMode!=='separated'||orbs.length<2||!Q||!Q.A)return {docBlindSpots:new Map(),topDivergent:[]};
+  const bridgedSet=new Set();
+  (Q.crossBridges||[]).forEach(b=>{bridgedSet.add(b.u);bridgedSet.add(b.v);});
+  const docActiveNodes=new Map();
+  for(let i=0;i<nodes.length;i++){
+    if(Q.show[i]&&Q.A[i]>0.15){
+      const d=nodes[i].doc||0;
+      const l=docActiveNodes.get(d)||[];l.push(i);docActiveNodes.set(d,l);
+    }
+  }
+  const docWordSets=new Map();
+  for(let i=0;i<nodes.length;i++){
+    const d=nodes[i].doc||0;
+    let s=docWordSets.get(d);
+    if(!s){s=new Set();docWordSets.set(d,s);}
+    s.add(nodes[i].word);
+  }
+  const docBlindSpots=new Map();
+  const allDivergent=[];
+  docActiveNodes.forEach((nodeIndices,d)=>{
+    const spots=[];
+    nodeIndices.forEach(i=>{
+      const w=nodes[i].word;
+      let existsInOther=false;
+      docWordSets.forEach((wSet,otherD)=>{if(otherD!==d&&wSet.has(w))existsInOther=true;});
+      if(!existsInOther&&!bridgedSet.has(i)){
+        const divScore=Q.A[i]*(0.6+0.4*(nodes[i].nf||0.5));
+        spots.push({i,word:w,doc:d,docName:nodes[i].docName||('File '+(d+1)),score:divScore});
+        allDivergent.push({i,word:w,doc:d,docName:nodes[i].docName||('File '+(d+1)),score:divScore});
+      }
+    });
+    spots.sort((a,b)=>b.score-a.score);
+    docBlindSpots.set(d,spots);
+  });
+  allDivergent.sort((a,b)=>b.score-a.score);
+  return {docBlindSpots,topDivergent:allDivergent.slice(0,24)};
+}
+
+function updateDivergenceVisuals(){
+  divergenceGroup.clear();
+  if(fieldMode!=='separated'||orbs.length<2||!Q||!Q.A){
+    divergenceGroup.visible=false;return;
+  }
+  divergenceGroup.visible=true;
+  const div=computeDivergence();
+  
+  div.topDivergent.slice(0,16).forEach(spot=>{
+    const u=nodes[spot.i];
+    const c=document.createElement('canvas');c.width=1024;c.height=256;const ctx=c.getContext('2d');
+    
+    ctx.fillStyle='#ff243a';
+    ctx.beginPath();
+    ctx.roundRect(40,28,944,200,100);
+    ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.7)';
+    ctx.lineWidth=8;
+    ctx.stroke();
+    
+    ctx.fillStyle='#01050a';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.font='800 86px system-ui,-apple-system,sans-serif';
+    ctx.fillText(spot.word,512,128);
+    const tx=new THREE.CanvasTexture(c);tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
+    const sm=new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false});
+    const sp=new THREE.Sprite(sm);
+    sp.position.set(u.x,u.y,u.z);
+    sp.scale.set(.34*FS,.085*FS,1);
+    sp.renderOrder=38;
+    sp.userData={isDivergent:true,nodeIndex:spot.i,i:spot.i,doc:spot.doc};
+    divergenceGroup.add(sp);
+  });
+}
+
+function extractConceptExcerpt(docIndex,word,otherWord){
+  if(!curDocs[docIndex]||!curDocs[docIndex].text)return {text:'',start:0,end:0};
+  const fullText=curDocs[docIndex].text;
+  const sents=[];let s=0;const re=/[.!?]+["'\u2019\u201d)\]]*\s+|\n[ \t\r]*\n\s*/g;let m;
+  while((m=re.exec(fullText))){const e=m.index+m[0].length;if(e>s)sents.push({s,e,text:fullText.slice(s,e)});s=e;}
+  if(s<fullText.length)sents.push({s,e:fullText.length,text:fullText.slice(s)});
+  if(!sents.length)return {text:fullText.slice(0,350).trim(),start:0,end:Math.min(350,fullText.length)};
+
+  const wLower=word.toLowerCase(),oLower=otherWord?otherWord.toLowerCase():null;
+  const wRe=new RegExp('\\b'+wLower.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i');
+  let bestIdx=-1,bestScore=-1;
+  sents.forEach((sent,idx)=>{
+    let sc=0;
+    if(wRe.test(sent.text))sc+=10;
+    else if(sent.text.toLowerCase().includes(wLower))sc+=5;
+    if(oLower&&sent.text.toLowerCase().includes(oLower))sc+=8;
+    if(sc>0){const len=sent.text.trim().length;if(len>=35&&len<=300)sc+=3;}
+    if(sc>bestScore){bestScore=sc;bestIdx=idx;}
+  });
+  if(bestIdx===-1){
+    const idx=fullText.toLowerCase().indexOf(wLower);
+    if(idx>=0){
+      const st=Math.max(0,idx-80),en=Math.min(fullText.length,idx+220);
+      return {text:fullText.slice(st,en).trim(),start:st,end:en};
+    }
+    return {text:sents[0].text.trim(),start:sents[0].s,end:sents[0].e};
+  }
+  let stIdx=bestIdx,enIdx=bestIdx,curLen=sents[bestIdx].text.length;
+  if(curLen<140&&enIdx+1<sents.length&&curLen+sents[enIdx+1].text.length<=420){enIdx++;curLen+=sents[enIdx].text.length;}
+  if(curLen<140&&stIdx>0&&curLen+sents[stIdx-1].text.length<=420){stIdx--;curLen+=sents[stIdx].text.length;}
+  return {text:fullText.slice(sents[stIdx].s,sents[enIdx].e).trim(),start:sents[stIdx].s,end:sents[enIdx].e};
+}
+
+let activeHologramBridge=null;
+let dualHologramMesh=null;
+
+function highlightWord(text,word,colorHex){
+  if(!word)return esc(text);
+  const re=new RegExp('(\\b'+word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b)','gi');
+  return esc(text).replace(re,`<mark style="background:${colorHex};color:#01050a;font-weight:700;border-radius:4px;padding:1px 4px;">$1</mark>`);
+}
+
+function showDualPassageJuxtaposition(bridge){
+  activeHologramBridge=bridge;
+  const docA=bridge.docA!==undefined?bridge.docA:0;
+  const docB=bridge.docB!==undefined?bridge.docB:1;
+  const colA=getDocColor(docA),colB=getDocColor(docB);
+  const strength=Math.round(Math.min(99,Math.max(50,bridge.normScore*100)));
+  const excA=extractConceptExcerpt(docA,bridge.wordA,bridge.wordB);
+  const excB=extractConceptExcerpt(docB,bridge.wordB,bridge.wordA);
+
+  
+  const ov=$('#dual-hologram');
+  if(ov){
+    $('#dh-doc-a').textContent='📄 '+(bridge.docNameA||('File '+(docA+1)));
+    $('#dh-doc-a').style.background=colA.hex;
+    $('#dh-word-a').textContent=bridge.wordA;
+    $('#dh-left-pane').style.background=`linear-gradient(180deg, ${colA.hex}18 0%, rgba(0,0,0,0) 100%)`;
+    $('#dh-excerpt-a').innerHTML=highlightWord(excA.text,bridge.wordA,colA.hex);
+
+    $('#dh-doc-b').textContent='📄 '+(bridge.docNameB||('File '+(docB+1)));
+    $('#dh-doc-b').style.background=colB.hex;
+    $('#dh-word-b').textContent=bridge.wordB;
+    $('#dh-right-pane').style.background=`linear-gradient(180deg, ${colB.hex}18 0%, rgba(0,0,0,0) 100%)`;
+    $('#dh-excerpt-b').innerHTML=highlightWord(excB.text,bridge.wordB,colB.hex);
+
+    $('#dh-strength-num').textContent=strength+'%';
+    $('#dh-bridge-type').textContent=bridge.kind==='direct'?'Direct Match':'Semantic Bridge';
+    ov.hidden=false;
+  }
+
+  
+  render3DDualHologram(bridge,excA.text,excB.text,strength,colA,colB);
+}
+
+function hideDualPassageJuxtaposition(){
+  activeHologramBridge=null;
+  const ov=$('#dual-hologram');
+  if(ov)ov.hidden=true;
+  dualJuxtapositionGroup.clear();
+  dualJuxtapositionGroup.visible=false;
+}
+
+function render3DDualHologram(bridge,textA,textB,strength,colA,colB){
+  dualJuxtapositionGroup.clear();
+  const hc=document.createElement('canvas');hc.width=1600;hc.height=860;const hx=hc.getContext('2d');
+
+  
+  hx.fillStyle='rgba(6,12,24,.95)';
+  hx.beginPath();hx.roundRect(20,20,1560,820,32);hx.fill();
+
+  
+  const bGrad=hx.createLinearGradient(20,0,1580,0);
+  bGrad.addColorStop(0,colA.hex);
+  bGrad.addColorStop(1,colB.hex);
+  hx.strokeStyle=bGrad;hx.lineWidth=8;hx.stroke();
+
+  
+  hx.font='700 34px system-ui,-apple-system,sans-serif';
+  hx.fillStyle='#ffffff';hx.textAlign='left';hx.textBaseline='top';
+  hx.fillText('DUAL-PASSAGE JUXTAPOSITION HOLOGRAM',50,44);
+
+  
+  hx.font='700 32px system-ui,-apple-system,sans-serif';
+  hx.fillStyle='rgba(255,255,255,.7)';hx.textAlign='right';
+  hx.fillText('✕ Close',1530,44);
+
+  
+  hx.fillStyle='rgba(255,255,255,.03)';
+  hx.beginPath();hx.roundRect(50,110,640,680,20);hx.fill();
+  hx.strokeStyle=colA.hex;hx.lineWidth=2;hx.stroke();
+
+  hx.fillStyle=colA.hex;hx.font='700 30px system-ui,-apple-system,sans-serif';hx.textAlign='left';
+  hx.fillText('📄 '+(bridge.docNameA||'Document 1'),75,135);
+  hx.fillStyle='#ffffff';hx.font='600 24px system-ui,-apple-system,sans-serif';
+  hx.fillText(`Concept: "${bridge.wordA}"`,75,178);
+
+  
+  hx.font='400 24px system-ui,-apple-system,sans-serif';hx.fillStyle='#d6fbff';
+  const linesA=wrapT(hx,textA,580).slice(0,12);
+  linesA.forEach((l,li)=>{hx.fillText(l,75,226+li*36);});
+
+  
+  hx.textAlign='center';
+  const cx=800,cy=420;
+  hx.fillStyle='rgba(4,18,30,.8)';hx.beginPath();hx.arc(cx,cy,72,0,Math.PI*2);hx.fill();
+  hx.strokeStyle='rgba(93,240,255,.8)';hx.lineWidth=4;hx.stroke();
+  hx.shadowColor='#5df0ff';hx.shadowBlur=20;
+  hx.fillStyle='#ffffff';hx.font='800 38px system-ui,-apple-system,sans-serif';
+  hx.fillText(strength+'%',cx,cy-14);
+  hx.shadowBlur=0;
+  hx.fillStyle='#5df0ff';hx.font='700 16px system-ui,-apple-system,sans-serif';
+  hx.fillText('ALIGNMENT',cx,cy+22);
+  hx.fillStyle='#ffb347';hx.font='700 38px system-ui,-apple-system,sans-serif';
+  hx.fillText('⇄',cx,cy+120);
+  hx.fillStyle='rgba(255,255,255,.7)';hx.font='600 18px system-ui,-apple-system,sans-serif';
+  hx.fillText(bridge.kind==='direct'?'DIRECT OVERLAP':'SEMANTIC BRIDGE',cx,cy+156);
+
+  
+  hx.fillStyle='rgba(255,255,255,.03)';
+  hx.beginPath();hx.roundRect(910,110,640,680,20);hx.fill();
+  hx.strokeStyle=colB.hex;hx.lineWidth=2;hx.stroke();
+
+  hx.fillStyle=colB.hex;hx.font='700 30px system-ui,-apple-system,sans-serif';hx.textAlign='left';
+  hx.fillText('📄 '+(bridge.docNameB||'Document 2'),935,135);
+  hx.fillStyle='#ffffff';hx.font='600 24px system-ui,-apple-system,sans-serif';
+  hx.fillText(`Concept: "${bridge.wordB}"`,935,178);
+
+  
+  hx.font='400 24px system-ui,-apple-system,sans-serif';hx.fillStyle='#d6fbff';
+  const linesB=wrapT(hx,textB,580).slice(0,12);
+  linesB.forEach((l,li)=>{hx.fillText(l,935,226+li*36);});
+
+  const tx=new THREE.CanvasTexture(hc);tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
+  const sm=new THREE.MeshBasicMaterial({map:tx,transparent:true,side:THREE.DoubleSide,depthTest:false});
+  dualHologramMesh=new THREE.Mesh(new THREE.PlaneGeometry(1.28*FS,.68*FS),sm);
+  dualHologramMesh.renderOrder=50;
+
+  const u=nodes[bridge.u],v=nodes[bridge.v];
+  if(renderer.xr.isPresenting){
+    const cam=renderer.xr.getCamera();
+    const dir=new THREE.Vector3(0,0,-1).applyQuaternion(cam.quaternion);
+    dualHologramMesh.position.copy(cam.position).add(dir.multiplyScalar(1.15));
+    dualHologramMesh.quaternion.copy(cam.quaternion);
+  }else{
+    const mx=(u.x+v.x)*.5,my=Math.max(u.y,v.y)+.38,mz=(u.z+v.z)*.5;
+    dualHologramMesh.position.set(mx,my,mz);
+    dualHologramMesh.lookAt(camera.position);
+  }
+  dualJuxtapositionGroup.add(dualHologramMesh);
+  dualJuxtapositionGroup.visible=true;
 }
 
 const labelCache=new Map();
@@ -1955,16 +2287,32 @@ function applyState(quick){
   }
   const fq=selQ(),pre=nI.slice(),sm=SS.size&&!fq;
   if(fq)SS.forEach(s=>{nI[s]=Math.max(nI[s],1.3);nc[s]=2;ea[s]=1;labs.push([s,1]);});
-  if(sm){// selection query still running: dim field, selected words only, no stale overlap view
+  if(sm){
     for(let i=0;i<N;i++)nI[i]*=.55;for(let e=0;e<E;e++){ei[e]=Math.max(ei[e]*.35,.025);er[e]=0;}
     ea.fill(.3);labs.length=0;
     SS.forEach(s=>{nI[s]=1.3;nc[s]=2;ea[s]=1;labs.push([s,1]);});
   }
+  const isSep=fieldMode==='separated'&&orbs.length>1;
+  const div=(isSep&&Q&&Q.A)?computeDivergence():null;
+  const divSet=div?new Set(div.topDivergent.map(d=>d.i)):null;
+  const divShownSet=div?new Set(div.topDivergent.slice(0,16).map(d=>d.i)):null;
   const hid=new Uint8Array(N);let newest=-1;
   visible=[];const colOn=!!(col.hide&&col.hide.length===N&&!hasCtx());
   for(let i=0;i<N;i++){
     nA[i]=nI[i];nP[i]=SS.has(i)?1:0;nF[i]=(SS.size&&(sm||nc[i]>=2))?(nc[i]>=2?1:0):(Q&&Q.A?(nc[i]===1?1:0):.3+.7*ni[i]);nS[i]=.013+.055*ni[i]+(nc[i]===2?.03:nc[i]===1?.012*nI[i]:0);
-    const cc=nc[i]===2?GO:nc[i]===1?mix(CY,AM,Math.min(1,nI[i])):nc[i]===3?WH:(ni[i]<.7?mix(VI,CY,ni[i]/.7):mix(CY,WH,(ni[i]-.7)/.3));
+    let cc;
+    if(divSet&&divSet.has(i)){
+      
+      cc=[1.0, 0.22, 0.28];
+      nA[i]=Math.max(nA[i], 1.35);
+      nP[i]=1;
+      nS[i]*=1.35;
+    }else if(isSep){
+      const docC=getDocRgb(nodes[i].doc||0);
+      cc=nc[i]===2?GO:nc[i]===1?mix(docC,AM,Math.min(1,nI[i])):nc[i]===3?WH:(ni[i]<.7?mix(docC,CY,ni[i]/.7):mix(docC,WH,(ni[i]-.7)/.3));
+    }else{
+      cc=nc[i]===2?GO:nc[i]===1?mix(CY,AM,Math.min(1,nI[i])):nc[i]===3?WH:(ni[i]<.7?mix(VI,CY,ni[i]/.7):mix(CY,WH,(ni[i]-.7)/.3));
+    }
     nC.set(cc,i*3);if(!hid[i]&&!(colOn&&col.hide[i])&&(nI[i]>.1||pre[i]>.1))visible.push(i);
   }
   if(col.hide&&col.hide.length===N&&!hasCtx())for(let i=0;i<N;i++)if(!col.hide[i]&&col.cnt[i]>1)nS[i]*=1+.14*Math.sqrt(col.cnt[i]-1);
@@ -1990,8 +2338,10 @@ function applyState(quick){
   aT.needsUpdate=true;for(const a of ['aI','aDir','aCol'])dots.geometry.attributes[a].needsUpdate=true;
   for(const a of ['aI','aSize','aCol','aF','aP'])pts.geometry.attributes[a].needsUpdate=true;
   lines.geometry.attributes.aI.needsUpdate=true;lines.geometry.attributes.aCol.needsUpdate=true;
-  const vs=new Set(visible),seenL=new Set();for(let j=labs.length-1;j>=0;j--){if(!vs.has(labs[j][0])||seenL.has(labs[j][0]))labs.splice(j,1);else seenL.add(labs[j][0]);}
-  labelGroup.clear();labs.forEach(([i,k])=>labelGroup.add(label(i,k)));forcedSet=new Set(labs.map(l=>l[0]));refreshWV();
+  const vs=new Set(visible),seenL=new Set();for(let j=labs.length-1;j>=0;j--){const id=labs[j][0];if(!vs.has(id)||seenL.has(id)||(divShownSet&&divShownSet.has(id)))labs.splice(j,1);else seenL.add(id);}
+  labelGroup.clear();labs.forEach(([i,k])=>labelGroup.add(label(i,k)));forcedSet=new Set(labs.map(l=>l[0]));
+  if(divShownSet){divShownSet.forEach(i=>{forcedSet.add(i);const sp=lodMap.get(i);if(sp&&sp.parent===lodGroup)lodGroup.remove(sp);});}
+  refreshWV();
   updateCrossVisuals();
   if(quick){kDirty=true;}else updateInfo();
 }
@@ -2069,7 +2419,7 @@ function hebbPull(ids){
   try{updateGeom();}catch(e){console.warn(e);}
   saveField();
 }
-// A rebuild (a rare query word joins the field) re-runs the layout from scratch, so replay what the field had learned.
+
 function replayHebb(){
   if(!HLOG.length)return;const ix=new Map(nodes.map((n,i)=>[n.word,i]));
   HLOG.forEach(g=>hebbMove(g.map(w=>ix.get(w)).filter(i=>i!==undefined)));
@@ -2155,7 +2505,6 @@ docsEl.addEventListener('click',async e=>{
     await ingest(rest);
   }
 });
-// ---- Demo text: lets a first-time visitor (or a headset user with empty storage) start immediately ----
 const DEMO_ID='demo-oceans-v1';
 const DEMO_DOCS=[
 {name:'Demo: The ocean as a heat reservoir',text:`The ocean is the largest heat reservoir at the surface of the Earth. Water absorbs far more heat than air or land for each degree of warming, so the ocean stores most of the extra energy that greenhouse gases trap in the atmosphere. When sunlight reaches the surface of the ocean, the upper layer warms first. Wind mixes that warm water downward, and the heat slowly spreads into deeper layers over decades.
@@ -2196,7 +2545,7 @@ async function ingest0(docs,opts={}){
   stat('Building field…');ingesting=true;
   curCorpus=opts.id||hashDocs(docs);
   let r;
-  try{r=await ENG.call({t:'ingest',docs:docs.map(d=>({name:d.name,text:d.text})),pre},t=>stat(t));}
+  try{r=await ENG.call({t:'ingest',docs:docs.map(d=>({name:d.name,text:d.text})),mode:fieldMode,pre},t=>stat(t));}
   catch(err){if(my===EPOCH)ingesting=false;stat('Analysis failed: '+err.message);renderDocs();return false;}
   if(my!==EPOCH)return false;
   ingesting=false;
@@ -2258,7 +2607,6 @@ function fieldR(){let r=.3;for(const n of nodes){const d=Math.hypot(n.x,n.y,n.z)
 const fitScale=t=>THREE.MathUtils.clamp(t/fieldR(),.08,4);
 let needCenter=false,arMode=false,placing=false,placedOnce=false,arScale=null,lastHit=false,reqLook=null,sessAR=false,centerS=.3,xrNote='';
 let hudA='',hudB='';
-// ---- Synthesized audio: harmonic chimes, soft UI ticks, and a wash for queries (no audio files) ----
 const VOICE={st:'idle',want:false,hand:-1,pr:null,lvl:0,lv:0,ap:0,busy:0,chunks:[],n:0,peak:0,cool:0,stream:null,ctx:null,warm:null,lost:0,closeT:0,away:0,fresh:true,live:'',hits:[],bhits:[],boom:null,itT:1.2,itBusy:false,sess:0};
 const AU={ctx:null,out:null,on:true,nb:null,last:{c:0,t:0,w:0}};
 try{AU.on=localStorage.getItem('cf.snd')!=='0';}catch(e){}
@@ -2273,8 +2621,8 @@ const PENT=[0,2,4,7,9];
 function nodeFreq(i){
   const n=nodes[i];if(!n)return 440;
   let mf=1;for(let k=0;k<nodes.length;k++)if(nodes[k].freq>mf)mf=nodes[k].freq;
-  const fq=Math.log(1+(n.freq||1))/Math.log(1+mf),oct=2-Math.round(fq*2);   // frequent words sound lower
-  const midi=48+PENT[(n.adj?n.adj.length:0)%5]+12*oct;                       // degree picks the pentatonic note
+  const fq=Math.log(1+(n.freq||1))/Math.log(1+mf),oct=2-Math.round(fq*2);
+  const midi=48+PENT[(n.adj?n.adj.length:0)%5]+12*oct;
   return 440*Math.pow(2,(midi-69)/12);
 }
 function sfxChime(i){
@@ -2299,10 +2647,9 @@ function sfxWash(){
   const g=c.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.05,t+.4);g.gain.exponentialRampToValueAtTime(.0001,t+1.4);
   s.connect(f);f.connect(g);g.connect(AU.out);s.start(t);s.stop(t+1.45);
 }
-// ================= voice: Whisper + palm orb =================
 const VOICE_MODEL='Xenova/whisper-tiny.en';
 function whisperWorker(){
-  const LIB='https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js';
+  const LIB='https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
   let asr=null,loading=null,cur=null;
   async function get(model){
     if(asr)return asr;
@@ -2328,7 +2675,7 @@ function vnote(t,ms){ms=ms===undefined?4000:ms;xrNote=t;stat(t);clearTimeout(vnT
 function voiceWarm(){
   if(VOICE.warm)return;
   VOICE.warm=WSP.call({t:'load',model:VOICE_MODEL},p=>stat('Loading Whisper '+p+'%')).catch(e=>{VOICE.warm=null;stat('Whisper could not load: '+(e&&e.message||e));});
-  // ask for the microphone once so the first palm gesture does not stall on the permission prompt
+  
   try{navigator.mediaDevices.getUserMedia({audio:true}).then(s=>s.getTracks().forEach(t=>t.stop())).catch(()=>{});}catch(e){}
 }
 function voiceUI(){const b=document.getElementById('micb');if(b)b.classList.toggle('on',VOICE.st==='rec'||VOICE.st==='starting');kDirty=true;}
@@ -2390,7 +2737,7 @@ async function voiceSend(audio,dm){
   finally{VOICE.busy--;}
 }
 function voiceToggle(){if(VOICE.st==='rec'||VOICE.st==='starting')voiceStop(true);else voiceStart('key');}
-// ---- palm reading ----
+
 function palmRead(r,hd){
   const h=r.h;if(!h||!h.userData.on||h.visible===false)return null;
   const J=h.joints,g=n=>{const j=J[n];if(!j||j.jointRadius===undefined||j.visible===false)return null;return j.getWorldPosition(new THREE.Vector3());};
@@ -2404,7 +2751,7 @@ function palmRead(r,hd){
   const v=hd.clone().sub(c).normalize(),facing=n.y>.35||n.dot(v)>.55;
   return {open:open>=3&&tot>=3,closed:closed>=3&&tot>=3,n,c,facing};
 }
-const PALM_HOLD=.75;   // seconds the open palm must be held before the orb appears
+const PALM_HOLD=.75;   
 function voiceStep(dt){
   if(!renderer.xr.isPresenting)return;
   if(VOICE.cool>0)VOICE.cool-=dt;
@@ -2423,7 +2770,7 @@ function voiceStep(dt){
   else VOICE.lost+=dt;
   if(VOICE.closeT>.12||VOICE.lost>.45||VOICE.away>.5){voiceStop(true);VOICE.hand=-1;VOICE.cool=.9;}
 }
-// ---- orb and lightning ----
+
 const ORB=new THREE.Group();ORB.visible=false;scene.add(ORB);
 const orbU={uT:{value:0},uL:{value:0},uA:{value:0}};
 const orbMesh=new THREE.Mesh(new THREE.SphereGeometry(1,32,20),new THREE.ShaderMaterial({uniforms:orbU,transparent:true,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending,
@@ -2474,7 +2821,7 @@ function voiceInterim(){
   VOICE.itBusy=true;
   WSP.call({t:'run',model:VOICE_MODEL,audio},null,[audio.buffer]).then(r=>{if(VOICE.st==='rec'&&sid===VOICE.sess)voiceLive(voiceClean(r.text));}).catch(()=>{}).finally(()=>{VOICE.itBusy=false;VOICE.itT=1;});
 }
-// explosion
+
 const NBM=160,bpP=new Float32Array(NBM*3),bpV=new Float32Array(NBM*3),bgB=new THREE.BufferGeometry();
 bgB.setAttribute('position',new THREE.BufferAttribute(bpP,3));
 const boomPts=new THREE.Points(bgB,new THREE.PointsMaterial({color:0xaee8ff,size:.012,sizeAttenuation:true,transparent:true,depthTest:false,depthWrite:false,blending:THREE.AdditiveBlending}));
@@ -2645,8 +2992,8 @@ function hud(){
   hudB=xrNote||(sel>=0?`${nodes[sel].adj.length} links \u00b7 A adds to query \u00b7 B clears`:(nodes.length?nodes.length+' concepts \u00b7 pinch to select':'Load text before entering VR'));
   kDirty=true;iDirty=true;
 }
-// Layout mirrors the desktop screen: + top-left with the timeline under it, history and settings
-// top-right, the info panel on the right, the query bar bottom-centre, ? bottom-left.
+
+
 (function buildKeys(){
   const B=1576;
   KEYS.push(
@@ -2800,7 +3147,7 @@ function placeKB(dt){
     if(Math.abs(df)>.75)kMove=true;if(Math.abs(df)<.05)kMove=false;
     if(kMove)kYaw+=df*Math.min(1,dt*3);
   }
-  // One screen-sized layout, 1 m ahead of the head, turning only about the vertical axis.
+  
   const SC=.78*VS,sy=Math.sin(kYaw),cy=Math.cos(kYaw),D=1.0,lx=((1576-200)/1000-.8)*SC,ly=(.45-(98+187.5)/1000)*SC;kb.scale.setScalar(SC);ib.scale.setScalar(SC);
   _t.set(_h.x-sy*D,_h.y-.05,_h.z-cy*D);
   _t2.set(_t.x+cy*lx+sy*.01,_t.y+ly,_t.z-sy*lx+cy*.01);
@@ -2853,14 +3200,14 @@ function infoHit(c){
   return {px:h.uv.x*IW,py:(1-h.uv.y)*IH,d:h.distance};
 }
 const _ft=new THREE.Vector3();
-// Index fingertip against the word list, like a finger on a touchscreen. Returns panel pixels while touching, else null.
+
 function fingerTouch(r){
   if(!r.c.userData.isHand||!r.h.userData.on||r.h.visible===false||!ib.visible)return null;
   const j=r.h.joints['index-finger-tip'];if(!j||j.jointRadius===undefined||j.visible===false)return null;
   j.getWorldPosition(_ft);ib.updateWorldMatrix(true,false);ib.worldToLocal(_ft);
   const sc=ib.scale.x||1,W=.4,Hh=.4*IH/IW,z=_ft.z*sc,m=.02;
   const inside=_ft.x>-W/2-m/sc&&_ft.x<W/2+m/sc&&_ft.y>-Hh/2-m/sc&&_ft.y<Hh/2+m/sc;
-  // press zone: from just in front of the glass to a little behind it; hysteresis so it does not flicker
+  
   const on=r.ft?(z>-.09&&z<.045):(z>-.03&&z<.012);
   if(!inside||!on)return null;
   return {px:(_ft.x/W+.5)*IW,py:(.5-_ft.y/Hh)*IH};
@@ -2873,21 +3220,21 @@ function uiStep(){
       if(ft){
         if(!r.ft){r.ft={px:ft.px,py:ft.py,off:iScroll,mv:false,t:nw,ly:ft.py,lt:nw};iVel=0;sfxTick(.6);}
         const f=r.ft;
-        if(!f.mv&&Math.abs(ft.py-f.py)>16){f.mv=true;f.py=ft.py;f.off=iScroll;}   // moved enough: it is a scroll, not a tap
+        if(!f.mv&&Math.abs(ft.py-f.py)>16){f.mv=true;f.py=ft.py;f.off=iScroll;}   
         if(f.mv){const prev=iScroll;setScroll(f.off+(f.py-ft.py)/ROW);
           const dts=Math.max(.008,(nw-f.lt)/1000);iVel=iVel*.6+((iScroll-prev)/dts)*.4;}
         f.lt=nw;f.ly=ft.py;f.lx=ft.px;r.uiHold=true;ibHot=true;
       }else if(r.ft){
         const f=r.ft;r.ft=null;r.uiHold=false;
-        if(!f.mv&&nw-f.t<450&&infoCache){   // quick touch without sliding = tap
+        if(!f.mv&&nw-f.t<450&&infoCache){   
           if(f.py<HV){const c=ibChips.find(c=>f.px>=c.x-6&&f.px<=c.x+c.w+6&&f.py>=c.y-6&&f.py<=c.y+c.h+6);
             if(c){if(c.i===-2){SS.clear();selV++;sel=-1;applyState();}else toggleSel(c.i);}}
           else{const it=infoCache.rows[Math.floor((f.py-HV)/ROW+iScroll)];if(it&&it.i>=0)select(it.i);}}
         if(!f.mv)iVel=0;else if(Math.abs(iVel)>14)iVel=Math.sign(iVel)*14;
       }
     }
-    if(r.ft){r.tp=false;return;}   // finger is on the list: ignore the pointer ray for this hand
-    // Hand rays wobble as the fingers close. At the moment a pinch starts, aim with the pose from ~80 ms earlier.
+    if(r.ft){r.tp=false;return;}   
+    
     RAYOV=null;
     if(r.c.userData.isHand){
       const nw=performance.now(),H=r.rh||(r.rh=[]);H.push({t:nw,o:r.c.getWorldPosition(new THREE.Vector3()),q:r.c.getWorldQuaternion(new THREE.Quaternion())});
@@ -2895,9 +3242,9 @@ function uiStep(){
       if(r.pin&&!r.tp){let e=null;for(const x of H){if(nw-x.t>=80)e=x;}if(e)RAYOV={c:r.c,o:e.o,q:e.q};}
     }
     let hit=panelHit(r.c,r.slide),ih=infoHit(r.c),rh=rdHit(r.c);
-    // A pinch that lands in the gaps around the keys is swallowed by the HUD instead of grabbing the field behind it.
+    
     const nr=!hit&&(r.c.userData.isHand?r.pin:r.c.userData.tr)&&!r.tp?panelNear(r.c):false;RAYOV=null;
-    // Whichever panel the ray reaches first wins, so a floating panel in front never clicks keys behind it.
+    
     if(r.slide&&hit){ih=null;rh=null;}else if(r.ibd&&ih){hit=null;rh=null;}else if(r.rds&&rh){hit=null;ih=null;}
     else{const dh=hit?hit.d:1e9,di=ih?ih.d:1e9,dr=rh?rh.d:1e9,m=Math.min(dh,di,dr);if(dh>m)hit=null;if(di>m)ih=null;if(dr>m)rh=null;}
     r.hk=hit?hit.k:null;if(ih)ibHot=true;if(rh){rbHot=true;rbHov=rh.k;}
@@ -2966,7 +3313,7 @@ function previewAt(p,n){
   reticle.matrix.copy(hM);reticle.matrixWorldNeedsUpdate=true;rFoot.scale.setScalar(s*1.3);reticle.visible=true;
 }
 
-// ---- Room awareness: detected planes -> table seating (with glow ring) and wall-snapped reading panel ----
+
 let PLN=[],plT=0,seatWanted=false,seatT0=0,seat=null;
 const _ph=new THREE.Vector3(),_pf=new THREE.Vector3(),_pl=new THREE.Vector3();
 const seatRing=new THREE.Group();seatRing.visible=false;seatRing.renderOrder=5;dolly.add(seatRing);
@@ -3123,13 +3470,24 @@ renderer.domElement.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]
 renderer.domElement.addEventListener('pointerup',e=>{
   if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>4||!nodes.length)return;
   ray.setFromCamera(new THREE.Vector2(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1),camera);
-  // Check if clicked directly on a thread label badge
+  if(dualJuxtapositionGroup.visible&&dualHologramMesh){
+    const hitHolo=ray.intersectObject(dualHologramMesh)[0];
+    if(hitHolo){hideDualPassageJuxtaposition();return;}
+  }
+  
   const hitLbl=crossLabelsGroup.children.length?ray.intersectObjects(crossLabelsGroup.children)[0]:null;
   if(hitLbl&&hitLbl.object&&hitLbl.object.userData&&hitLbl.object.userData.bridge){
     const b=hitLbl.object.userData.bridge;
     SS.clear();SS.add(b.u);SS.add(b.v);sel=b.v;selV++;applyState();
-    PS.auto=true;showPassages({title:`${nodes[b.u].word} \u2194 ${nodes[b.v].word} (Overlap)`,ids:[nodes[b.u].id,nodes[b.v].id],w:[1,1],must:[0,1],all:false,R:.85});
+    showDualPassageJuxtaposition(b);
     sfxChime(b.u);return;
+  }
+  
+  const hitDiv=divergenceGroup.children.length?ray.intersectObjects(divergenceGroup.children)[0]:null;
+  if(hitDiv&&hitDiv.object&&hitDiv.object.userData&&hitDiv.object.userData.nodeIndex!==undefined){
+    const ni=hitDiv.object.userData.nodeIndex;
+    select(ni);
+    sfxChime(ni);return;
   }
   const i=pick(ray.ray.origin,ray.ray.direction,.02);
   if(i>=0)select(i);
@@ -3137,7 +3495,7 @@ renderer.domElement.addEventListener('pointerup',e=>{
     if(xb>=0){
       const b=Q.crossBridges[xb];
       SS.clear();SS.add(b.u);SS.add(b.v);sel=b.v;selV++;applyState();
-      PS.auto=true;showPassages({title:`${nodes[b.u].word} \u2194 ${nodes[b.v].word} (Overlap)`,ids:[nodes[b.u].id,nodes[b.v].id],w:[1,1],must:[0,1],all:false,R:.8});
+      showDualPassageJuxtaposition(b);
       sfxChime(b.u);
     }else{
       const k=edgePick(e.clientX,e.clientY);if(k>=0){PS.auto=true;showPassages(specLink(k));}
@@ -3153,7 +3511,7 @@ async function startXR(look,quiet){
   const cur=renderer.xr.getSession();if(cur){cur.end();return;}
   if(!nodes.length){
     if(quiet)return;
-    // Do not await here: the headset needs the click's user gesture to start a session.
+    
     if(ingesting)stat('Still building the field. Press Enter again in a moment.');
     else{stat('Loading the demo text. Press Enter again in a moment.');loadDemo();}
     return;
@@ -3167,8 +3525,8 @@ async function startXR(look,quiet){
   }catch(e){reqLook=null;if(!quiet)stat('Could not start: '+(e&&e.message||e));}
 }
 arBtn.onclick=()=>startXR('mr');vrB.onclick=()=>startXR('vr');
-// Meta Quest: enter mixed reality without pressing the button. Try straight away, then offer the session
-// through the browser's own entry point, and fall back to the first controller click or pinch on the page.
+
+
 const QUEST=/OculusBrowser|Quest/i.test(navigator.userAgent);
 async function offerXR(){
   if(!navigator.xr||!navigator.xr.offerSession||renderer.xr.getSession())return;
@@ -3198,6 +3556,22 @@ for(let i=0;i<2;i++){
   c.addEventListener('selectend',()=>{c.userData.tr=false;});
   c.addEventListener('selectstart',e=>{if(e.data.hand)return;c.userData.tr=true;if(!nodes.length||placing||panelHit(c)||infoHit(c)||rdHit(c))return;
     const o=c.getWorldPosition(new THREE.Vector3()),d=new THREE.Vector3(0,0,-1).applyQuaternion(c.getWorldQuaternion(new THREE.Quaternion()));
+    ray.set(o,d);
+    if(dualJuxtapositionGroup.visible&&dualHologramMesh){
+      const hitHolo=ray.intersectObject(dualHologramMesh)[0];
+      if(hitHolo){hideDualPassageJuxtaposition();return;}
+    }
+    const hitLbl=crossLabelsGroup.children.length?ray.intersectObjects(crossLabelsGroup.children)[0]:null;
+    if(hitLbl&&hitLbl.object&&hitLbl.object.userData&&hitLbl.object.userData.bridge){
+      const b=hitLbl.object.userData.bridge;
+      SS.clear();SS.add(b.u);SS.add(b.v);sel=b.v;selV++;applyState();
+      showDualPassageJuxtaposition(b);
+      sfxChime(b.u);return;
+    }
+    const hitDiv=divergenceGroup.children.length?ray.intersectObjects(divergenceGroup.children)[0]:null;
+    if(hitDiv&&hitDiv.object&&hitDiv.object.userData&&hitDiv.object.userData.nodeIndex!==undefined){
+      select(hitDiv.object.userData.nodeIndex);return;
+    }
     const k=pick(o,d,.1);if(k>=0)select(k);});
   h.userData={on:false};h.addEventListener('connected',()=>h.userData.on=true);h.addEventListener('disconnected',()=>h.userData.on=false);
   const cm=cf.createControllerModel(gr),hm=hf.createHandModel(h,'spheres');gr.add(cm);h.add(hm);
@@ -3290,7 +3664,7 @@ function handPoint(r){
   const j=r.h.joints,ti=j['thumb-tip'],ix=j['index-finger-tip'];
   if(r.h.userData.on&&ti&&ix&&ti.jointRadius!==undefined){
     const a=ti.getWorldPosition(new THREE.Vector3()),b=ix.getWorldPosition(new THREE.Vector3()),d=a.distanceTo(b);
-    // Hand out of view: joints hidden or frozen at their last pose. Release everything; never keep pulling.
+    
     const key=a.x+','+a.y+','+a.z+','+b.x+','+b.y+','+b.z;
     if(key===r.lk)r.ls=(r.ls||0)+GDT;else{r.ls=0;r.lk=key;}
     if(r.h.visible===false||ti.visible===false||ix.visible===false||r.ls>.3||!isFinite(d)){
@@ -3510,7 +3884,7 @@ $hb.addEventListener('click',async e=>{
   const c=corpora.find(x=>x.id===id);
   if(c&&!nodes.length&&!curCorpus){if(await ingest(c.docs,{id:c.id,noSave:true}))stat(summary()+' Restored from your last session.');}
   else if(!nodes.length&&!curCorpus&&!ingesting){
-    // First visit (or nothing saved): start with a ready-made text so VR/MR can be entered immediately.
+    
     const rec=corpora.slice().sort((a,b)=>b.ts-a.ts)[0];
     if(rec){if(await ingest(rec.docs,{id:rec.id,noSave:true}))stat(summary()+' Restored your most recent text.');}
     else await loadDemo(true);
@@ -3528,7 +3902,7 @@ function updateGeom(){
   const eo=lines.geometry.attributes.aO.array;edges.forEach((e,k)=>{const a=nodes[e.s],b=nodes[e.t];eo[k*6]=b.x;eo[k*6+1]=b.y;eo[k*6+2]=b.z;eo[k*6+3]=a.x;eo[k*6+4]=a.y;eo[k*6+5]=a.z;});lines.geometry.attributes.aO.needsUpdate=true;
   lines.geometry.attributes.position.needsUpdate=true;dots.geometry.attributes.position.needsUpdate=true;dots.geometry.attributes.aB.needsUpdate=true;
   const mv=sp=>{const n=nodes[sp.userData.i];if(n)sp.position.set(n.x,n.y,n.z);};
-  labelGroup.children.forEach(mv);lodMap.forEach(mv);
+  labelGroup.children.forEach(mv);lodMap.forEach(mv);divergenceGroup.children.forEach(mv);
 }
 function platform(){
   let r=0.3;for(const n of nodes){const d=Math.hypot(n.x,n.y,n.z);if(d>r)r=d;}
@@ -3881,7 +4255,7 @@ function psSig(){
   const r=PS.res;if(!r)return 'PS|\u2026';
   return 'PS|'+psBody()+'|'+r.ps.map(p=>{const m=p.m||[];return m.length+':'+(m.length?m[0][0]+'-'+m[m.length-1][1]:'');}).join(',');
 }
-// Passages as paragraphs of styled word pieces: 0 plain, 1 related (cyan), 2 core (amber), 3 source line.
+
 function psRuns(){
   const r=PS.res;
   if(!r)return [[['Searching passages\u2026',0,false]]];
@@ -3973,7 +4347,7 @@ function colUpd(dt){
    el.style.left=Math.max(0,Math.min(innerWidth-60,e.clientX-d.x))+'px';el.style.top=Math.max(0,Math.min(innerHeight-40,e.clientY-d.y))+'px';});
   const end=()=>{d=null;};el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);});})();
 
-// ================= source passages =================
+
 const $ps=$('#ps'),PS={auto:true,seq:0,spec:null,res:null};
 const hlText=(t,m)=>{let o='',p=0;m.forEach(([a,b,k])=>{if(a<p)return;o+=esc(t.slice(p,a))+`<mark${k?' class="hot"':''}>${esc(t.slice(a,b))}</mark>`;p=b;});return o+esc(t.slice(p));};
 function specConcept(i){
@@ -4020,7 +4394,7 @@ async function showPassages(sp,off){
   PS.res=r;paintPass();
   $('#psb').scrollTop=0;
 }
-// Keep the panel directly beneath the + button / attached-texts block on the left.
+
 function placePs(){const t=document.getElementById('top');if(!t)return;document.documentElement.style.setProperty('--pstop',Math.round(t.getBoundingClientRect().bottom+10)+'px');}
 try{new ResizeObserver(placePs).observe(document.getElementById('top'));}catch(e){}
 addEventListener('resize',placePs);placePs();
@@ -4069,7 +4443,7 @@ function crossPick(cx,cy){
   }
   return best;
 }
-// ================= real documents: PDF, Word, HTML, URLs =================
+
 const PDFV='4.4.168';let pdfjsP=null,mammothP=null;
 const loadScript=u=>new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=u;sc.onload=res;sc.onerror=()=>rej(new Error('Could not load '+u));document.head.appendChild(sc);});
 async function pdfText(buf){
@@ -4168,7 +4542,7 @@ function applyLLM(){
 }
 function applyFS(){
   document.documentElement.style.setProperty('--fs',FS);
-  VS=Math.min(1.35,1+(FS-1)*.6);          // VR/AR panels grow more gently so they stay in reach
+  VS=Math.min(1.35,1+(FS-1)*.6);          
   [kb,ib,rb].forEach(m=>m.scale.setScalar(VS));
   const rs=sp=>sp.scale.set(.2*FS,.05*FS,1);
   labelCache.forEach(rs);lodMap.forEach(rs);
@@ -4239,6 +4613,67 @@ renderer.setAnimationLoop((t,frame)=>{
 const fmUni=$('#fm-uni'),fmSep=$('#fm-sep');
 if(fmUni)fmUni.onclick=()=>setFieldMode('unified');
 if(fmSep)fmSep.onclick=()=>setFieldMode('separated');
+
+const cmOver=$('#cm-over'),cmDiv=$('#cm-div');
+if(cmOver)cmOver.onclick=()=>{if(typeof setCrossMode==='function')setCrossMode('overlap');};
+if(cmDiv)cmDiv.onclick=()=>{if(typeof setCrossMode==='function')setCrossMode('divergence');};
+
+const dhClose=$('#dh-close');
+if(dhClose)dhClose.onclick=hideDualPassageJuxtaposition;
+const dhOverlay=$('#dual-hologram');
+if(dhOverlay)dhOverlay.onclick=e=>{if(e.target===dhOverlay)hideDualPassageJuxtaposition();};
+const dhSynth=$('#dh-synth-btn');
+if(dhSynth)dhSynth.onclick=()=>{
+  if(!activeHologramBridge)return;
+  const b=activeHologramBridge;
+  const docA=b.docNameA||('Document '+(b.docA+1));
+  const docB=b.docNameB||('Document '+(b.docB+1));
+  const promptText=`Synthesize how ${docA} and ${docB} intersect based on the bridge between "${b.wordA}" and "${b.wordB}": 1) Common Ground, 2) Key Disagreements, 3) Novel Cross-Disciplinary Insight.`;
+  hideDualPassageJuxtaposition();
+  $('#q').value=promptText;
+  runQuery(promptText);
+  if(CFG.on&&window.askLLM)window.askLLM(promptText);
+};
+addEventListener('keydown',e=>{if(e.key==='Escape'&&dhOverlay&&!dhOverlay.hidden)hideDualPassageJuxtaposition();});
 </script>
+<div id="dual-hologram" class="dh-overlay" hidden>
+  <div class="dh-card">
+    <div class="dh-header">
+      <div class="dh-title">Dual-Passage Juxtaposition Hologram</div>
+      <button class="dh-close" id="dh-close" title="Close juxtaposition (Esc)">✕</button>
+    </div>
+    <div class="dh-body">
+      
+      <div class="dh-pane dh-left" id="dh-left-pane">
+        <div class="dh-pane-header">
+          <span class="dh-doc-badge" id="dh-doc-a"></span>
+          <span class="dh-word-badge" id="dh-word-a"></span>
+        </div>
+        <div class="dh-excerpt" id="dh-excerpt-a"></div>
+      </div>
+      
+      <div class="dh-center">
+        <div class="dh-strength-circle">
+          <div class="dh-strength-num" id="dh-strength-num">85%</div>
+          <div class="dh-strength-sub">ALIGNMENT</div>
+        </div>
+        <div class="dh-bridge-symbol">⇄</div>
+        <div class="dh-bridge-type" id="dh-bridge-type">Semantic Bridge</div>
+      </div>
+      
+      <div class="dh-pane dh-right" id="dh-right-pane">
+        <div class="dh-pane-header">
+          <span class="dh-doc-badge" id="dh-doc-b"></span>
+          <span class="dh-word-badge" id="dh-word-b"></span>
+        </div>
+        <div class="dh-excerpt" id="dh-excerpt-b"></div>
+      </div>
+    </div>
+    <div class="dh-footer">
+      <span class="dh-tip">Zero context switching: direct primary source comparison across documents</span>
+      <button class="dh-synth-btn" id="dh-synth-btn">Ask AI to Synthesize this Bridge</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
