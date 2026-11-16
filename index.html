@@ -1873,6 +1873,7 @@ function updateCrossVisuals(){
   if(crossLinesMesh){crossGroup.remove(crossLinesMesh);crossLinesMesh.geometry.dispose();crossLinesMesh=null;}
   if(crossDotsMesh){crossGroup.remove(crossDotsMesh);crossDotsMesh.geometry.dispose();crossDotsMesh=null;}
   crossLabelsGroup.clear();
+  updateDivergenceVisuals();
   if(fieldMode!=='separated'||!Q||!Q.crossBridges||!Q.crossBridges.length){
     crossGroup.visible=false;orbHaloGroup.visible=(fieldMode==='separated'&&orbs.length>1);return;
   }
@@ -2268,6 +2269,7 @@ let visible=[],forcedSet=new Set();
 function applyState(quick){
   const N=nodes.length,E=edges.length;if(!N)return;
   if(Q&&Q.fromSel&&!SS.size)Q=null;
+  const isSep=fieldMode==='separated'&&orbs.length>1;
   const nI=new Float32Array(N),ni=new Float32Array(N),ei=new Float32Array(E),ec=new Uint8Array(E),nc=new Uint8Array(N),er=new Float32Array(E),ea=new Float32Array(N).fill(1);
   const labs=[];
   for(let i=0;i<N;i++){ni[i]=nodes[i].nf;}
@@ -2278,8 +2280,19 @@ function applyState(quick){
   }else{
     for(let i=0;i<N;i++)nI[i]=.18+1.9*Math.pow(ni[i],1.2);
     for(let e=0;e<E;e++){ei[e]=(.04+.14*edges[e].wn)*(.45+.9*(nodes[edges[e].s].nf+nodes[edges[e].t].nf)/2);er[e]=edges[e].wn;}
+    if(isSep){
+      orbs.forEach(orb=>{
+        const docNodes=[];
+        for(let i=0;i<N;i++)if(nodes[i].doc===orb.doc)docNodes.push(i);
+        docNodes.sort((a,b)=>(nodes[b].score||0)-(nodes[a].score||0));
+        docNodes.slice(0,10).forEach(i=>labs.push([i,0]));
+      });
+    }else if(!col.hide){
+      const topNodes=[...Array(N).keys()].sort((a,b)=>(nodes[b].score||0)-(nodes[a].score||0));
+      topNodes.slice(0,20).forEach(i=>labs.push([i,0]));
+    }
   }
-  if(col.hide&&col.hide.length===N&&!hasCtx()){
+  if(col.hide&&col.hide.length===N&&!hasCtx()&&!isSep){
     for(let i=0;i<N;i++){
       if(col.hide[i]){nI[i]*=.1;ea[i]=.25;}
       else if(col.cnt[i]>1){nI[i]=Math.max(nI[i],.75+.08*Math.min(5,col.cnt[i]));ea[i]=1;labs.push([i,0]);}
@@ -2292,12 +2305,11 @@ function applyState(quick){
     ea.fill(.3);labs.length=0;
     SS.forEach(s=>{nI[s]=1.3;nc[s]=2;ea[s]=1;labs.push([s,1]);});
   }
-  const isSep=fieldMode==='separated'&&orbs.length>1;
   const div=(isSep&&Q&&Q.A)?computeDivergence():null;
   const divSet=div?new Set(div.topDivergent.map(d=>d.i)):null;
   const divShownSet=div?new Set(div.topDivergent.slice(0,16).map(d=>d.i)):null;
   const hid=new Uint8Array(N);let newest=-1;
-  visible=[];const colOn=!!(col.hide&&col.hide.length===N&&!hasCtx());
+  visible=[];const colOn=!isSep&&!!(col.hide&&col.hide.length===N&&!hasCtx());
   for(let i=0;i<N;i++){
     nA[i]=nI[i];nP[i]=SS.has(i)?1:0;nF[i]=(SS.size&&(sm||nc[i]>=2))?(nc[i]>=2?1:0):(Q&&Q.A?(nc[i]===1?1:0):.3+.7*ni[i]);nS[i]=.013+.055*ni[i]+(nc[i]===2?.03:nc[i]===1?.012*nI[i]:0);
     let cc;
@@ -2438,8 +2450,44 @@ function toggleSel(i){
   if(SS.size)selQuery();
   return !hasAny;
 }
+function selectEdge(k){
+  if(k<0||k>=edges.length)return;
+  const e=edges[k];
+  const sNodes=(word2all&&word2all.get(nodes[e.s].id))||[e.s];
+  const tNodes=(word2all&&word2all.get(nodes[e.t].id))||[e.t];
+  SS.clear();
+  sNodes.forEach(i=>SS.add(i));
+  tNodes.forEach(i=>SS.add(i));
+  sel=e.t;selV++;
+  if(Q&&Q.fromSel)Q=null;
+  applyState();
+  psAuto();
+  if(SS.size)selQuery();
+  sfxChime(e.s);
+  PS.auto=true;
+  showPassages(specLink(k));
+}
 function select(i){if(i<0)return;const on=toggleSel(i);if(on)sfxChime(i);if(on&&SS.size===1&&!replaying)pushHist(selectEntry(i));}
-function clearAll(){SS.clear();selV++;sel=-1;Q=null;$q.value='';applyState();psAuto();if(nodes.length)stat(summary());}
+function clearAll(){
+  SS.clear();
+  selV++;
+  sel=-1;
+  Q=null;
+  $q.value='';
+  pulseKey='';
+  lodClear();
+  hideDualPassageJuxtaposition();
+  $ps.hidden=true;
+  PS.seq++;
+  divergenceGroup.clear();
+  divergenceGroup.visible=false;
+  crossGroup.visible=false;
+  crossLabelsGroup.clear();
+  updatePulse(true);
+  applyState();
+  psAuto();
+  if(nodes.length)stat(summary());
+}
 const $=s=>document.querySelector(s),$q=$('#q'),$info=$('#info');
 const stat=t=>{const s=$('#stat');s.textContent=t;clearTimeout(stat.t);stat.t=setTimeout(()=>{s.textContent='';},4000);hud();};
 const summary=()=>`${nodes.length} concepts, ${edges.length} links from ${docCount} file${docCount===1?'':'s'}.`;
@@ -3498,7 +3546,7 @@ renderer.domElement.addEventListener('pointerup',e=>{
       showDualPassageJuxtaposition(b);
       sfxChime(b.u);
     }else{
-      const k=edgePick(e.clientX,e.clientY);if(k>=0){PS.auto=true;showPassages(specLink(k));}
+      const k=edgePick(e.clientX,e.clientY);if(k>=0)selectEdge(k);
     }}
 });
 addEventListener('keydown',e=>{if(!/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))keys[e.code]=true;});
@@ -3572,7 +3620,8 @@ for(let i=0;i<2;i++){
     if(hitDiv&&hitDiv.object&&hitDiv.object.userData&&hitDiv.object.userData.nodeIndex!==undefined){
       select(hitDiv.object.userData.nodeIndex);return;
     }
-    const k=pick(o,d,.1);if(k>=0)select(k);});
+    const k=pick(o,d,.1);if(k>=0)select(k);
+    else{const ek=edgePickRay(o,d,.06);if(ek>=0)selectEdge(ek);}});
   h.userData={on:false};h.addEventListener('connected',()=>h.userData.on=true);h.addEventListener('disconnected',()=>h.userData.on=false);
   const cm=cf.createControllerModel(gr),hm=hf.createHandModel(h,'spheres');gr.add(cm);h.add(hm);
   dolly.add(c,gr,h);rig.push({c,h,cm,hm,pin:false,hk:null,tp:false,uiHold:false});
@@ -4421,12 +4470,39 @@ function edgePick(cx,cy){
   if(!edges.length)return -1;
   camera.updateMatrixWorld();const V=camera.matrixWorldInverse,P=camera.projectionMatrix;
   const pr=(n,o)=>{o.set(n.x,n.y,n.z).applyMatrix4(G.matrixWorld).applyMatrix4(V);if(o.z>-.02)return false;o.applyMatrix4(P);o.x=(o.x*.5+.5)*innerWidth;o.y=(-o.y*.5+.5)*innerHeight;return true;};
-  let best=-1,bd=10;
+  let best=-1,bd=16;
   for(let k=0;k<edges.length;k++){
     if(Math.max(eI[k*2],eI[k*2+1])<.03)continue;
     const e=edges[k];if(!pr(nodes[e.s],_pa)||!pr(nodes[e.t],_pb))continue;
     const dx=_pb.x-_pa.x,dy=_pb.y-_pa.y,L=dx*dx+dy*dy;let t=L?((cx-_pa.x)*dx+(cy-_pa.y)*dy)/L:0;t=Math.max(0,Math.min(1,t));
     const d=Math.hypot(cx-(_pa.x+t*dx),cy-(_pa.y+t*dy));if(d<bd){bd=d;best=k;}
+  }
+  return best;
+}
+const _vA=new THREE.Vector3(),_vB=new THREE.Vector3(),_vAB=new THREE.Vector3(),_vAO=new THREE.Vector3();
+function edgePickRay(o,d,maxDist){
+  if(!edges.length)return -1;
+  let best=-1,bd=maxDist||.06;
+  for(let k=0;k<edges.length;k++){
+    if(Math.max(eI[k*2],eI[k*2+1])<.03)continue;
+    const e=edges[k];
+    _vA.set(nodes[e.s].x,nodes[e.s].y,nodes[e.s].z).applyMatrix4(G.matrixWorld);
+    _vB.set(nodes[e.t].x,nodes[e.t].y,nodes[e.t].z).applyMatrix4(G.matrixWorld);
+    _vAB.subVectors(_vB,_vA);
+    _vAO.subVectors(_vA,o);
+    const L2=_vAB.lengthSq();if(L2<1e-6)continue;
+    const dDotAB=d.dot(_vAB),dDotAO=d.dot(_vAO),abDotAO=_vAB.dot(_vAO);
+    const denom=L2-dDotAB*dDotAB;
+    let t=0;
+    if(Math.abs(denom)>1e-6){
+      t=(dDotAB*dDotAO-abDotAO)/denom;
+      t=Math.max(0,Math.min(1,t));
+    }
+    const ptSeg=_vA.clone().addScaledVector(_vAB,t);
+    const s=Math.max(0,ptSeg.clone().sub(o).dot(d));
+    const ptRay=o.clone().addScaledVector(d,s);
+    const dist=ptSeg.distanceTo(ptRay);
+    if(dist<bd){bd=dist;best=k;}
   }
   return best;
 }
