@@ -210,6 +210,32 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 #micb{flex:none;width:46px;height:46px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
 #micb svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #micb.on{background:rgba(93,240,255,.35);border-color:#5df0ff;box-shadow:0 0 18px rgba(93,240,255,.7)}
+
+/* Field mode segmented pill toggle */
+.fmode-pill{display:inline-flex;align-items:center;background:rgba(0,0,0,.45);border:1px solid rgba(93,240,255,.32);border-radius:20px;padding:2px;gap:2px;margin-left:6px;vertical-align:middle}
+.fmode-pill .fm-btn{background:transparent;border:0;color:var(--ink);opacity:.65;padding:4px 10px;font-size:calc(12px*var(--fs,1));border-radius:14px;cursor:pointer;transition:all .18s;line-height:1}
+.fmode-pill .fm-btn:hover{opacity:.95;color:#fff}
+.fmode-pill .fm-btn.active{background:rgba(93,240,255,.24);color:var(--cy);opacity:1;font-weight:600;box-shadow:0 0 10px rgba(93,240,255,.35)}
+
+/* Docs drawer arrangement row */
+.fmode-row{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-bottom:1px solid rgba(93,240,255,.14);font-size:calc(12px*var(--fs,1))}
+.fmode-toggle{display:inline-flex;background:rgba(0,0,0,.35);border:1px solid rgba(93,240,255,.25);border-radius:14px;padding:2px;gap:2px}
+.fmode-toggle button{background:transparent;border:0;padding:3px 8px;font-size:calc(11px*var(--fs,1));border-radius:10px;color:var(--ink);opacity:.65;cursor:pointer}
+.fmode-toggle button.active{background:rgba(93,240,255,.24);color:var(--cy);opacity:1;font-weight:600}
+
+/* Cross-field overlap info card */
+.xoverlap-box{background:linear-gradient(135deg,rgba(93,240,255,.09),rgba(255,179,71,.09));border:1px solid rgba(93,240,255,.35);border-radius:8px;padding:8px 9px;margin-bottom:8px;box-shadow:0 0 14px rgba(93,240,255,.08) inset}
+.xoverlap-hd{display:flex;align-items:center;gap:6px;font-size:calc(11px*var(--fs,1));color:var(--am);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.xoverlap-cnt{margin-left:auto;font-size:calc(10px*var(--fs,1));color:var(--ink);opacity:.7;font-weight:normal;text-transform:none}
+.xoverlap-chips{display:flex;flex-wrap:wrap;gap:4px;max-height:130px;overflow-y:auto}
+.xchip{display:inline-flex;align-items:center;gap:4px;padding:3px 6px;border-radius:4px;font-size:calc(11px*var(--fs,1));cursor:pointer;background:rgba(0,0,0,.4);border:1px solid rgba(93,240,255,.25);transition:all .15s}
+.xchip:hover{background:rgba(93,240,255,.2);border-color:var(--cy);transform:translateY(-1px)}
+.xchip.direct{border-color:rgba(255,179,71,.5);background:rgba(255,179,71,.12);color:var(--am)}
+.xchip.direct .xc-arr{color:var(--am);font-weight:700}
+.xchip.hidden{border-color:rgba(93,240,255,.4);color:var(--cy)}
+.xchip.hidden .xc-arr{color:var(--cy)}
+.xchip .xc-score{opacity:.65;font-size:calc(9px*var(--fs,1));margin-left:2px}
+
 </style>
 </head>
 <body>
@@ -218,6 +244,10 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
   <div class="row" style="margin-top:0;align-items:center">
     <button id="attl" title="Add text to the field" aria-label="Add text" aria-haspopup="menu">+</button><input id="file" type="file" accept=".txt,.md,.text,.csv,.json,.html,.htm,.pdf,.docx,text/*" multiple>
     <button id="dcnt" hidden title="Show or hide the attached texts"></button>
+    <div id="fmode" class="fmode-pill" hidden title="Field arrangement: Unified single orb or Separated orbs per file">
+      <button type="button" id="fm-uni" class="fm-btn active" data-m="unified" title="Unified: single merged conceptual field (default)">Unified</button>
+      <button type="button" id="fm-sep" class="fm-btn" data-m="separated" title="Separated: each file gets its own orb of connections; queries find and draw cross-field overlap lines">Separated</button>
+    </div>
     
     <button id="vr" hidden>Enter VR</button>
     <button id="ar" hidden style="color:var(--am);border-color:var(--am)">Enter mixed reality</button>
@@ -279,7 +309,7 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 let CUR=null;
 const PROG=t=>{if(CUR!==null)self.postMessage({rid:CUR,prog:t});};
 const NCAP=3000,K=6,FORCE=new Set();
-let nodes=[],edges=[],word2i=new Map(),FAMH=new Map();
+let nodes=[],edges=[],word2i=new Map(),FAMH=new Map(),fieldMode='unified',ORBS=[];
 const FV=4;
 
 const STOP=new Set(`the and for with are there was were been has had have did does doing having done you your yours her hers him his she they them their theirs its our ours mine that this per of to in is it be by as at an on am he me my we us if or so do but off out himself herself itself myself yourself ourselves themselves yes no thereby get gets got getting goes going went let lets one ones than then too very just also can could would should might may must shall these those such some any each both either neither other others another about from into onto here while upon up down even yet nor quite whenever wherever whatever whoever whichever what when where which who whom whose why how because since during before after above below between through under again further once`.split(' '));
@@ -294,7 +324,7 @@ const WHW=new Set('what when where who whom whose which why how'.split(' '));
 const okw=e=>e.length<=(e.indexOf(' ')>0?36:24)&&!/(.)\1\1/.test(e)&&!WHW.has(e);
 function junkW(e){if(/n't$/.test(e))return true;if(e.indexOf("'")<0)return false;const t=/^([a-z-]+)'(s|d|ll|ve|re|m|t)$/.exec(e);return !t||STOP.has(t[1])||t[1].length<2||t[2]!=='s';}
 const TOKRE=/[\p{L}\p{M}]+(?:['-][\p{L}\p{M}]+)*|\d+(?:[.,]\d+)*|[.!?;:()\u2014\u2013]+|,|\n[ \t\r]*\n/gu;
-const FILL=1,BRKP=.9,MAXBRK=40,XSEG=.4;
+const FILL=1,BRKP=.9,MAXBRK=40;
 let corp=[],vocab=['','\u0001'],cfreq=[0,0],cIdf=new Float32Array(0),CN=0,LT=1,HZ=120,DEC=[],PMIN=25,DOCW=80,exclC=null;
 const rawId=new Map();
 let PASS=null,PIX=null,DOCS=[],FOLDM=null;
@@ -396,9 +426,40 @@ function recount(){
     else cIdf[i]=Math.max(0,Math.log(1+1/(3*(cfreq[i]/Math.max(1,CN))+.005)));}
   corp.forEach(d=>{const t=d.ids,p=d.pol,a=[],o=[];let i=0;
     for(let e=0;e<t.length;e++){if(t[e]===0){if(p[e]&32){a.push(e);o.push(i);i=0;}}else i++;}
-    o.push(i);const m=new Map();for(let e=0;e<a.length;e++)m.set(a[e],Math.min(o[e],o[e+1])<PMIN);d.pb=m;d.post=null;d.spost=null;});
+    o.push(i);const m=new Map();for(let e=0;e<a.length;e++)m.set(a[e],Math.min(o[e],o[e+1])<PMIN);d.pb=m;d.bnd||(d.bnd=ideaBounds(d.ids));d.post=null;d.spost=null;});
   exclC=new Uint8Array(vocab.length);
   for(let e=1;e<vocab.length;e++)if(vocab[e].charCodeAt(0)<58||STRUCT.has(vocab[e]))exclC[e]=1;exclC[FILL]=1;
+}
+// Idea boundaries, ported from symboltransformer so both files cut contexts at the same places:
+// slide two adjacent 100-token windows along the text, compare their idf-weighted word vectors, and
+// cut at the deepest, well-separated similarity valleys (>= 200 tokens apart). Texts under 250
+// tokens are one idea. The scan below never lets a co-occurrence window cross one of these cuts.
+function ideaBounds(ids){
+  const T=ids.length,W=100;
+  if(T<250)return Uint32Array.of(0);
+  const pos=[],sim=[],A=new Map(),B=new Map();
+  let nA=0,nB=0,dot=0;
+  const addA=(x,d)=>{if(x<=FILL||!(cIdf[x]>0))return;const w=cIdf[x],old=A.get(x)||0,nw=old+d;
+    nw>0?A.set(x,nw):A.delete(x);nA+=(nw*nw-old*old)*w*w;dot+=d*w*w*(B.get(x)||0);};
+  const addB=(x,d)=>{if(x<=FILL||!(cIdf[x]>0))return;const w=cIdf[x],old=B.get(x)||0,nw=old+d;
+    nw>0?B.set(x,nw):B.delete(x);nB+=(nw*nw-old*old)*w*w;dot+=d*w*w*(A.get(x)||0);};
+  for(let t=0;t<W;t++)addA(ids[t],1);
+  for(let t=W;t<2*W;t++)addB(ids[t],1);
+  for(let a=W;;){
+    const na=Math.sqrt(Math.max(0,nA))||1,nb=Math.sqrt(Math.max(0,nB))||1;
+    pos.push(a);sim.push(dot/(na*nb));
+    if(a+25>T-W)break;
+    for(let t=0;t<25;t++){addA(ids[a-W+t],-1);addA(ids[a+t],1);addB(ids[a+t],-1);addB(ids[a+W+t],1);}
+    a+=25;
+  }
+  const u=sim.length,depth=sim.map((v,t)=>{let l=t,r=t;
+    for(;l>0&&sim[l-1]>=sim[l];)l--;for(;r<u-1&&sim[r+1]>=sim[r];)r++;return sim[l]+sim[r]-2*v;});
+  const mean=depth.reduce((x,y)=>x+y,0)/u,sd=Math.sqrt(depth.reduce((x,y)=>x+(y-mean)*(y-mean),0)/u),
+    thr=Math.max(.1,mean+.5*sd),out=[0];
+  for(let e=0;e<u;e++)
+    depth[e]>=thr&&depth[e]>=(depth[e-1]||0)&&depth[e]>(depth[e+1]||0)&&
+    pos[e]-out[out.length-1]>=200&&T-pos[e]>=200&&out.push(pos[e]);
+  return Uint32Array.from(out);
 }
 function eachFwd(l,t,fn,end,pb){const a=Math.min(end-1,t+HZ);let o=0,i=1;
   for(let s=t+1;s<=a;s++){const x=l[s];if(x!==0){if(x>FILL)fn(s,s-t,i);}else{if(++o>MAXBRK)break;const e=pb&&pb.get(s);i*=e===undefined?BRKP:e?.5:0;if(i===0)break;}}}
@@ -436,42 +497,42 @@ function packScan(w){
   const n=w.acc.size,ids=new Uint32Array(n),acc=new Float64Array(n),raw=new Uint32Array(n),fw=new Float64Array(n);
   let i=0;
   for(const [r,v] of w.acc){ids[i]=r;acc[i]=v;raw[i]=w.raw.get(r);const f=w.fw.get(r);if(f)fw[i]=f;i++;}
-  return {hits:w.hits,ids,acc,raw,fw};
+  return {hits:w.hits,stride:w.stride,ids,acc,raw,fw};
 }
 // One corpus pass for a batch of terms with disjoint id sets. Always excludes exclC; the caller's
 // own `excl` is applied later, when a packed entry is read.
+// Counting rule (identical to symboltransformer's leapScan): every occurrence of the term adds
+// DEC[distance]*gap-factor for each neighbour inside the same idea (windows stop at idea boundaries
+// d.bnd), acc sums over occurrences, raw counts them, and terms with more than 4e4 occurrences are
+// sampled every `stride`-th occurrence.
 function scanRaw(items){
   const n=vocab.length,s=new Int32Array(n),ss=new Int32Array(svocab.length),SD=new Map();
   let hasS=false,L=null;
   const R=items.map((e,t)=>{
-    e.ids.forEach(x=>{s[x]=t+1;});e.sids.forEach(x=>{ss[x]=t+1;hasS=true;});
-    const w={acc:new Map(),raw:new Map(),fw:new Map(),hits:0,sg:-1,sm:new Map()};
-    // Within one segment a neighbour counts once, at its strongest (nearest) link to ANY occurrence of
-    // the term, so repeating a word ("data structures" x5) never adds weight. Links that leave the
-    // anchor's segment are discounted (topic shift), so contexts do not bleed into each other.
-    const f=fwd=>(p,dist,m)=>{const r=L[p];if(exclC[r])return;let a=DEC[dist]*m;if(SG&&SG[p]!==CS)a*=XSEG;
-      let v=w.sm.get(r);if(!v)w.sm.set(r,v=[0,0]);if(a>v[0])v[0]=a;if(fwd&&a>v[1])v[1]=a;};
+    let fq=0;e.ids.forEach(x=>{s[x]=t+1;fq+=cfreq[x];});e.sids.forEach(x=>{ss[x]=t+1;hasS=true;});
+    const w={acc:new Map(),raw:new Map(),fw:new Map(),hits:0,stride:Math.max(1,Math.ceil(fq/4e4))};
+    const f=fwd=>(p,dist,m)=>{const r=L[p];if(exclC[r])return;const a=DEC[dist]*m;
+      w.acc.set(r,(w.acc.get(r)||0)+a);w.raw.set(r,(w.raw.get(r)||0)+1);if(fwd)w.fw.set(r,(w.fw.get(r)||0)+a);};
     w.fF=f(1);w.fB=f(0);return w;});
-  const flushSeg=w=>{w.sm.forEach((v,r)=>{w.acc.set(r,(w.acc.get(r)||0)+v[0]);w.raw.set(r,(w.raw.get(r)||0)+1);if(v[1]>0)w.fw.set(r,(w.fw.get(r)||0)+v[1]);});w.sm.clear();};
-  let SG=null,CS=-1;
   let off=0;
   for(const d of corp){
-    const l=d.ids,h=l.length,base=off;off+=h;L=l;SG=d.seg;
+    const l=d.ids,h=l.length,base=off,bd=d.bnd||[0];off+=h;L=l;
     buildPost(d);if(hasS)buildSPost(d);
     const u=[];
     items.forEach(e=>{
       for(const id of e.ids){const p=d.post.get(id);if(p)for(const k of p)u.push(k);}
       for(const id of e.sids){const p=d.spost.get(id);if(p)for(const k of p)u.push(k);}});
     const us=Uint32Array.from(u).sort();
+    let m=0,f=0,p=bd.length>1?bd[1]:h;
     for(const o of us){
+      for(;o>=p;){m++;f=p;p=m+1<bd.length?bd[m+1]:h;}
       const g=(l[o]>FILL?s[l[o]]:(d.sw[o]?ss[d.sw[o]]:0))-1;if(g<0)continue;const w=R[g];
       let s0=o,e0=o;for(;s0>0&&o-s0<60&&l[s0-1]!==0;)s0--;for(;e0<h-1&&e0-o<60&&l[e0+1]!==0;)e0++;
       if(e0-s0>=4){let k=2166136261;for(let q=s0;q<=e0;q++)k=Math.imul(k^l[q],16777619);k=(k>>>0)+'_'+(e0-s0);
         const at=base+s0,pv=SD.get(k);if(pv===undefined)SD.set(k,at);else if(pv!==at)continue;}
-      CS=d.seg[o];if(w.sg!==CS){flushSeg(w);w.sg=CS;w.hits++;}
-      eachFwd(l,o,w.fF,h,d.pb);eachBwd(l,o,w.fB,0,d.pb);
+      if(w.hits++%w.stride)continue;
+      eachFwd(l,o,w.fF,p,d.pb);eachBwd(l,o,w.fB,f,d.pb);
     }
-    R.forEach(w=>{flushSeg(w);w.sg=-1;});
   }
   return R.map(packScan);
 }
@@ -499,9 +560,9 @@ function leapScan(terms,excl){
     const c=ent.get(k),p=new Map(),hits=c.hits;let a=0;
     for(let i=0;i<c.ids.length;i++){
       const r=c.ids[i];if(excl[r])continue;
-      if(hits>=20&&CN>3e3&&c.raw[i]<2)continue;
+      if(hits>=20&&CN>3e3&&c.raw[i]*c.stride<2)continue;
       const o=cIdf[r];if(!(o>.08))continue;
-      const v=c.acc[i],ex=hits*DW*cfreq[r]/Math.max(1,LT);
+      const v=c.acc[i],ex=Math.ceil(hits/c.stride)*DW*cfreq[r]/Math.max(1,LT);
       const sc=Math.log(1+v)*o*(GEN.get(vocab[r])||1)*Math.log(1+v/(ex+1));
       p.set(r,sc);if(sc>a)a=sc;}
     p.forEach((v,r)=>p.set(r,v/(a||1)));
@@ -768,7 +829,7 @@ function musCos(e, t) {
   );
 }
 
-const PREC = { win: 12, min: 3, q: 0.5, sub: 90, cap: 1e12 };
+const PREC = { win: 12, min: 3, q: 0.5, sub: 90, cap: 400 };
 function lbound(e, t) {
   let n = 0,
     s = e.length;
@@ -1066,6 +1127,117 @@ function buildField(){
   try{edgeSeq();}catch(err){console.warn(err);edges.forEach(e=>{e.g=1;e.bk=0;e.fwd=1;});nodes.forEach(n=>{if(n.pos===undefined)n.pos=0;});}
   PROG('Laying out\u2026');
   layout();
+  ORBS=[{doc:0,name:(DOCS[0]&&DOCS[0].name)||'Unified Field',center:[0,0,0],radius:2.1,nodeCount:nodes.length}];
+  nodes.forEach(n=>{n.doc=0;n.docName=(DOCS[0]&&DOCS[0].name)||'Unified Field';n.orbCenter=[0,0,0];});
+  edges.forEach(e=>{e.doc=0;});
+}
+
+function buildFieldSeparated(){
+  const K_docs=DOCS.length;
+  if(K_docs<=1){
+    buildField();
+    ORBS=[{doc:0,name:(DOCS[0]&&DOCS[0].name)||'Unified Field',center:[0,0,0],radius:2.1,nodeCount:nodes.length}];
+    return;
+  }
+  PROG('Building separated file fields\u2026');
+  nodes=[];edges=[];word2i=new Map();ORBS=[];FAMH=new Map();
+  const centers=[];
+  if(K_docs===2){
+    centers.push([-1.85,0,0],[1.85,0,0]);
+  }else{
+    const D=1.5+0.35*K_docs;
+    for(let d=0;d<K_docs;d++){
+      const a=(2*Math.PI*d)/K_docs - Math.PI/2;
+      centers.push([D*Math.cos(a),0,D*Math.sin(a)]);
+    }
+  }
+  const perDocCap=Math.min(600,Math.max(100,Math.floor(NCAP/K_docs*1.5)));
+  for(let d=0;d<K_docs;d++){
+    const dIds=corp[d].ids,dFreq=new Map();
+    for(let i=0;i<dIds.length;i++){const id=dIds[i];if(id>FILL)dFreq.set(id,(dFreq.get(id)||0)+1);}
+    const dCand=[];
+    for(const [id,cnt] of dFreq){
+      const w=vocab[id];
+      if(!w||exclC[id]||!(cIdf[id]>.08)||!okw(w)||junkW(w)||w.charCodeAt(0)<97)continue;
+      dCand.push([id,cnt*cIdf[id]*(GEN.get(w)||1),cnt]);
+    }
+    let dList=dCand.filter(c=>c[2]>=2);if(dList.length<25)dList=dCand;
+    dList.sort((a,b)=>b[1]-a[1]);
+    dList=dList.slice(0,perDocCap);
+    const kept=[],byP=new Map();
+    const headOf=id=>{const w=vocab[id],b=byP.get(w.slice(0,2));if(b)for(const j of b)if(famNear(vocab[j],w))return j;return null;};
+    for(const c of dList){const h=headOf(c[0]);if(h!==null){FAMH.set(c[0],h);continue;}const k=vocab[c[0]].slice(0,2),b=byP.get(k);b?b.push(c[0]):byP.set(k,[c[0]]);kept.push(c);}
+    dList=kept;
+    FORCE.forEach(id=>{
+      if(!dFreq.has(id)||dList.some(c=>c[0]===id))return;
+      const h=headOf(id);
+      if(h!==null)FAMH.set(id,h);
+      else{const k=vocab[id].slice(0,2),b=byP.get(k);b?b.push(id):byP.set(k,[id]);dList.push([id,dFreq.get(id)*Math.max(cIdf[id],.08),dFreq.get(id)]);}
+    });
+    const id2kd=new Map(dList.map((c,k)=>[c[0],k]));
+    const pairs=new Map(),tLen=dIds.length;
+    for(let p=0;p<tLen;p++){
+      const a=dIds[p];if(a<=FILL||!id2kd.has(a))continue;
+      const kA=id2kd.get(a),lim=Math.min(tLen,p+HZ);
+      let o=0,weight=1;
+      for(let q=p+1;q<lim;q++){
+        const b=dIds[q];
+        if(b===0){if(++o>MAXBRK)break;weight*=BRKP;if(weight===0)break;continue;}
+        if(b<=FILL||!id2kd.has(b)||b===a)continue;
+        const kB=id2kd.get(b),dist=q-p,v=(DEC[dist]||(1/dist))*weight;
+        const key=kA<kB?kA+'|'+kB:kB+'|'+kA;
+        let e=pairs.get(key);if(!e){e={a:Math.min(kA,kB),b:Math.max(kA,kB),sw:0,dir:0,c:0};pairs.set(key,e);}
+        e.sw+=v;e.c++;e.dir+=(kA===e.a?1:0);
+      }
+    }
+    const nodeLinks=new Map();
+    pairs.forEach(e=>{
+      const lA=nodeLinks.get(e.a)||[];lA.push(e);nodeLinks.set(e.a,lA);
+      const lB=nodeLinks.get(e.b)||[];lB.push(e);nodeLinks.set(e.b,lB);
+    });
+    const keptPairs=new Set();
+    nodeLinks.forEach(links=>{
+      links.sort((x,y)=>(y.sw/y.c)-(x.sw/x.c));
+      links.slice(0,K).forEach(e=>keptPairs.add(e));
+    });
+    const used=new Set();
+    keptPairs.forEach(e=>{used.add(e.a);used.add(e.b);});
+    FORCE.forEach(id=>{const k=id2kd.get(id);if(k!==undefined)used.add(k);});
+    if(used.size<3&&dList.length>=3){dList.slice(0,10).forEach((_,k)=>used.add(k));}
+    const docNodes=[],remap=new Map();
+    [...used].sort((x,y)=>x-y).forEach(k=>{
+      const [id,score,cnt]=dList[k];
+      remap.set(k,docNodes.length);
+      docNodes.push({id,word:vocab[id],freq:cnt||cfreq[id],score,adj:[],doc:d,docName:DOCS[d].name});
+    });
+    const docEdges=[];
+    keptPairs.forEach(e=>{
+      const A=remap.get(e.a),B=remap.get(e.b);
+      if(A===undefined||B===undefined)return;
+      const fw=e.dir/e.c>=.5,w=e.sw/e.c;
+      const ed={s:fw?A:B,t:fw?B:A,w,doc:d};
+      const edgeIdx=docEdges.length;
+      docEdges.push(ed);
+      docNodes[A].adj.push({j:B,e:edgeIdx});
+      docNodes[B].adj.push({j:A,e:edgeIdx});
+    });
+    let mw=1e-6;for(const e of docEdges)if(e.w>mw)mw=e.w;docEdges.forEach(e=>e.wn=Math.sqrt(e.w/mw));
+    const SP_d=K_docs===2?1.25:1.15;
+    layout(docNodes,docEdges,SP_d);
+    const C=centers[d];
+    docNodes.forEach(n=>{n.x+=C[0];n.y+=C[1];n.z+=C[2];n.orbCenter=C;});
+    ORBS.push({doc:d,name:DOCS[d].name,center:C,radius:SP_d,nodeCount:docNodes.length});
+    const startIdx=nodes.length;
+    docNodes.forEach((n,localIdx)=>{
+      word2i.set(n.id,startIdx+localIdx);
+      n.adj.forEach(a=>{a.j+=startIdx;a.e+=edges.length;});
+      nodes.push(n);
+    });
+    docEdges.forEach(e=>{
+      edges.push({s:e.s+startIdx,t:e.t+startIdx,w:e.w,wn:e.wn,fwd:e.fwd!==undefined?e.fwd:1,gap:1,g:1,bk:0,doc:d});
+    });
+  }
+  try{edgeSeq();}catch(err){edges.forEach(e=>{e.g=1;e.bk=0;e.fwd=1;});nodes.forEach(n=>{if(n.pos===undefined)n.pos=0;});}
 }
 function restoreField(f){
   if(!f||f.v!==FV||!f.n||!f.e)return false;
@@ -1170,14 +1342,15 @@ function bhRepulse(P,D,N,k2){
 }
 
 // Label propagation on the weighted link graph -> a handful of topic communities.
-function communities(N){
+function communities(subNodes,subEdges,N){
+  if(!subNodes)subNodes=nodes;if(!subEdges)subEdges=edges;if(N===undefined)N=subNodes.length;
   const l=Int32Array.from({length:N},(_,i)=>i),order=[...Array(N).keys()];
   for(let it=0;it<20;it++){
     for(let i=N-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
     let ch=0;
     for(const i of order){
       const s=new Map();
-      for(const a of nodes[i].adj){const w=edges[a.e].wn*edges[a.e].wn+.02;s.set(l[a.j],(s.get(l[a.j])||0)+w);}
+      for(const a of subNodes[i].adj){const w=subEdges[a.e].wn*subEdges[a.e].wn+.02;s.set(l[a.j],(s.get(l[a.j])||0)+w);}
       let b=l[i],bv=s.get(b)||0;
       for(const [c,v] of s)if(v>bv+1e-9){bv=v;b=c;}
       if(b!==l[i]){l[i]=b;ch++;}
@@ -1191,17 +1364,20 @@ function communities(N){
   for(let i=0;i<N;i++)if(idx.has(l[i]))out[i]=idx.get(l[i]);
   for(let pass=0;pass<4;pass++)for(let i=0;i<N;i++){
     if(out[i]>=0)continue;const s=new Map();
-    for(const a of nodes[i].adj)if(out[a.j]>=0)s.set(out[a.j],(s.get(out[a.j])||0)+edges[a.e].wn);
+    for(const a of subNodes[i].adj)if(out[a.j]>=0)s.set(out[a.j],(s.get(out[a.j])||0)+subEdges[a.e].wn);
     let b=-1,bv=0;for(const [c,v] of s)if(v>bv){bv=v;b=c;}
     if(b>=0)out[i]=b;}
   for(let i=0;i<N;i++)if(out[i]<0)out[i]=0;
   return {l:out,nc:Math.max(1,keep.length)};
 }
-function layout(){
-  const N=nodes.length,P=new Float32Array(N*3),D=new Float32Array(N*3);
-  for(let i=0;i<N;i++){const u=Math.random()*2-1,a=Math.random()*6.283,r=Math.sqrt(1-u*u);P[i*3]=r*Math.cos(a);P[i*3+1]=u;P[i*3+2]=r*Math.sin(a);}
-  const k=Math.cbrt(8/N),it=Math.max(60,Math.min(320,Math.floor(5e8/(N*N))));
-  const CMN=N>=12?communities(N):{l:new Int32Array(N),nc:1},cm=CMN.l,nc=CMN.nc;
+function layout(subNodes,subEdges,SP){
+  if(!subNodes)subNodes=nodes;if(!subEdges)subEdges=edges;if(SP===undefined)SP=2.1;
+  const N=subNodes.length;if(!N)return;
+  if(N===1){subNodes[0].x=0;subNodes[0].y=0;subNodes[0].z=0;return;}
+  const P=new Float32Array(N*3),D=new Float32Array(N*3);
+  for(let i=0;i<N;i++){const u=Math.random()*2-1,a=Math.random()*6.283,r=Math.sqrt(Math.max(0,1-u*u));P[i*3]=r*Math.cos(a);P[i*3+1]=u;P[i*3+2]=r*Math.sin(a);}
+  const k=Math.cbrt(8/N),it=Math.max(50,Math.min(320,Math.floor(5e8/(N*N))));
+  const CMN=N>=12?communities(subNodes,subEdges,N):{l:new Int32Array(N),nc:1},cm=CMN.l,nc=CMN.nc;
   const cc=new Float64Array(nc*3),cn=new Float64Array(nc),pv=new Float64Array(nc*3);
   if(nc>1){// seed each community in its own region of the ball
     for(let i=0;i<N;i++){const j=cm[i],y=1-2*(j+.5)/nc,r=Math.sqrt(Math.max(0,1-y*y)),a=j*2.399963;
@@ -1215,7 +1391,7 @@ function layout(){
         D[i*3]+=dx*f;D[i*3+1]+=dy*f;D[i*3+2]+=dz*f;D[j*3]-=dx*f;D[j*3+1]-=dy*f;D[j*3+2]-=dz*f;
       }
     }else bhRepulse(P,D,N,k*k);
-    for(const e of edges){
+    for(const e of subEdges){
       const i=e.s,j=e.t,dx=P[i*3]-P[j*3],dy=P[i*3+1]-P[j*3+1],dz=P[i*3+2]-P[j*3+2];
       const d=Math.sqrt(dx*dx+dy*dy+dz*dz)+1e-4,f=(.9/k)*(.3+.7*e.wn)*(nc>1?(cm[i]===cm[j]?1.4:.6):1);
       D[i*3]-=dx*f;D[i*3+1]-=dy*f;D[i*3+2]-=dz*f;D[j*3]+=dx*f;D[j*3+1]+=dy*f;D[j*3+2]+=dz*f;
@@ -1240,9 +1416,9 @@ function layout(){
   }
   let cx=0,cy=0,cz=0;for(let i=0;i<N;i++){cx+=P[i*3];cy+=P[i*3+1];cz+=P[i*3+2];}cx/=N;cy/=N;cz/=N;
   let mx=0;for(let i=0;i<N;i++){P[i*3]-=cx;P[i*3+1]-=cy;P[i*3+2]-=cz;mx=Math.max(mx,Math.hypot(P[i*3],P[i*3+1],P[i*3+2]));}
-  for(let i=0;i<N*3;i++)P[i]/=mx;
-  const SP=2.1;for(let i=0;i<N*3;i++)P[i]*=SP;
-  const dm=.35*Math.cbrt(4.19*SP*SP*SP/N);   // loose spacing only: a strict one forces uniform density and hides hubs
+  for(let i=0;i<N*3;i++)P[i]/=(mx||1);
+  for(let i=0;i<N*3;i++)P[i]*=SP;
+  const dm=.35*Math.cbrt(4.19*SP*SP*SP/N);
   for(let it=0;it<80;it++){
     let moved=false;const grid=new Map(),cs=dm;
     const key=(x,y,z)=>(x*73856093)^(y*19349663)^(z*83492791);
@@ -1260,7 +1436,7 @@ function layout(){
     }
     if(!moved)break;
   }
-  nodes.forEach((n,i)=>{n.x=P[i*3];n.y=P[i*3+1];n.z=P[i*3+2];});
+  subNodes.forEach((n,i)=>{n.x=P[i*3];n.y=P[i*3+1];n.z=P[i*3+2];});
 }
 // ---- source passages ----
 function splitPass(text){
@@ -1360,15 +1536,23 @@ const forceWords=()=>[...FORCE].map(i=>vocab[i]);
 self.onmessage=e=>{
   const m=e.data;CUR=m.rid;
   try{
-    if(m.t==='reset'){resetCorpus();nodes=[];edges=[];word2i=new Map();return;}
+        if(m.t==='reset'){resetCorpus();nodes=[];edges=[];word2i=new Map();ORBS=[];return;}
+    if(m.t==='setMode'){
+      fieldMode=m.mode||'unified';
+      let built=false;
+      if(fieldMode==='separated'&&DOCS.length>1){buildFieldSeparated();built=true;}
+      else{buildField();built=true;}
+      self.postMessage({rid:m.rid,nodes,edges,orbs:ORBS,mode:fieldMode,force:forceWords(),built});return;}
     if(m.t==='ingest'){
       PROG('Encoding text\u2026');
-      resetCorpus();nodes=[];edges=[];word2i=new Map();
+      resetCorpus();nodes=[];edges=[];word2i=new Map();ORBS=[];
+      fieldMode=m.mode||fieldMode||'unified';
       DOCS=m.docs;m.docs.forEach(d=>corp.push(encode(d.text)));
       foldPlurals();PROG('Finding phrases\u2026');mergePhrases();PROG('Counting\u2026');recount();
       let built=false;
-      if(!(m.pre&&restoreField(m.pre))){buildField();built=true;}
-      self.postMessage({rid:m.rid,nodes,edges,force:forceWords(),built});return;}
+      if(fieldMode==='separated'&&DOCS.length>1){buildFieldSeparated();built=true;}
+      else if(!(m.pre&&restoreField(m.pre))){buildField();built=true;}
+      self.postMessage({rid:m.rid,nodes,edges,orbs:ORBS,mode:fieldMode,force:forceWords(),built});return;}
     if(m.t==='passages'){self.postMessage(Object.assign({rid:m.rid},getPassages(m)));return;}
     if(m.t==='query'){
       const res=coocc(m.seq?mergeQ(m.seq):m.words);
@@ -1376,7 +1560,13 @@ self.onmessage=e=>{
       let rebuilt=null;
       if(!m.again){
         const need=[];res.seeds.forEach(sd=>sd.ids.forEach(id=>{if(word2i.get(id)===undefined&&cfreq[id]&&!FAMH.has(id))need.push(id);}));
-        if(need.length){need.slice(0,60).forEach(id=>FORCE.add(id));buildField();rebuilt={nodes,edges,force:forceWords()};}}
+        if(need.length){
+          need.slice(0,60).forEach(id=>FORCE.add(id));
+          if(fieldMode==='separated'&&DOCS.length>1)buildFieldSeparated();
+          else buildField();
+          rebuilt={nodes,edges,orbs:ORBS,mode:fieldMode,force:forceWords()};
+        }
+      }
       self.postMessage({rid:m.rid,rebuilt,res:{
         seeds:res.seeds.map(s=>({q:s.q,ids:[...new Set(s.ids.map(i=>FAMH.has(i)?FAMH.get(i):i))]})),
         M:(()=>{const m=new Map();res.M.forEach(x=>{const id=FAMH.has(x.id)?FAMH.get(x.id):x.id,o=m.get(id);if(!o||x.s>o.s)m.set(id,{id,lp:x.lp,s:x.s,pq:x.pq});});return [...m.values()];})()}});return;}
@@ -1431,7 +1621,40 @@ function updatePulse(textOnly){
   edges.forEach((e,k)=>{eD[k*2]=nD[e.s];eD[k*2+1]=nD[e.t];});
   pts.geometry.attributes.aD.needsUpdate=true;lines.geometry.attributes.aDv.needsUpdate=true;
 }
-const setField=r=>{nodes=r.nodes;edges=r.edges;word2i=new Map(nodes.map((n,i)=>[n.id,i]));forceWords=r.force;};
+let fieldMode='unified',orbs=[],word2all=new Map();
+const setField=r=>{
+  nodes=r.nodes;edges=r.edges;orbs=r.orbs||[];
+  fieldMode=r.mode||fieldMode||'unified';
+  word2i=new Map(nodes.map((n,i)=>[n.id,i]));
+  word2all=new Map();
+  nodes.forEach((n,i)=>{const l=word2all.get(n.id)||[];l.push(i);word2all.set(n.id,l);});
+  forceWords=r.force;
+  updateModeUI();
+};
+function updateModeUI(){
+  const fm=$('#fmode');
+  if(fm){
+    fm.hidden=!(curDocs&&curDocs.length>1);
+    const bu=$('#fm-uni'),bs=$('#fm-sep');
+    if(bu)bu.classList.toggle('active',fieldMode==='unified');
+    if(bs)bs.classList.toggle('active',fieldMode==='separated');
+  }
+}
+async function setFieldMode(mode){
+  if(mode===fieldMode)return;
+  if(curDocs.length<2)return;
+  fieldMode=mode;
+  stat(mode==='separated'?'Separating into file orbs\u2026':'Unifying file fields\u2026');
+  updateModeUI();
+  try{
+    const r=await ENG.call({t:'setMode',mode});
+    setField(r);
+    buildVisuals();
+    if(LASTQ&&LASTQ.trim()){await runQuery(LASTQ,true);}
+    else applyState();
+    stat(mode==='separated'?`Separated into ${orbs.length} file orbs. Query to reveal cross-field overlap.`:'Unified into a single conceptual field.');
+  }catch(e){stat('Mode switch failed: '+e.message);}
+}
 
 let FS=1,VS=1;try{const v=parseFloat(localStorage.getItem('cf.fs'));if(isFinite(v))FS=Math.max(.8,Math.min(1.6,v));}catch(e){}
 let nodes=[],edges=[],word2i=new Map(),sel=-1,Q=null;const SS=new Set();let selV=0;
@@ -1511,6 +1734,156 @@ function refreshWV(){
   lines.geometry.attributes.aW.needsUpdate=true;dots.geometry.attributes.aWa.needsUpdate=true;dots.geometry.attributes.aWb.needsUpdate=true;wvPend=false;
 }
 let eRank=[],lIdx,dIdx,lSpec=0,lAmbN=0,dN=0,lastLN=-1,pts,lines,dots,dI,dD,dC,nA,nS,nC,nF,nP,eI,eC,labelGroup=new THREE.Group();G.add(labelGroup);
+const crossGroup=new THREE.Group();G.add(crossGroup);
+const crossLabelsGroup=new THREE.Group();crossGroup.add(crossLabelsGroup);
+const orbHaloGroup=new THREE.Group();G.add(orbHaloGroup);
+const crossLineMat=new THREE.ShaderMaterial({
+  uniforms:U,transparent:true,depthWrite:false,...ADD,
+  vertexShader:`attribute vec3 aCol;attribute float aI;attribute float aPh;attribute float aKind;uniform float uT;varying vec3 vC;varying float vI;varying float vKind;varying float vPh;void main(){vC=aCol;vI=aI;vKind=aKind;vPh=aPh;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+  fragmentShader:`uniform float uT;uniform float uG;varying vec3 vC;varying float vI;varying float vKind;varying float vPh;void main(){float pulse=.72+.28*sin(uT*3.8+vPh*6.28);vec3 col=vC*(vI*pulse*(vKind>.5?1.35:1.15));gl_FragColor=vec4(col*uG,1.);}`
+});
+const crossDotMat=new THREE.ShaderMaterial({
+  uniforms:U,transparent:true,depthWrite:false,...ADD,
+  vertexShader:`attribute vec3 aB;attribute vec3 aCol;attribute float aPh;attribute float aI;uniform float uT;varying vec3 vC;varying float vI;void main(){float t=fract(uT*.22+aPh);vec3 pos=mix(position,aB,t);vec4 mv=modelViewMatrix*vec4(pos,1.);gl_PointSize=clamp(26.*aI/-mv.z,6.,64.);vC=aCol;vI=aI*(.8+.2*sin(uT*5.+aPh*6.28));gl_Position=projectionMatrix*mv;}`,
+  fragmentShader:`uniform float uG;varying vec3 vC;varying float vI;void main(){float d=length(gl_PointCoord-.5);if(d>.5)discard;float glow=pow(1.-d*2.,1.8);gl_FragColor=vec4(vC*glow*vI*1.5*uG,1.);}`
+});
+let crossLinesMesh=null,crossDotsMesh=null;
+
+function computeCrossBridges(A,show,pq,cv,seedK,seeds){
+  const N=nodes.length,docActive=new Map();
+  for(let i=0;i<N;i++){
+    if(show[i]&&A[i]>0){
+      const d=nodes[i].doc!==undefined?nodes[i].doc:0;
+      const l=docActive.get(d)||[];l.push(i);docActive.set(d,l);
+    }
+  }
+  const docList=[...docActive.keys()];
+  if(docList.length<2)return [];
+  const directPairs=[],hiddenPairs=[],nT=(seeds&&seeds.length)||1;
+  for(let a=0;a<docList.length;a++){
+    for(let b=a+1;b<docList.length;b++){
+      const da=docList[a],db=docList[b];
+      const nodesA=docActive.get(da)||[],nodesB=docActive.get(db)||[];
+      const bWordMap=new Map();nodesB.forEach(j=>{bWordMap.set(nodes[j].word,j);});
+      for(const i of nodesA){
+        const wA=nodes[i].word;
+        if(bWordMap.has(wA)){
+          const j=bWordMap.get(wA),actG=Math.sqrt(A[i]*A[j]),cvM=.5*((cv[i]||.5)+(cv[j]||.5)),score=1.+actG*.8+cvM*.4;
+          directPairs.push({u:i,v:j,score,normScore:Math.min(1,score/2.2),kind:'direct',wordA:wA,wordB:wA,docA:da,docB:db,docNameA:nodes[i].docName||('File '+(da+1)),docNameB:nodes[j].docName||('File '+(db+1))});
+        }
+        for(const j of nodesB){
+          if(nodes[j].word===wA)continue;
+          let sharedQ=0,qHits=0;
+          if(pq[i]&&pq[j]){
+            pq[i].forEach((valA,q)=>{const valB=pq[j].get(q);if(valB>0){sharedQ+=Math.min(valA,valB);qHits++;}});
+          }
+          const actG=Math.sqrt(A[i]*A[j]),cvG=Math.sqrt((cv[i]||0)*(cv[j]||0));
+          let hScore=0;
+          if(sharedQ>0){
+            const qFactor=(sharedQ/nT)*(.6+.4*qHits/nT);
+            hScore=qFactor*actG*(.5+.5*cvG);
+          }else if(cvG>.35&&actG>.4){
+            hScore=cvG*actG*.6;
+          }
+          if(hScore>=0.16){
+            hiddenPairs.push({u:i,v:j,score:hScore,normScore:Math.min(1,hScore/1.5),kind:'hidden',wordA:wA,wordB:nodes[j].word,docA:da,docB:db,docNameA:nodes[i].docName||('File '+(da+1)),docNameB:nodes[j].docName||('File '+(db+1))});
+          }
+        }
+      }
+    }
+  }
+  directPairs.sort((x,y)=>y.score-x.score);hiddenPairs.sort((x,y)=>y.score-x.score);
+  return [...directPairs.slice(0,30),...hiddenPairs.slice(0,45)];
+}
+
+function updateCrossVisuals(){
+  if(crossLinesMesh){crossGroup.remove(crossLinesMesh);crossLinesMesh.geometry.dispose();crossLinesMesh=null;}
+  if(crossDotsMesh){crossGroup.remove(crossDotsMesh);crossDotsMesh.geometry.dispose();crossDotsMesh=null;}
+  crossLabelsGroup.clear();
+  if(fieldMode!=='separated'||!Q||!Q.crossBridges||!Q.crossBridges.length){
+    crossGroup.visible=false;orbHaloGroup.visible=(fieldMode==='separated'&&orbs.length>1);return;
+  }
+  crossGroup.visible=true;orbHaloGroup.visible=true;
+  const bridges=Q.crossBridges,M=bridges.length;
+  const pos=new Float32Array(M*6),col=new Float32Array(M*6),aI=new Float32Array(M*2),aPh=new Float32Array(M*2),aKind=new Float32Array(M*2);
+  const dPos=new Float32Array(M*2*3),dB=new Float32Array(M*2*3),dCol=new Float32Array(M*2*3),dPh=new Float32Array(M*2),dI=new Float32Array(M*2);
+  bridges.forEach((b,k)=>{
+    const u=nodes[b.u],v=nodes[b.v];
+    pos.set([u.x,u.y,u.z,v.x,v.y,v.z],k*6);
+    const isDirect=b.kind==='direct',c=isDirect?[1.,.82,.35]:[.25,.95,1.];
+    col.set([c[0],c[1],c[2],c[0],c[1],c[2]],k*6);
+    const intens=.55+.45*b.normScore;
+    aI[k*2]=intens;aI[k*2+1]=intens;
+    const ph=(k*.17)%1.;aPh[k*2]=ph;aPh[k*2+1]=ph;
+    const kd=isDirect?1.:0.;aKind[k*2]=kd;aKind[k*2+1]=kd;
+    for(let m=0;m<2;m++){
+      const q=k*2+m;dPos.set([u.x,u.y,u.z],q*3);dB.set([v.x,v.y,v.z],q*3);dCol.set(c,q*3);dPh[q]=ph+m*.5;dI[q]=intens*1.2;
+    }
+  });
+  const lg=new THREE.BufferGeometry();
+  lg.setAttribute('position',new THREE.BufferAttribute(pos,3));lg.setAttribute('aCol',new THREE.BufferAttribute(col,3));
+  lg.setAttribute('aI',new THREE.BufferAttribute(aI,1));lg.setAttribute('aPh',new THREE.BufferAttribute(aPh,1));lg.setAttribute('aKind',new THREE.BufferAttribute(aKind,1));
+  crossLinesMesh=new THREE.LineSegments(lg,crossLineMat);crossLinesMesh.frustumCulled=false;crossGroup.add(crossLinesMesh);
+  const dg=new THREE.BufferGeometry();
+  dg.setAttribute('position',new THREE.BufferAttribute(dPos,3));dg.setAttribute('aB',new THREE.BufferAttribute(dB,3));
+  dg.setAttribute('aCol',new THREE.BufferAttribute(dCol,3));dg.setAttribute('aPh',new THREE.BufferAttribute(dPh,1));dg.setAttribute('aI',new THREE.BufferAttribute(dI,1));
+  crossDotsMesh=new THREE.Points(dg,crossDotMat);crossDotsMesh.frustumCulled=false;crossGroup.add(crossDotsMesh);
+
+  // Floating word badges directly on the golden thread / cross bridges
+  const topB=bridges.slice(0,16);
+  topB.forEach(b=>{
+    const u=nodes[b.u],v=nodes[b.v];
+    const mx=(u.x+v.x)*.5,my=(u.y+v.y)*.5+.045,mz=(u.z+v.z)*.5;
+    const c=document.createElement('canvas');c.width=1024;c.height=256;const ctx=c.getContext('2d');
+    const isDirect=b.kind==='direct';
+    ctx.fillStyle=isDirect?'rgba(20,15,5,.85)':'rgba(4,18,30,.85)';
+    ctx.strokeStyle=isDirect?'rgba(255,179,71,.88)':'rgba(93,240,255,.88)';
+    ctx.lineWidth=14;
+    ctx.beginPath();
+    ctx.roundRect(40,28,944,200,100);
+    ctx.fill();
+    ctx.stroke();
+    ctx.shadowColor=isDirect?'#ffb347':'#5df0ff';
+    ctx.shadowBlur=26;
+    ctx.fillStyle=isDirect?'#ffe2a8':'#d6fbff';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    const labelText=isDirect?`✨ ${b.wordA}`:`${b.wordA} \u2194 ${b.wordB}`;
+    ctx.font=isDirect?'700 96px system-ui,-apple-system,sans-serif':'700 76px system-ui,-apple-system,sans-serif';
+    ctx.fillText(labelText,512,128);
+    const tx=new THREE.CanvasTexture(c);tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
+    const sm=new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false,blending:THREE.AdditiveBlending});
+    const sp=new THREE.Sprite(sm);sp.position.set(mx,my,mz);sp.scale.set(.36*FS,.09*FS,1);sp.renderOrder=35;
+    sp.userData={isBridge:true,bridge:b};
+    crossLabelsGroup.add(sp);
+  });
+}
+
+function updateOrbHalos(){
+  orbHaloGroup.clear();
+  if(fieldMode!=='separated'||orbs.length<2){orbHaloGroup.visible=false;return;}
+  orbHaloGroup.visible=true;
+  const ringMat=new THREE.LineBasicMaterial({color:0x5df0ff,transparent:true,opacity:.3,blending:THREE.AdditiveBlending});
+  orbs.forEach((orb,d)=>{
+    const C=orb.center,R=orb.radius||1.25;
+    const pts=[];for(let i=0;i<=64;i++){const a=(i/64)*6.28318;pts.push(new THREE.Vector3(C[0]+Math.cos(a)*R,C[1],C[2]+Math.sin(a)*R));}
+    orbHaloGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),ringMat));
+    const pts2=[];for(let i=0;i<=64;i++){const a=(i/64)*6.28318;pts2.push(new THREE.Vector3(C[0]+Math.cos(a)*R,C[1]+Math.sin(a)*R*.35,C[2]+Math.cos(a)*R*.35));}
+    orbHaloGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts2),ringMat));
+    const c=document.createElement('canvas');c.width=1024;c.height=256;const ctx=c.getContext('2d');
+    ctx.font='600 70px system-ui,-apple-system,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.shadowColor='#5df0ff';ctx.shadowBlur=24;ctx.fillStyle='#ffffff';
+    let lt=(orb.name||('File '+(d+1))).replace(/^Demo:\s*/i,'');if(lt.length>28)lt=lt.slice(0,26)+'\u2026';
+    ctx.fillText('📄 '+lt,512,100);
+    ctx.font='400 50px system-ui,-apple-system,sans-serif';ctx.fillStyle='#5df0ff';
+    ctx.fillText(`${orb.nodeCount} concepts \u00b7 Field ${d+1}`,512,180);
+    const tx=new THREE.CanvasTexture(c);tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
+    const sm=new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false,blending:THREE.AdditiveBlending});
+    const sp=new THREE.Sprite(sm);sp.position.set(C[0],C[1]+R+.45,C[2]);sp.scale.set(.7*FS,.175*FS,1);sp.renderOrder=15;
+    orbHaloGroup.add(sp);
+  });
+}
+
 const labelCache=new Map();
 function label(i,kind){
   const key=nodes[i].word+kind;let s=labelCache.get(key);
@@ -1551,7 +1924,7 @@ function buildVisuals(){
   lIdx=new Uint32Array(E*2);dIdx=new Uint32Array(E*PN);lg.setIndex(new THREE.BufferAttribute(lIdx,1));dg.setIndex(new THREE.BufferAttribute(dIdx,1));
   eRank=Array.from({length:E},(_,k)=>k).sort((a,b)=>edges[b].w-edges[a].w);lSpec=0;lAmbN=0;dN=0;lastLN=-1;
   lines=new THREE.LineSegments(lg,edgeMat);lines.frustumCulled=false;
-  G.add(lines,pts,dots);SS.clear();selV++;sel=-1;Q=null;pulseKey='';updatePulse(true);applyState();psAuto();
+  G.add(lines,pts,dots);SS.clear();selV++;sel=-1;Q=null;pulseKey='';updatePulse(true);updateOrbHalos();applyState();psAuto();
 }
 const hasCtx=()=>SS.size>0||!!(Q&&Q.top);
 let RB=true;try{RB=localStorage.getItem('cf.rb3')!=='0';}catch(e){}
@@ -1619,6 +1992,7 @@ function applyState(quick){
   lines.geometry.attributes.aI.needsUpdate=true;lines.geometry.attributes.aCol.needsUpdate=true;
   const vs=new Set(visible),seenL=new Set();for(let j=labs.length-1;j>=0;j--){if(!vs.has(labs[j][0])||seenL.has(labs[j][0]))labs.splice(j,1);else seenL.add(labs[j][0]);}
   labelGroup.clear();labs.forEach(([i,k])=>labelGroup.add(label(i,k)));forcedSet=new Set(labs.map(l=>l[0]));refreshWV();
+  updateCrossVisuals();
   if(quick){kDirty=true;}else updateInfo();
 }
 async function runQuery(text,again,opts){
@@ -1637,17 +2011,36 @@ async function runQuery(text,again,opts){
   const res=rr.res;
   if(!res){if(so)return;Q=null;applyState();stat('None of those words occur in your text. Try terms from it.');return;}
   const N=nodes.length,E=edges.length,A=new Float32Array(N),show=new Uint8Array(N),pq=new Array(N);let miss=0,n1=0,n2=0;const seedK=new Set();
-  res.seeds.forEach(sd=>sd.ids.forEach(id=>{const k=word2i.get(id);if(k!==undefined){A[k]=1;show[k]=1;pq[k]=new Map([[sd.q,1]]);seedK.add(k);}}));
-  res.M.forEach(e=>{const k=word2i.get(e.id);if(k===undefined){miss++;return;}
-    A[k]=Math.max(A[k],(e.lp===1?1:.8)*(.25+.75*Math.min(1,e.s)));show[k]=1;pq[k]=e.pq;e.lp===1?n1++:n2++;});
-  // How strongly each emerged word connects the query terms: strength across terms, weighted by how many it spans.
+  const getKs=id=>word2all&&word2all.has(id)?word2all.get(id):([word2i.get(id)].filter(x=>x!==undefined));
+  res.seeds.forEach(sd=>sd.ids.forEach(id=>{
+    getKs(id).forEach(k=>{A[k]=1;show[k]=1;pq[k]=new Map([[sd.q,1]]);seedK.add(k);});
+  }));
+  res.M.forEach(e=>{
+    const ks=getKs(e.id);
+    if(!ks.length){miss++;return;}
+    ks.forEach(k=>{
+      A[k]=Math.max(A[k],(e.lp===1?1:.8)*(.25+.75*Math.min(1,e.s)));show[k]=1;pq[k]=e.pq;
+    });
+    e.lp===1?n1++:n2++;
+  });
   const nT=res.seeds.length,cv=new Float32Array(N);let cm=1e-9;
-  res.M.forEach(e=>{const k=word2i.get(e.id);if(k===undefined||seedK.has(k))return;let sum=0,hit=0;
-    res.seeds.forEach(sd=>{const v=(e.pq&&e.pq.get&&e.pq.get(sd.q))||0;sum+=v;if(v>0)hit++;});
-    const c=(sum/nT)*(.5+.5*hit/nT);cv[k]=c;if(c>cm)cm=c;});
+  res.M.forEach(e=>{
+    const ks=getKs(e.id);
+    ks.forEach(k=>{
+      if(seedK.has(k))return;let sum=0,hit=0;
+      res.seeds.forEach(sd=>{const v=(e.pq&&e.pq.get&&e.pq.get(sd.q))||0;sum+=v;if(v>0)hit++;});
+      const c=(sum/nT)*(.5+.5*hit/nT);cv[k]=c;if(c>cm)cm=c;
+    });
+  });
   for(let i=0;i<N;i++)cv[i]/=cm;seedK.forEach(k=>{cv[k]=1;});
-  {const cut=cthrOf();res.M.map(e=>word2i.get(e.id)).filter(k=>k!==undefined&&!seedK.has(k)).sort((a,b)=>cv[b]-cv[a])
-    .forEach((k,r)=>{if(r>=3&&cv[k]<cut){show[k]=0;A[k]=0;}});}
+  {const cut=cthrOf();
+   res.M.forEach(e=>{
+     const ks=getKs(e.id);
+     ks.forEach(k=>{
+       if(!seedK.has(k)&&cv[k]<cut){show[k]=0;A[k]=0;}
+     });
+   });
+  }
   const top=[...Array(N).keys()].filter(i=>show[i]).sort((a,b)=>cv[b]-cv[a]||A[b]-A[a]);
   const eIv=new Float32Array(E);let mo=1e-6;
   edges.forEach((e,k)=>{if(!show[e.s]||!show[e.t])return;let ov=0;
@@ -1656,7 +2049,11 @@ async function runQuery(text,again,opts){
   for(let k=0;k<E;k++)eIv[k]=eIv[k]>0?.1+.95*Math.pow(eIv[k]/mo,.8):.03;
   if(!replaying&&!so)hebbPull([...seedK,...top.slice(0,4)]);
   if(!so)sfxWash();
-  Q={A,show,top,eI:eIv,terms:res.seeds.map(s=>s.q),seed:seedK,cv,sg:res.seeds.map(s=>s.ids.slice()),fromSel:so,sk};if(!so){SS.clear();selV++;sel=-1;}updatePulse(false);applyState();if(!replaying&&!so){pushHist(queryEntry(text,top,A,eIv));}
+  let crossBridges=[];
+  if(fieldMode==='separated'&&orbs.length>1){
+    crossBridges=computeCrossBridges(A,show,pq,cv,seedK,res.seeds);
+  }
+  Q={A,show,top,eI:eIv,terms:res.seeds.map(s=>s.q),seed:seedK,cv,sg:res.seeds.map(s=>s.ids.slice()),fromSel:so,sk,crossBridges};if(!so){SS.clear();selV++;sel=-1;}updatePulse(false);applyState();if(!replaying&&!so){pushHist(queryEntry(text,top,A,eIv));}
   psAuto();if(!so)stat(summary());
 }
 function hebbMove(ids){
@@ -1679,7 +2076,18 @@ function replayHebb(){
 }
 function selQ(){return !!(Q&&Q.fromSel&&SS.size&&Q.sk===[...SS].join(','));}
 function selQuery(){const ws=[...SS].map(i=>nodes[i].word);if(ws.length)runQuery(ws.join(' '),true,{sel:true,words:ws});}
-function toggleSel(i){if(SS.has(i))SS.delete(i);else SS.add(i);sel=SS.size?[...SS].pop():-1;selV++;if(SS.has(i)&&SS.size>1&&!replaying)hebbPull([...SS]);if(Q&&Q.fromSel)Q=null;applyState();psAuto();if(SS.size)selQuery();return SS.has(i);}
+function toggleSel(i){
+  const w=nodes[i]&&nodes[i].word;
+  const ks=(w&&word2all&&word2all.get(nodes[i].id))||[i];
+  const hasAny=ks.some(k=>SS.has(k));
+  ks.forEach(k=>{if(hasAny)SS.delete(k);else SS.add(k);});
+  sel=SS.size?[...SS].pop():-1;selV++;
+  if(!hasAny&&SS.size>1&&!replaying)hebbPull([...SS]);
+  if(Q&&Q.fromSel)Q=null;
+  applyState();psAuto();
+  if(SS.size)selQuery();
+  return !hasAny;
+}
 function select(i){if(i<0)return;const on=toggleSel(i);if(on)sfxChime(i);if(on&&SS.size===1&&!replaying)pushHist(selectEntry(i));}
 function clearAll(){SS.clear();selV++;sel=-1;Q=null;$q.value='';applyState();psAuto();if(nodes.length)stat(summary());}
 const $=s=>document.querySelector(s),$q=$('#q'),$info=$('#info');
@@ -1689,8 +2097,15 @@ let docCount=0;
 function updateInfo(){
   const d=infoData();
   if(d){$info.style.display='flex';$info.style.paddingTop=d.t?'':'4px';
-    const selRows=[...SS].map(i=>`<li class="sel" data-i="${i}"><span>${esc(nodes[i].word)}</span><span class="w">${nodes[i].freq}</span><span><button class="sxb" data-x="${i}" title="Deselect ${esc(nodes[i].word)}" aria-label="Deselect ${esc(nodes[i].word)}">\u2715</button></span></li>`).join('');
-    $('#infob').innerHTML=`${d.t?`<div class="ih"><div>${esc(d.s)}</div></div>`:''}<div class="il"><ul${d.t?'':' style="margin-top:0"'}>${selRows}${d.rows.map(r=>`<li data-i="${r.i}"><span>${esc(r.l)}</span><span class="w">${r.n}</span></li>`).join('')}</ul></div>`;
+    const seenSel=new Set(),selRows=[];
+    for(const i of SS){
+      const w=nodes[i].word;
+      if(!seenSel.has(w)){
+        seenSel.add(w);
+        selRows.push(`<li class="sel" data-i="${i}"><span>${esc(w)}</span><span class="w">${nodes[i].freq}</span><span><button class="sxb" data-x="${i}" title="Deselect ${esc(w)}" aria-label="Deselect ${esc(w)}">\u2715</button></span></li>`);
+      }
+    }
+    $('#infob').innerHTML=`${d.t?`<div class="ih"><div>${esc(d.s)}</div></div>`:''}<div class="il"><ul${d.t?'':' style="margin-top:0"'}>${selRows.join('')}${d.rows.map(r=>`<li data-i="${r.i}"><span>${esc(r.l)}</span><span class="w">${r.n}</span></li>`).join('')}</ul></div>`;
   }else $info.style.display='none';
   hud();
 }
@@ -1707,13 +2122,28 @@ function renderDocs(){
   if(!curDocs.length){docsEl.hidden=true;docsEl.innerHTML='';return;}
   const wc=t=>t.split(/\s+/).filter(Boolean).length;
   docsEl.hidden=!docsOpen;
+  const modeRow=curDocs.length>1?`
+    <div class="fmode-row">
+      <span>Field Layout</span>
+      <div class="fmode-toggle">
+        <button type="button" class="${fieldMode==='unified'?'active':''}" data-fm="unified">Unified</button>
+        <button type="button" class="${fieldMode==='separated'?'active':''}" data-fm="separated">Separated Orbs</button>
+      </div>
+    </div>
+    <div class="hs" style="padding:4px 8px 6px;margin:0">
+      ${fieldMode==='separated'?'Each file has its own orb. Queries find and draw cross-field overlap connections.':'All attached texts form a single unified conceptual field (default).'}
+    </div>
+  `:'';
   docsEl.innerHTML=`<div class="dh"><span>${curDocs.length} attached text${curDocs.length===1?'':'s'}</span>${curDocs.length>1?'<button id="ctx" title="Remove all attached text and its saved copy">\u2715 Clear All</button>':''}<span>${curDocs.reduce((a,d)=>a+wc(d.text),0).toLocaleString()} words</span></div>`+
+    modeRow+
     curDocs.map((d,i)=>`<div class="dr"><button class="dn" data-v="${i}" title="Show or hide a preview">${docOpen.has(d.name)?'\u25be':'\u25b8'} ${esc(d.name)}</button><span class="dm">${wc(d.text).toLocaleString()} w</span><button class="dx" data-d="${i}" title="Remove ${esc(d.name)}" aria-label="Remove ${esc(d.name)}">\u00d7</button></div>`+
     (docOpen.has(d.name)?`<pre class="dp">${esc(d.text.slice(0,1500))}${d.text.length>1500?'\n\u2026':''}</pre>`:'')).join('')+
     `<div class="da"><button id="docadd" title="Add more text files to the field">+ Add more files</button></div>`;
 }
 $('#dcnt').onclick=()=>{docsOpen=!docsOpen;renderDocs();};
 docsEl.addEventListener('click',async e=>{
+  const fmt=e.target.closest('button[data-fm]');
+  if(fmt){setFieldMode(fmt.dataset.fm);renderDocs();return;}
   if(e.target.closest('#ctx')){ctxClear();return;}
   if(e.target.closest('#docadd')){$('#file').click();return;}
   const v=e.target.closest('button[data-v]');
@@ -1819,7 +2249,11 @@ addEventListener('drop',e=>{e.preventDefault();load(e.dataTransfer.files);});
 $('#qf').addEventListener('submit',e=>{e.preventDefault();runQuery($q.value).then(autoBrain);});
 $('#clr').onclick=clearAll;
 $('#helpbtn').onclick=()=>{const h=$('#hint');h.hidden=!h.hidden;$('#helpbtn').setAttribute('aria-expanded',String(!h.hidden));};
-$info.addEventListener('click',e=>{const pg=e.target.closest('button.pg');if(pg){e.stopPropagation();PS.auto=true;showPassages(pg.dataset.e!==undefined?specLink(+pg.dataset.e):specWith(+pg.dataset.n));return;}const xb=e.target.closest('button[data-x]');if(xb){e.stopPropagation();toggleSel(+xb.dataset.x);return;}const li=e.target.closest('li[data-i]');if(li)select(+li.dataset.i);});
+$info.addEventListener('click',e=>{
+  const pg=e.target.closest('button.pg');if(pg){e.stopPropagation();PS.auto=true;showPassages(pg.dataset.e!==undefined?specLink(+pg.dataset.e):specWith(+pg.dataset.n));return;}
+  const xb=e.target.closest('button[data-x]');if(xb){e.stopPropagation();toggleSel(+xb.dataset.x);return;}
+  const li=e.target.closest('li[data-i]');if(li)select(+li.dataset.i);
+});
 function fieldR(){let r=.3;for(const n of nodes){const d=Math.hypot(n.x,n.y,n.z);if(d>r)r=d;}return r;}
 const fitScale=t=>THREE.MathUtils.clamp(t/fieldR(),.08,4);
 let needCenter=false,arMode=false,placing=false,placedOnce=false,arScale=null,lastHit=false,reqLook=null,sessAR=false,centerS=.3,xrNote='';
@@ -2142,23 +2576,21 @@ const ib=new THREE.Mesh(new THREE.PlaneGeometry(.4,.4*IH/IW),new THREE.MeshBasic
 ib.renderOrder=30;ib.visible=false;ib.frustumCulled=false;scene.add(ib);
 let HUIDE=false,ibHpx=0,kDirty=true,iDirty=true,infoCache=null,kbOpen=false,pressK=null,pressT=0,lastPh=0,hsig='';
 function infoData(){
+  const makeRows=indices=>{
+    const out=[],seen=new Set();
+    for(const i of indices){
+      const w=nodes[i].word;
+      if(seen.has(w))continue;
+      seen.add(w);
+      const v=Q.cv?Q.cv[i]:Q.A[i];
+      out.push({i,l:w,v,n:v.toFixed(2)});
+    }
+    return out;
+  };
   if(selQ()&&Q.top){const sk=Q.sk;
-    return {key:'sq'+sk,t:'sel',s:`${SS.size} selected \u00b7 related words as if asked together`,rows:Q.top.filter(i=>!SS.has(i)).map(i=>({i,l:nodes[i].word,v:Q.cv?Q.cv[i]:Q.A[i],n:(Q.cv?Q.cv[i]:Q.A[i]).toFixed(2)}))};}
+    return {key:'sq'+sk,t:'sel',s:`${SS.size} selected \u00b7 related words as if asked together`,rows:makeRows(Q.top.filter(i=>!SS.has(i)))};}
   if(SS.size)return {key:'sp'+[...SS].join(','),t:'sel',s:`${SS.size} selected \u00b7 searching\u2026`,rows:[]};
-  if(false){
-    const sl=[...SS];
-    if(sl.length===1){const sel=sl[0];
-      const n=nodes[sel],c=n.adj.slice().sort((a,b)=>edges[b.e].w-edges[a.e].w).filter(a=>!(Q&&Q.seed&&Q.seed.has(a.j))),mx=Math.max(1e-6,...c.map(a=>edges[a.e].w));
-      return {key:'s'+sel,t:n.word,s:`${n.freq} mentions, ${n.adj.length} links`,rows:c.map(a=>{const e=edges[a.e];return {i:a.j,l:(e.s===sel?'\u2192 ':'\u2190 ')+nodes[a.j].word,v:e.w/mx,n:e.w.toFixed(2),e:a.e};})};}
-    const m=new Map(),dr=[];
-    sl.forEach(s=>{const ad=nodes[s].adj,mx=Math.max(1e-6,...ad.map(a=>edges[a.e].w));
-      ad.forEach(a=>{if(SS.has(a.j)){return;}
-        if(Q&&Q.seed&&Q.seed.has(a.j))return;
-        const v=edges[a.e].w/mx,o=m.get(a.j)||{c:0,v:0};o.c++;o.v=Math.max(o.v,v);m.set(a.j,o);});});
-    const rows=dr.concat([...m].sort((a,b)=>b[1].c-a[1].c||b[1].v-a[1].v).map(([i,o])=>({i,l:nodes[i].word+(o.c>1?' \u2605':''),v:Math.min(1,o.v+.4*(o.c-1)),n:o.c+'/'+sl.length})));
-    return {key:'m'+sl.join(','),t:sl.map(i=>nodes[i].word).join(' + '),s:`${sl.length} selected \u00b7 \u2605 links several`,rows};
-  }
-  if(Q&&Q.top)return {key:'q'+Q.terms.join(' '),t:'',s:'',rows:Q.top.filter(i=>!(Q.seed&&Q.seed.has(i))).map(i=>({i,l:nodes[i].word,v:Q.cv?Q.cv[i]:Q.A[i],n:(Q.cv?Q.cv[i]:Q.A[i]).toFixed(2)}))};
+  if(Q&&Q.top)return {key:'q'+Q.terms.join(' '),t:'',s:'',rows:makeRows(Q.top.filter(i=>!(Q.seed&&Q.seed.has(i))))};
   return null;
 }
 let iScroll=0,ibHot=false,iVel=0;
@@ -2170,7 +2602,9 @@ function drawInfo(){
   x.font='600 26px '+F;
   if(SS.size){
     let cx=24,cy=14,rows=1;
-    const items=[...SS].map(i=>({i,t:nodes[i].word})).concat(SS.size>1?[{i:-2,t:'clear all'}]:[]);
+    const seenT=new Set(),items=[];
+    for(const i of SS){const t=nodes[i].word;if(!seenT.has(t)){seenT.add(t);items.push({i,t});}}
+    if(items.length>1)items.push({i:-2,t:'clear all'});
     for(const it of items){const lab=it.t.length>14?it.t.slice(0,13)+'\u2026':it.t,w=x.measureText(lab).width+(it.i>=0?60:36);
       if(cx+w>IW-24&&cx>24){cx=24;cy+=46;rows++;}
       if(rows>3)break;
@@ -2689,9 +3123,25 @@ renderer.domElement.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]
 renderer.domElement.addEventListener('pointerup',e=>{
   if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>4||!nodes.length)return;
   ray.setFromCamera(new THREE.Vector2(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1),camera);
+  // Check if clicked directly on a thread label badge
+  const hitLbl=crossLabelsGroup.children.length?ray.intersectObjects(crossLabelsGroup.children)[0]:null;
+  if(hitLbl&&hitLbl.object&&hitLbl.object.userData&&hitLbl.object.userData.bridge){
+    const b=hitLbl.object.userData.bridge;
+    SS.clear();SS.add(b.u);SS.add(b.v);sel=b.v;selV++;applyState();
+    PS.auto=true;showPassages({title:`${nodes[b.u].word} \u2194 ${nodes[b.v].word} (Overlap)`,ids:[nodes[b.u].id,nodes[b.v].id],w:[1,1],must:[0,1],all:false,R:.85});
+    sfxChime(b.u);return;
+  }
   const i=pick(ray.ray.origin,ray.ray.direction,.02);
   if(i>=0)select(i);
-  else{const k=edgePick(e.clientX,e.clientY);if(k>=0){PS.auto=true;showPassages(specLink(k));}}
+  else{const xb=crossPick(e.clientX,e.clientY);
+    if(xb>=0){
+      const b=Q.crossBridges[xb];
+      SS.clear();SS.add(b.u);SS.add(b.v);sel=b.v;selV++;applyState();
+      PS.auto=true;showPassages({title:`${nodes[b.u].word} \u2194 ${nodes[b.v].word} (Overlap)`,ids:[nodes[b.u].id,nodes[b.v].id],w:[1,1],must:[0,1],all:false,R:.8});
+      sfxChime(b.u);
+    }else{
+      const k=edgePick(e.clientX,e.clientY);if(k>=0){PS.auto=true;showPassages(specLink(k));}
+    }}
 });
 addEventListener('keydown',e=>{if(!/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))keys[e.code]=true;});
 addEventListener('keyup',e=>keys[e.code]=false);
@@ -3606,6 +4056,19 @@ function edgePick(cx,cy){
   }
   return best;
 }
+function crossPick(cx,cy){
+  if(!Q||!Q.crossBridges||!Q.crossBridges.length)return -1;
+  camera.updateMatrixWorld();const V=camera.matrixWorldInverse,P=camera.projectionMatrix;
+  const pr=(n,o)=>{o.set(n.x,n.y,n.z).applyMatrix4(G.matrixWorld).applyMatrix4(V);if(o.z>-.02)return false;o.applyMatrix4(P);o.x=(o.x*.5+.5)*innerWidth;o.y=(-o.y*.5+.5)*innerHeight;return true;};
+  let best=-1,bd=12;
+  for(let k=0;k<Q.crossBridges.length;k++){
+    const b=Q.crossBridges[k];
+    if(!pr(nodes[b.u],_pa)||!pr(nodes[b.v],_pb))continue;
+    const dx=_pb.x-_pa.x,dy=_pb.y-_pa.y,L=dx*dx+dy*dy;let t=L?((cx-_pa.x)*dx+(cy-_pa.y)*dy)/L:0;t=Math.max(0,Math.min(1,t));
+    const d=Math.hypot(cx-(_pa.x+t*dx),cy-(_pa.y+t*dy));if(d<bd){bd=d;best=k;}
+  }
+  return best;
+}
 // ================= real documents: PDF, Word, HTML, URLs =================
 const PDFV='4.4.168';let pdfjsP=null,mammothP=null;
 const loadScript=u=>new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=u;sc.onload=res;sc.onerror=()=>rej(new Error('Could not load '+u));document.head.appendChild(sc);});
@@ -3772,6 +4235,10 @@ renderer.setAnimationLoop((t,frame)=>{
   }
   renderer.render(scene,camera);
 });
+
+const fmUni=$('#fm-uni'),fmSep=$('#fm-sep');
+if(fmUni)fmUni.onclick=()=>setFieldMode('unified');
+if(fmSep)fmSep.onclick=()=>setFieldMode('separated');
 </script>
 </body>
 </html>
