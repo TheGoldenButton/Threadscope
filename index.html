@@ -300,7 +300,7 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 </div>
 <div id="rd" class="panel" hidden><div id="rdh"><button id="rdp" title="Older reading">&#8249;</button><span id="rdn">0/0</span><button id="rdnx" title="Newer reading">&#8250;</button><span id="rdt"></span><button id="rdst" title="Stop generating" hidden>&#9632; Stop</button><button id="rdx" title="Close">&#10005;</button></div><div id="rdb"></div><div id="rdm"></div><form id="rdf"><input id="rdq" type="text" placeholder="Ask a follow-up within this context" autocomplete="off"><button type="submit" id="rds">Send</button></form></div>
 <button id="helpbtn" aria-label="Help" aria-expanded="false" title="Help">?</button>
-<div id="hint" class="panel" hidden>Desktop: drag to orbit, wheel to zoom, WASD/QE to fly, click concepts to select several (selected words pulse; click again to deselect). With words selected, Play puts you inside the current, flying node to node in resonant order. Every word you type is searched, including common words like the or not; only the drawn field hides them. VR: a query bar, keyboard and a results box float in view (point and pinch or trigger the bar to type). The keyboard's mic key dictates into the bar with Whisper: press it, speak, press it again, then press W for Wikipedia or Ask. Mixed reality (Quest 3): press Enter mixed reality to see your room through the passthrough cameras. Pinch and drag anywhere to carry the data sphere (the right stick spins it), pinch with both hands and spread to resize and twist it, quick pinch on a word to select it (or tap a selected word chip in the list box to deselect it); select several to see how they connect, and pinch a selected word again to deselect it. Two hands pushing out pushes the orbs away; motioning forward pulls them toward you. Pointing at words in the word list highlights them with a SELECT cue for easy clicking. The field remembers where you put it between mixed-reality sessions. Sticks fly in VR. A adds the selected concept to the query, B clears. Press Place on the panel to snap the field onto a wall, table or floor. In VR the top buttons are: + paste copied text, \u21C4 switch saved text, W fetch Wikipedia for the typed topic, \u00B6 source passages, and the gear toggles the LLM. Brighter nodes are more frequent words. Zoom out and neighbouring words collapse into the most dominant word of their area (bigger dot, labelled); zoom in and they expand again. The field learns as you use it: words you query or select together are drawn a little closer each time, and the arrangement is saved per text. Line colour is based on how often the words at each end occur in your text: rare words are violet and blue, then green and yellow, and the most frequent words are orange and red, so each line blends between its two ends. The cog (top right) can switch lines to colour by link strength instead. Once you have a query or selection, a Play button, timeline and speed button appear: words appear one by one, strongest resonance first (the speed button cycles 0.25x to 4x). The results box scrolls: thumbstick while pointing at it, or (hand tracking) touch it with your index fingertip and slide up or down like a touchscreen, with a flick for momentum; tap a row to select that word. Source passages: select a concept (or click a link line, or press the ¶ button on a row) to see the sentences where the words occur, with the document name; how many are shown adapts to how strongly the words resonate. Voice: hold out an open palm (palm up or toward you) steadily for about three quarters of a second in mixed reality or VR with hand tracking. An orb appears in your hand with lightning arcing to the network; speak, then close your hand or pull it away to send. Whisper runs in your browser (the first use downloads a small model). On desktop, or with controllers, use the mic button. Attach PDF, Word or HTML files, or fetch URLs.</div>
+<div id="hint" class="panel" hidden>Desktop: drag to orbit, wheel to zoom, WASD/QE to fly, click concepts to select several (selected words pulse; click again to deselect). With words selected, Play puts you inside the current, flying node to node in resonant order. Every word you type is searched, including common words like the or not; only the drawn field hides them. VR: a query bar, keyboard and a results box float in view (point and pinch or trigger the bar to type). The keyboard's mic key dictates into the bar with Whisper: press it, speak, press it again, then press W for Wikipedia or Ask. Or open your palm (the orb) or tap the mic and say &ldquo;Wikipedia: your topic&rdquo; to pull that page in; add &ldquo;as its own sphere&rdquo; or &ldquo;into the unified space&rdquo; to choose where it lands. Mixed reality (Quest 3): press Enter mixed reality to see your room through the passthrough cameras. Pinch and drag anywhere to carry the data sphere (the right stick spins it), pinch with both hands and spread to resize and twist it, quick pinch on a word to select it (or tap a selected word chip in the list box to deselect it); select several to see how they connect, and pinch a selected word again to deselect it. Two hands pushing out pushes the orbs away; motioning forward pulls them toward you. Pointing at words in the word list highlights them with a SELECT cue for easy clicking. The field remembers where you put it between mixed-reality sessions. Sticks fly in VR. A adds the selected concept to the query, B clears. Press Place on the panel to snap the field onto a wall, table or floor. In VR the top buttons are: + paste copied text, \u21C4 switch saved text, W fetch Wikipedia for the typed topic, \u00B6 source passages, and the gear toggles the LLM. Brighter nodes are more frequent words. Zoom out and neighbouring words collapse into the most dominant word of their area (bigger dot, labelled); zoom in and they expand again. The field learns as you use it: words you query or select together are drawn a little closer each time, and the arrangement is saved per text. Line colour is based on how often the words at each end occur in your text: rare words are violet and blue, then green and yellow, and the most frequent words are orange and red, so each line blends between its two ends. The cog (top right) can switch lines to colour by link strength instead. Once you have a query or selection, a Play button, timeline and speed button appear: words appear one by one, strongest resonance first (the speed button cycles 0.25x to 4x). The results box scrolls: thumbstick while pointing at it, or (hand tracking) touch it with your index fingertip and slide up or down like a touchscreen, with a flick for momentum; tap a row to select that word. Source passages: select a concept (or click a link line, or press the ¶ button on a row) to see the sentences where the words occur, with the document name; how many are shown adapts to how strongly the words resonate. Voice: hold out an open palm (palm up or toward you) steadily for about three quarters of a second in mixed reality or VR with hand tracking. An orb appears in your hand with lightning arcing to the network; speak, then close your hand or pull it away to send. Whisper runs in your browser (the first use downloads a small model). On desktop, or with controllers, use the mic button. Attach PDF, Word or HTML files, or fetch URLs.</div>
 <script type="text/plain" id="engine-src">
 
 
@@ -1626,8 +1626,8 @@ const ENG=(()=>{
   return {call(msg,prog){return new Promise((res,rej)=>{const id=++rid;pend.set(id,{res,rej,prog});w.postMessage({...msg,rid:id});});},
     post(msg){w.postMessage({...msg,rid:++rid});}};
 })();
-let EPOCH=0,ingesting=false,qSeq=0,forceWords=[],qBusy=0;
-const thinking=()=>qBusy>0||ingesting||!!rdBusy||VOICE.st==='rec'||VOICE.busy>0;
+let EPOCH=0,ingesting=false,qSeq=0,forceWords=[],qBusy=0;var wikiBusy=0;
+const thinking=()=>qBusy>0||ingesting||wikiBusy>0||!!rdBusy||VOICE.st==='rec'||VOICE.busy>0;
 let nD=null,eD=null,pulseKey='',pulseOn=0;
 const txtWords=()=>{const a=$q.value.toLowerCase().match(/[\p{L}\d'-]+/gu)||[],s=new Set(a);for(let i=0;i+1<a.length;i++)s.add(a[i]+' '+a[i+1]);return s;};
 
@@ -2033,8 +2033,8 @@ function label(i,kind){
 }
 function buildVisuals(){
   lodClear();col.lv=null;col.hide=null;
-  if(pts){G.remove(pts,lines,dots);pts.geometry.dispose();lines.geometry.dispose();dots.geometry.dispose();}
-  labelCache.forEach(s=>{s.material.map.dispose();s.material.dispose();});labelCache.clear();
+  if(pts){G.remove(pts,lines,dots);slowDispose([pts.geometry,lines.geometry,dots.geometry]);}
+  slowDispose([...labelCache.values()]);labelCache.clear();
   const N=nodes.length,E=edges.length;
   {const lf=nodes.map(n=>Math.log(1+n.freq));let lo=Infinity,hi=-Infinity;for(const v of lf){if(v<lo)lo=v;if(v>hi)hi=v;}
    nodes.forEach((n,i)=>n.nf=hi>lo?(lf[i]-lo)/(hi-lo):.5);
@@ -2160,7 +2160,8 @@ function applyState(quick){
 }
 async function runQuery(text,again,opts){
   const so=!!(opts&&opts.sel);
-  if(!nodes.length){stat('Build the field first.');return;}
+  if(!so&&!replaying){const wq=parseWiki(text);if(wq){$q.value='';wikiCommand(wq);return;}}
+  if(!nodes.length){stat('Build the field first. Say \u201cWikipedia: a topic\u201d to load one.');return;}
   const seq=[...text.toLowerCase().replace(/[\u2018\u2019]/g,"'").matchAll(TOKRE)].map(m=>/^\d/.test(m[0])?m[0].replace(/,/g,''):m[0]).filter(w=>/^[\p{L}\p{M}\d]/u.test(w)),words=[...new Set(seq)];
   if(ingesting){stat('The field is still building. Try again in a moment.');return;}
   if(!so)LASTQ=text.trim();
@@ -2398,7 +2399,7 @@ async function ingest0(docs,opts={}){
   if(my!==EPOCH)return false;
   ingesting=false;
   docCount=docs.length;curDocs=docs;setField(r);HLOG=r.built?[]:((pre&&pre.h)||[]);
-  if(r.built)saveField();
+  if(r.built&&!(r.mode==='separated'&&docs.length>1))saveField();
   if(nodes.length<3){stat('Not enough repeated concepts. Attach longer text.');renderDocs();return false;}
   buildVisuals();stat(summary());renderDocs();
   if(!opts.noSave)saveCorpus(docs,curCorpus);
@@ -2431,7 +2432,7 @@ $('#wkadd').onclick=async()=>{
     for(const t of titles){
       const r=await fetch(WAPI+'?action=query&prop=extracts&explaintext=1&redirects=1&format=json&origin=*&titles='+encodeURIComponent(t));
       const pg=Object.values((await r.json()).query.pages)[0],tx=(pg.extract||'').replace(/^=+\s*(.*?)\s*=+\s*$/gm,'$1');
-      if(tx.length>200)docs.push({name:'Wikipedia: '+(pg.title||t),text:tx});
+      if(tx.length>200)docs.push({name:'Wikipedia: '+(pg.title||t),text:wikiTrim(tx)});
     }
     if(!docs.length){wkS.textContent='Those pages had no readable text.';return;}
     wkQueue.clear();wkR.querySelectorAll('.wm.on').forEach(x=>x.classList.remove('on'));wkUpd();
@@ -2441,6 +2442,61 @@ $('#wkadd').onclick=async()=>{
     wkS.textContent=ok?`Added ${docs.length} page${docs.length>1?'s':''}. Search again to add more.`:'Not enough repeated concepts in those pages.';
   }catch(e){wkS.textContent='Wikipedia request failed: '+(e&&e.message||e);}
 };
+
+// ---- "Wikipedia: topic" command (spoken into the orb, dictated, or typed) ----
+// Drops reference/see-also tails and caps very long pages so the field builds fast instead of stalling the headset.
+function wikiTrim(tx){
+  tx=tx.replace(/\n[ \t]*(?:See also|References|External links|Further reading|Notes|Bibliography|Sources|Citations)[ \t]*\n[\s\S]*$/,'');
+  const CAP=LOW?45000:110000;
+  if(tx.length>CAP){const k=tx.lastIndexOf('\n',CAP);tx=tx.slice(0,k>CAP*.6?k:CAP);}
+  return tx;
+}
+// Returns {topic, how} where how is 'separated' (own sphere), 'unified', or null (keep the current layout mode).
+function parseWiki(text){
+  const m=/^\W*(?:wiki(?:pedia)?|wicky(?:pedia)?|wikipeedia)\b(.*)$/is.exec(String(text||'').trim());
+  if(!m)return null;
+  let rest=m[1];const punct=/^\s*(?:colon\b|[:,;\-\u2013\u2014])/i.test(rest);
+  rest=rest.replace(/^\s*(?:colon\b|[:,;\-\u2013\u2014])+\s*/i,'');
+  rest=rest.replace(/^\W*(?:please\s+)?(?:search|look\s?up|find|load|get|download|pull\s?up|fetch)(?:\s+up)?\s+(?:(?:for|about|on|up)\s+)?/i,'');
+  if(!punct)rest=rest.replace(/^\W*(?:(?:for|about|on)\s+)?(?:the\s+topic\s+)?/i,'');
+  let how=null;
+  const SEP=/[\s,]*\b(?:(?:as|in|into|to|with)\s+(?:its\s+own|it's\s+own|their\s+own|a\s+new|a\s+separate|own|separate)\s+(?:sphere|orb|field|brain)|(?:in|as)\s+a\s+(?:new\s+)?(?:sphere|orb)|separately|on\s+its\s+own)\b/i;
+  const UNI=/[\s,]*\b(?:(?:in|into|to|with)\s+(?:the\s+)?(?:unified|main|same|combined|merged|existing|current)\b(?:\s+(?:space|field|sphere|orb|brain))?|unified|merged?)\b/i;
+  if(SEP.test(rest)){how='separated';rest=rest.replace(SEP,' ');}
+  else if(UNI.test(rest)){how='unified';rest=rest.replace(UNI,' ');}
+  const topic=rest.replace(/^\W+/,'').replace(/[\s.,!?;:]+$/,'').replace(/\s+/g,' ').trim().slice(0,100);
+  return topic.length>=2?{topic,how}:null;
+}
+async function wikiFetch(topic){
+  const q=async p=>{const r=await fetch(WAPI+'?format=json&origin=*&'+p);if(!r.ok)throw new Error('HTTP '+r.status);return r.json();};
+  const L=((await q('action=query&list=search&srlimit=4&srprop=&srsearch='+encodeURIComponent(topic))).query||{}).search||[];
+  for(const hit of L){
+    const r=await q('action=query&prop=extracts%7Cpageprops&ppprop=disambiguation&explaintext=1&redirects=1&titles='+encodeURIComponent(hit.title));
+    const pg=Object.values((r.query||{}).pages||{})[0];
+    if(!pg||pg.missing!==undefined||(pg.pageprops&&pg.pageprops.disambiguation!==undefined))continue;
+    const raw=(pg.extract||'').replace(/^=+\s*(.*?)\s*=+\s*$/gm,'$1'),text=wikiTrim(raw);
+    if(text.length>200)return {title:pg.title||hit.title,text,capped:raw.length>text.length+2000};
+  }
+  return null;
+}
+async function wikiCommand(w){
+  if(wikiBusy){vnote('Still loading the last Wikipedia page\u2026',3000);return false;}
+  if(ingesting){vnote('The field is still building. Try again in a moment.',4000);return false;}
+  wikiBusy++;
+  try{
+    vnote('Wikipedia: looking up \u201c'+w.topic+'\u201d\u2026',0);
+    let pg;try{pg=await wikiFetch(w.topic);}catch(e){vnote('Wikipedia request failed: '+(e&&e.message||e),6000);return false;}
+    if(!pg){vnote('No Wikipedia page found for \u201c'+w.topic+'\u201d.',6000);return false;}
+    const name='Wikipedia: '+pg.title,keep=curDocs.filter(d=>d.name!==name);
+    if(w.how&&keep.length&&w.how!==fieldMode){fieldMode=w.how;try{localStorage.setItem('cf.fieldMode',fieldMode);}catch(e){}}
+    vnote('Building \u201c'+pg.title+'\u201d'+(pg.capped?' (long page trimmed)':'')+'\u2026',0);
+    const ok=await ingest([...keep,{name,text:pg.text}]);
+    if(ok){sfxChime(0);vnote('Added \u201c'+pg.title+'\u201d '+(keep.length?(fieldMode==='separated'?'as its own sphere':'into the unified space'):'to the field'),6000);}
+    else vnote('Not enough repeated concepts in \u201c'+pg.title+'\u201d.',6000);
+    return ok;
+  }catch(e){vnote('Wikipedia failed: '+(e&&e.message||e),6000);return false;}
+  finally{wikiBusy--;}
+}
 addEventListener('dragover',e=>e.preventDefault());
 addEventListener('drop',e=>{e.preventDefault();load(e.dataTransfer.files);});
 $('#qf').addEventListener('submit',e=>{e.preventDefault();runQuery($q.value).then(autoBrain);});
@@ -2535,9 +2591,8 @@ function voiceTeardown(){
 async function voiceStart(src){
   if(VOICE.st!=='idle')return;
   const dict=src==='dict';
-  if(!dict&&!nodes.length){vnote('Load text first, then speak.');return;}
   VOICE.dict=dict;VOICE.base=dict?$q.value.trim():'';
-  VOICE.st='starting';VOICE.want=true;VOICE.chunks=[];VOICE.n=0;VOICE.lvl=0;VOICE.peak=0;VOICE.sess++;VOICE.live='';VOICE.hits=[];VOICE.itT=1.2;if(!dict)$q.value='';voiceUI();voiceWarm();
+  VOICE.st='starting';VOICE.want=true;VOICE.chunks=[];VOICE.n=0;VOICE.lvl=0;VOICE.peak=0;VOICE.sess++;VOICE.live='';VOICE.hits=[];VOICE.wk=0;VOICE.itT=1.2;if(!dict)$q.value='';voiceUI();voiceWarm();
   try{
     const stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
     const AC=window.AudioContext||window.webkitAudioContext;let ctx;
@@ -2549,7 +2604,7 @@ async function voiceStart(src){
     Object.assign(VOICE,{stream,ctx,proc,srcN,mute});
     if(ctx.state==='suspended')await ctx.resume();
     if(!VOICE.want){voiceTeardown();VOICE.st='idle';voiceUI();return;}
-    VOICE.st='rec';voiceUI();vnote(VOICE.dict?'Dictating… press the mic key again to finish':'Listening… close your hand to send',0);
+    VOICE.st='rec';voiceUI();vnote(VOICE.dict?'Dictating… press the mic key again to finish':(nodes.length?'Listening… close your hand to send':'Listening… say \u201cWikipedia: your topic\u201d, then close your hand'),0);
   }catch(e){voiceTeardown();VOICE.st='idle';VOICE.want=false;VOICE.hand=-1;voiceUI();vnote('Microphone unavailable: '+(e&&e.message||e),6000);}
 }
 function voiceAudio(chunks,n,rate){
@@ -2580,7 +2635,10 @@ async function voiceSend(audio,dm){
     const t=voiceClean(r.text);
     if(!t)vnote("Didn't catch that. Try again.");
     else if(dm){const v=dictJoin(dm.base,t);$q.value=v;kDirty=true;vnote('Heard: '+v+'. Press W for Wikipedia or Ask.',6000);}
-    else{vnote('Heard: '+t,5000);$q.value=t;await runQuery(t);if(CFG.on){if(rdBusy)stopAll();setTimeout(brain,80);}}
+    else{const wq=parseWiki(t);
+      if(wq){$q.value='';await wikiCommand(wq);}
+      else if(!nodes.length)vnote('Heard: '+t+'. Nothing is loaded yet. Say \u201cWikipedia: your topic\u201d to load a page.',6000);
+      else{vnote('Heard: '+t,5000);$q.value=t;await runQuery(t);if(CFG.on){if(rdBusy)stopAll();setTimeout(brain,80);}}}
   }catch(e){vnote('Whisper failed: '+(e&&e.message||e),6000);}
   finally{VOICE.busy--;}
 }
@@ -2620,21 +2678,82 @@ function voiceStep(dt){
 }
 
 const ORB=new THREE.Group();ORB.visible=false;scene.add(ORB);
-const orbU={uT:{value:0},uL:{value:0},uA:{value:0}};
-const orbMesh=new THREE.Mesh(new THREE.SphereGeometry(1,32,20),new THREE.ShaderMaterial({uniforms:orbU,transparent:true,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending,
-  vertexShader:'varying vec3 vN;varying vec3 vP;void main(){vN=normalize(normalMatrix*normal);vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
-  fragmentShader:'uniform float uT;uniform float uL;uniform float uA;varying vec3 vN;varying vec3 vP;void main(){float f=1.-abs(vN.z);float rim=pow(f,2.2);float sw=.5+.5*sin(vP.x*9.+uT*4.)*sin(vP.y*8.-uT*3.)*sin(vP.z*10.+uT*5.);float core=pow(1.-f,3.);vec3 c=vec3(.35,.85,1.)*(rim*1.6+sw*.45*(1.+uL*3.))+vec3(1.,.95,.8)*core*(.5+uL*2.);gl_FragColor=vec4(c*uA,1.);}'}));
-orbMesh.renderOrder=40;
+// Energy orb: a plasma shell, a tiny rotating "node brain" inside it (glowing nodes, links, signals travelling the links),
+// two orbiting rings with satellites, and a soft aura. Same cyan / violet / mint / amber language as the main field.
+const ORBW={value:0};                         // 0 = cyan/violet, 1 = amber (a Wikipedia command was heard)
+const orbS={value:.03};                        // current orb radius in metres (drives point sizes)
+const orbU={uT:{value:0},uL:{value:0},uA:{value:0},uW:ORBW};
+const orbBody=new THREE.Group();ORB.add(orbBody);
+const orbMesh=new THREE.Mesh(new THREE.SphereGeometry(1,40,28),new THREE.ShaderMaterial({uniforms:orbU,transparent:true,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending,
+  vertexShader:`uniform float uT;uniform float uL;varying vec3 vN;varying vec3 vP;varying vec3 vV;
+void main(){vec3 p=position;float n=sin(p.x*6.+uT*3.1)*sin(p.y*5.5-uT*2.5)*sin(p.z*7.+uT*3.7);p*=1.+.07*n*(.35+uL*1.8);
+vec4 mv=modelViewMatrix*vec4(p,1.);vN=normalize(normalMatrix*normal);vP=position;vV=mv.xyz;gl_Position=projectionMatrix*mv;}`,
+  fragmentShader:`uniform float uT;uniform float uL;uniform float uA;uniform float uW;varying vec3 vN;varying vec3 vP;varying vec3 vV;
+void main(){vec3 V=normalize(-vV);float fr=1.-abs(dot(normalize(vN),V));float rim=pow(fr,2.3),core=pow(1.-fr,2.6);
+float a=sin(vP.x*6.+uT*2.1+sin(vP.y*5.-uT*1.7)*1.6),b=sin(vP.y*7.-uT*2.6+sin(vP.z*6.+uT*1.3)*1.8),c=sin(vP.z*6.5+uT*1.9+sin(vP.x*5.-uT*2.2)*1.5);
+float pl=a*b*c;float vein=pow(1.-abs(pl),7.);float cloud=.5+.5*pl;
+vec3 cy=mix(vec3(.36,.94,1.),vec3(1.,.8,.4),uW),vi=mix(vec3(.5,.36,1.),vec3(1.,.55,.2),uW),wh=vec3(1.,.97,.9);
+vec3 col=mix(vi,cy,smoothstep(.1,.85,fr))*(rim*1.5+cloud*.16*(1.+uL))+mix(cy,wh,.55)*vein*(.5+uL*1.6)*(.45+.55*fr)+wh*core*(.4+uL*1.7);
+gl_FragColor=vec4(col*uA,1.);}`}));
+orbMesh.renderOrder=40;orbBody.add(orbMesh);
+
 const hc=document.createElement('canvas');hc.width=hc.height=128;
 {const hx=hc.getContext('2d'),hg=hx.createRadialGradient(64,64,0,64,64,64);hg.addColorStop(0,'rgba(200,240,255,.9)');hg.addColorStop(.25,'rgba(80,200,255,.45)');hg.addColorStop(1,'rgba(0,120,255,0)');hx.fillStyle=hg;hx.fillRect(0,0,128,128);}
 const haloTex=new THREE.CanvasTexture(hc);haloTex.colorSpace=THREE.SRGBColorSpace;
 const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:haloTex,transparent:true,depthTest:false,depthWrite:false,blending:THREE.AdditiveBlending}));halo.renderOrder=39;
-ORB.add(orbMesh,halo);
-const MAXB=9,SEG=18;
-const bgL=new THREE.BufferGeometry(),bgP=new THREE.BufferGeometry(),bL=new Float32Array(MAXB*SEG*6),bP=new Float32Array(MAXB*(SEG+1)*3);
-bgL.setAttribute('position',new THREE.BufferAttribute(bL,3));bgP.setAttribute('position',new THREE.BufferAttribute(bP,3));
-const boltLines=new THREE.LineSegments(bgL,new THREE.LineBasicMaterial({color:0xcfefff,transparent:true,depthTest:false,depthWrite:false,blending:THREE.AdditiveBlending}));
-const boltPts=new THREE.Points(bgP,new THREE.PointsMaterial({color:0x8fe8ff,size:.006,sizeAttenuation:true,transparent:true,depthTest:false,depthWrite:false,blending:THREE.AdditiveBlending}));
+const coreSp=new THREE.Sprite(new THREE.SpriteMaterial({map:haloTex,color:0xffffff,transparent:true,depthTest:false,depthWrite:false,blending:THREE.AdditiveBlending}));coreSp.renderOrder=43;
+ORB.add(halo,coreSp);
+
+// glowing node sprite, same look as the field's nodes (soft body, bright core, thin ring)
+const miniNodeMat=new THREE.ShaderMaterial({uniforms:{uT:orbU.uT,uL:orbU.uL,uA:orbU.uA,uW:ORBW,uH:U.uH,uS:orbS},transparent:true,depthWrite:false,depthTest:false,...ADD,
+  vertexShader:`attribute float aSz;attribute float aPh;uniform float uT;uniform float uL;uniform float uA;uniform float uW;uniform float uH;uniform float uS;varying vec3 vC;varying float vI;
+void main(){vec4 mv=modelViewMatrix*vec4(position,1.);float tw=.62+.38*sin(uT*2.6+aPh*40.);float h=fract(aPh*3.7);
+vec3 cy=vec3(.36,.94,1.),vi=vec3(.55,.42,1.),mt=vec3(.45,1.,.72),am=vec3(1.,.7,.28);
+vec3 c=mix(mix(vi,cy,smoothstep(0.,.5,h)),mt,smoothstep(.55,.85,h));c=mix(c,am,smoothstep(.9,1.,h));c=mix(c,mix(am,vec3(1.,.92,.65),.4),uW*.85);
+gl_PointSize=min(max(aSz*uS*(1.+.6*uL)*(.8+.4*tw)*uH*.5*projectionMatrix[1][1]/-mv.z,3.),160.);vC=c;vI=uA*tw*(1.+uL*1.5);gl_Position=projectionMatrix*mv;}`,
+  fragmentShader:`varying vec3 vC;varying float vI;void main(){float d=length(gl_PointCoord-.5);if(d>.5)discard;float h=pow(1.-d*2.,2.);float c=smoothstep(.22,0.,d);float ring=smoothstep(.5,.45,d)*smoothstep(.3,.38,d);
+gl_FragColor=vec4((vC*(h*1.1+ring*.6)+vec3(1.)*c*.9)*vI,1.);}`});
+const miniDotMat=new THREE.ShaderMaterial({uniforms:{uT:orbU.uT,uL:orbU.uL,uA:orbU.uA,uH:U.uH,uS:orbS},transparent:true,depthWrite:false,depthTest:false,...ADD,
+  vertexShader:`attribute vec3 aB;attribute float aPh;attribute float aSp;uniform float uT;uniform float uL;uniform float uA;uniform float uH;uniform float uS;varying float vI;
+void main(){float t=fract(uT*.5*aSp+aPh);vec3 p=mix(position,aB,t);vec4 mv=modelViewMatrix*vec4(p,1.);float fade=smoothstep(0.,.15,t)*(1.-smoothstep(.85,1.,t));
+gl_PointSize=min(max(.13*uS*(1.+.8*uL)*uH*.5*projectionMatrix[1][1]/-mv.z,2.),60.);vI=fade*uA*(.7+uL*1.2);gl_Position=projectionMatrix*mv;}`,
+  fragmentShader:`varying float vI;void main(){float d=length(gl_PointCoord-.5);if(d>.5)discard;float h=pow(1.-d*2.,2.);gl_FragColor=vec4(vec3(.7,.97,1.)*h*vI*1.3,1.);}`});
+const MN=30,miniP=new Float32Array(MN*3),miniS=new Float32Array(MN),miniPh=new Float32Array(MN),miniE=[],_se=new Set();
+for(let i=0;i<MN;i++){const y=1-2*(i+.5)/MN,r0=Math.sqrt(1-y*y),a=i*2.39996,rad=.5+.32*((i*37%11)/11);
+  miniP[i*3]=Math.cos(a)*r0*rad;miniP[i*3+1]=y*rad;miniP[i*3+2]=Math.sin(a)*r0*rad;miniS[i]=.22+.2*((i*53%7)/7);miniPh[i]=(i*.618)%1;}
+for(let i=0;i<MN;i++){const d=[];for(let j=0;j<MN;j++)if(j!==i)d.push([(miniP[i*3]-miniP[j*3])**2+(miniP[i*3+1]-miniP[j*3+1])**2+(miniP[i*3+2]-miniP[j*3+2])**2,j]);
+  d.sort((x,y)=>x[0]-y[0]);for(let k=0;k<2;k++){const j=d[k][1],key=i<j?i*99+j:j*99+i;if(!_se.has(key)){_se.add(key);miniE.push(i<j?[i,j]:[j,i]);}}}
+const orbInner=new THREE.Group();orbBody.add(orbInner);
+{const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(miniP,3));g.setAttribute('aSz',new THREE.BufferAttribute(miniS,1));g.setAttribute('aPh',new THREE.BufferAttribute(miniPh,1));
+ const n=new THREE.Points(g,miniNodeMat);n.frustumCulled=false;n.renderOrder=42;orbInner.add(n);
+ const lp=new Float32Array(miniE.length*6);miniE.forEach(([a,b],k)=>{lp.set([miniP[a*3],miniP[a*3+1],miniP[a*3+2],miniP[b*3],miniP[b*3+1],miniP[b*3+2]],k*6);});
+ const lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.BufferAttribute(lp,3));
+ var miniLines=new THREE.LineSegments(lg,new THREE.LineBasicMaterial({color:0x6fe6ff,transparent:true,opacity:0,depthTest:false,depthWrite:false,blending:THREE.AdditiveBlending}));
+ miniLines.frustumCulled=false;miniLines.renderOrder=41;orbInner.add(miniLines);
+ const D=miniE.length*2,dp=new Float32Array(D*3),dB=new Float32Array(D*3),dPh=new Float32Array(D),dSp=new Float32Array(D);
+ miniE.forEach(([a,b],k)=>{for(let m=0;m<2;m++){const q=k*2+m;dp.set([miniP[a*3],miniP[a*3+1],miniP[a*3+2]],q*3);dB.set([miniP[b*3],miniP[b*3+1],miniP[b*3+2]],q*3);dPh[q]=(m*.5+((k*.37)%1))%1;dSp[q]=.8+.6*((k*.53)%1);}});
+ const dg=new THREE.BufferGeometry();dg.setAttribute('position',new THREE.BufferAttribute(dp,3));dg.setAttribute('aB',new THREE.BufferAttribute(dB,3));dg.setAttribute('aPh',new THREE.BufferAttribute(dPh,1));dg.setAttribute('aSp',new THREE.BufferAttribute(dSp,1));
+ const dots=new THREE.Points(dg,miniDotMat);dots.frustumCulled=false;dots.renderOrder=42;orbInner.add(dots);}
+function mkRing(r,col){const p=[];for(let i=0;i<=72;i++){const a=i/72*6.2832;p.push(new THREE.Vector3(Math.cos(a)*r,0,Math.sin(a)*r));}
+  const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints(p),new THREE.LineBasicMaterial({color:col,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthTest:false,depthWrite:false}));l.renderOrder=40;l.frustumCulled=false;return l;}
+function mkSat(ph){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(3),3));g.setAttribute('aSz',new THREE.BufferAttribute(new Float32Array([.34]),1));g.setAttribute('aPh',new THREE.BufferAttribute(new Float32Array([ph]),1));
+  const p=new THREE.Points(g,miniNodeMat);p.frustumCulled=false;p.renderOrder=42;return p;}
+const orbRing1=mkRing(1.35,0x5df0ff),orbRing2=mkRing(1.65,0xa98cff),orbPiv1=new THREE.Group(),orbPiv2=new THREE.Group(),orbSat1=mkSat(.12),orbSat2=mkSat(.46);
+orbRing1.rotation.x=1.15;orbRing2.rotation.x=.55;orbRing2.rotation.z=.4;orbRing1.add(orbSat1);orbRing2.add(orbSat2);orbPiv1.add(orbRing1);orbPiv2.add(orbRing2);orbBody.add(orbPiv1,orbPiv2);
+
+// ---- electricity: coherent jagged bolts with side forks, white-hot at the orb fading to cyan/violet (amber for Wikipedia),
+// drawn as vertex-coloured lines plus glowing beads on every vertex.
+const MAXB=9,SEG=20,FSEG=6,FPB=2,SPB=SEG+FPB*FSEG,VPB=SEG+1+FPB*FSEG;
+const bL=new Float32Array(MAXB*SPB*6),bLC=new Float32Array(MAXB*SPB*6),bP=new Float32Array(MAXB*VPB*3),bPC=new Float32Array(MAXB*VPB*3),bPS=new Float32Array(MAXB*VPB);
+const bgL=new THREE.BufferGeometry(),bgP=new THREE.BufferGeometry();
+bgL.setAttribute('position',new THREE.BufferAttribute(bL,3));bgL.setAttribute('color',new THREE.BufferAttribute(bLC,3));
+bgP.setAttribute('position',new THREE.BufferAttribute(bP,3));bgP.setAttribute('aCol',new THREE.BufferAttribute(bPC,3));bgP.setAttribute('aSz',new THREE.BufferAttribute(bPS,1));
+const boltOp={value:1};
+const boltLines=new THREE.LineSegments(bgL,new THREE.LineBasicMaterial({vertexColors:true,transparent:true,depthTest:false,depthWrite:false,blending:THREE.AdditiveBlending}));
+const boltPts=new THREE.Points(bgP,new THREE.ShaderMaterial({uniforms:{uH:U.uH,uOp:boltOp},transparent:true,depthWrite:false,depthTest:false,...ADD,
+  vertexShader:`attribute vec3 aCol;attribute float aSz;uniform float uH;uniform float uOp;varying vec3 vC;
+void main(){vec4 mv=modelViewMatrix*vec4(position,1.);gl_PointSize=min(max(aSz*uH*.5*projectionMatrix[1][1]/-mv.z,2.),90.);vC=aCol*uOp;gl_Position=projectionMatrix*mv;}`,
+  fragmentShader:`varying vec3 vC;void main(){float d=length(gl_PointCoord-.5);if(d>.5)discard;float h=pow(1.-d*2.,2.);float c=smoothstep(.16,0.,d);gl_FragColor=vec4(vC*(h*.85+c*1.5),1.);}`}));
 [boltLines,boltPts].forEach(o=>{o.frustumCulled=false;o.renderOrder=39;o.visible=false;scene.add(o);});
 const _vo=new THREE.Vector3(),_va=new THREE.Vector3(),_vb=new THREE.Vector3(),_vu=new THREE.Vector3(),_vv=new THREE.Vector3(),_vd=new THREE.Vector3(),UPV=new THREE.Vector3(0,1,0);
 let boltT=0,nearT=0,nearList=[];
@@ -2658,8 +2777,9 @@ function voiceHits(text){
 }
 function voiceLive(t){
   if(!t)return;
-  VOICE.live=t;$q.value=VOICE.dict?dictJoin(VOICE.base,t):t;VOICE.hits=voiceHits(t);pulseKey='';try{updatePulse(true);}catch(e){}
-  vnote('"'+t+'"',0);kDirty=true;
+  const wq=VOICE.dict?null:parseWiki(t);VOICE.wk=wq?1:0;
+  VOICE.live=t;$q.value=VOICE.dict?dictJoin(VOICE.base,t):t;VOICE.hits=wq?[]:voiceHits(t);pulseKey='';try{updatePulse(true);}catch(e){}
+  vnote(wq?'Wikipedia \u2192 '+wq.topic+(wq.how?(wq.how==='separated'?'  (own sphere)':'  (unified space)'):''):'"'+t+'"',0);kDirty=true;
 }
 function voiceInterim(){
   if(VOICE.itBusy||VOICE.st!=='rec'||!VOICE.ctx)return;
@@ -2672,7 +2792,7 @@ function voiceInterim(){
 
 const NBM=160,bpP=new Float32Array(NBM*3),bpV=new Float32Array(NBM*3),bgB=new THREE.BufferGeometry();
 bgB.setAttribute('position',new THREE.BufferAttribute(bpP,3));
-const boomPts=new THREE.Points(bgB,new THREE.PointsMaterial({color:0xaee8ff,size:.012,sizeAttenuation:true,transparent:true,depthTest:false,depthWrite:false,blending:THREE.AdditiveBlending}));
+const boomPts=new THREE.Points(bgB,new THREE.PointsMaterial({map:haloTex,color:0xaee8ff,size:.012,sizeAttenuation:true,transparent:true,depthTest:false,depthWrite:false,blending:THREE.AdditiveBlending}));
 boomPts.frustumCulled=false;boomPts.renderOrder=41;boomPts.visible=false;scene.add(boomPts);
 const flash=new THREE.Sprite(halo.material.clone());flash.renderOrder=42;flash.visible=false;scene.add(flash);
 function sfxBoom(){
@@ -2690,24 +2810,53 @@ function voiceBoom(){
   bgB.attributes.position.needsUpdate=true;boomPts.visible=true;flash.visible=true;flash.position.copy(p);
   sfxBoom();
 }
-function zap(A,T,reach,jit){
-  let nl=0,np=0;
+const BC0=[1,.98,.92],BC1=[.36,.94,1],BC2=[.62,.5,1],BW1=[1,.82,.42],BW2=[1,.55,.2],_c1=[0,0,0],_c2=[0,0,0],_mp=new Float32Array((SEG+1)*3);
+function boltCol(t,s,o,k){
+  let r,g,b;
+  if(t<.3){const f=t/.3;r=BC0[0]+(_c1[0]-BC0[0])*f;g=BC0[1]+(_c1[1]-BC0[1])*f;b=BC0[2]+(_c1[2]-BC0[2])*f;}
+  else{const f=Math.min(1,(t-.3)/.7);r=_c1[0]+(_c2[0]-_c1[0])*f;g=_c1[1]+(_c2[1]-_c1[1])*f;b=_c1[2]+(_c2[2]-_c1[2])*f;}
+  const fd=s*(1-.45*t);o[k]=r*fd;o[k+1]=g*fd;o[k+2]=b*fd;
+}
+function zap(A,T,reach,jit,R,w){
+  let ns=0,nv=0,nb=0;
+  for(let c=0;c<3;c++){_c1[c]=BC1[c]+(BW1[c]-BC1[c])*w;_c2[c]=BC2[c]+(BW2[c]-BC2[c])*w;}
   T.forEach(B0=>{
-    _vd.copy(B0).sub(A);const L=_vd.length();if(L<1e-4)return;
-    _vb.copy(A).addScaledVector(_vd,reach);_vd.divideScalar(L);
+    if(nb>=MAXB)return;
+    _vd.copy(B0).sub(A);const L=_vd.length();if(L<1e-4)return;nb++;
+    _vd.divideScalar(L);
+    _va.copy(A).addScaledVector(_vd,R*.85);                       // leave from the orb's skin
+    const Lr=Math.max(1e-4,(L-R*.85)*reach);
+    _vb.copy(_va).addScaledVector(_vd,Lr);
     _vu.set(_vd.z,0,-_vd.x);if(_vu.lengthSq()<1e-4)_vu.set(1,0,0);_vu.normalize();_vv.crossVectors(_vd,_vu);
-    let px=A.x,py=A.y,pz=A.z;
+    const am=Lr*.075*jit;let ou=0,ov=0,px=_va.x,py=_va.y,pz=_va.z;
     for(let k=0;k<=SEG;k++){
-      let x,y,z;
-      if(k===0){x=A.x;y=A.y;z=A.z;}
+      const f=k/SEG;let x,y,z;
+      if(k===0){x=_va.x;y=_va.y;z=_va.z;}
       else if(k===SEG){x=_vb.x;y=_vb.y;z=_vb.z;}
-      else{const f=k/SEG,am=L*reach*.07*Math.sin(Math.PI*f)*(.5+Math.random())*jit,an=Math.random()*6.2832,c=Math.cos(an)*am,sn=Math.sin(an)*am;
-        x=A.x+(_vb.x-A.x)*f+_vu.x*c+_vv.x*sn;y=A.y+(_vb.y-A.y)*f+_vu.y*c+_vv.y*sn;z=A.z+(_vb.z-A.z)*f+_vu.z*c+_vv.z*sn;}
-      bP[np++]=x;bP[np++]=y;bP[np++]=z;
-      if(k>0){bL[nl++]=px;bL[nl++]=py;bL[nl++]=pz;bL[nl++]=x;bL[nl++]=y;bL[nl++]=z;}
-      px=x;py=y;pz=z;}
+      else{const env=Math.pow(Math.sin(Math.PI*f),.8);ou=ou*.45+(Math.random()*2-1)*am*env;ov=ov*.45+(Math.random()*2-1)*am*env;
+        x=_va.x+_vd.x*Lr*f+_vu.x*ou+_vv.x*ov;y=_va.y+_vd.y*Lr*f+_vu.y*ou+_vv.y*ov;z=_va.z+_vd.z*Lr*f+_vu.z*ou+_vv.z*ov;}
+      _mp[k*3]=x;_mp[k*3+1]=y;_mp[k*3+2]=z;
+      bP[nv*3]=x;bP[nv*3+1]=y;bP[nv*3+2]=z;boltCol(f,1,bPC,nv*3);bPS[nv]=k===SEG?R*.42:R*(.1+.12*(1-f));nv++;
+      if(k>0){const o=ns*6;bL[o]=px;bL[o+1]=py;bL[o+2]=pz;bL[o+3]=x;bL[o+4]=y;bL[o+5]=z;boltCol((k-1)/SEG,1,bLC,o);boltCol(f,1,bLC,o+3);ns++;}
+      px=x;py=y;pz=z;
+    }
+    for(let q=0;q<FPB;q++){                                         // short side forks
+      const m=4+((Math.random()*(SEG-8))|0),sx=_mp[m*3],sy=_mp[m*3+1],sz=_mp[m*3+2],a1=Math.random()*2-1,a2=Math.random()*2-1;
+      let dx=_vd.x*.55+_vu.x*a1*.9+_vv.x*a2*.9,dy=_vd.y*.55+_vu.y*a1*.9+_vv.y*a2*.9,dz=_vd.z*.55+_vu.z*a1*.9+_vv.z*a2*.9;
+      const dl=Math.hypot(dx,dy,dz)||1;dx/=dl;dy/=dl;dz/=dl;
+      const FL=Lr*(.12+Math.random()*.16),t0=m/SEG;let fu=0,fv=0,qx=sx,qy=sy,qz=sz;
+      for(let k=1;k<=FSEG;k++){
+        const f=k/FSEG;fu=fu*.4+(Math.random()*2-1)*FL*.12*jit;fv=fv*.4+(Math.random()*2-1)*FL*.12*jit;
+        const x=sx+dx*FL*f+_vu.x*fu+_vv.x*fv,y=sy+dy*FL*f+_vu.y*fu+_vv.y*fv,z=sz+dz*FL*f+_vu.z*fu+_vv.z*fv,tt=Math.min(1,t0+f*.35),sc=.6*(1-f*.6),o=ns*6;
+        bL[o]=qx;bL[o+1]=qy;bL[o+2]=qz;bL[o+3]=x;bL[o+4]=y;bL[o+5]=z;boltCol(Math.min(1,t0+(k-1)/FSEG*.35),.6*(1-(k-1)/FSEG*.6),bLC,o);boltCol(tt,sc,bLC,o+3);ns++;
+        bP[nv*3]=x;bP[nv*3+1]=y;bP[nv*3+2]=z;boltCol(tt,sc,bPC,nv*3);bPS[nv]=R*.09;nv++;
+        qx=x;qy=y;qz=z;
+      }
+    }
   });
-  bgL.attributes.position.needsUpdate=true;bgP.attributes.position.needsUpdate=true;bgL.setDrawRange(0,nl/3);bgP.setDrawRange(0,np/3);
+  bgL.attributes.position.needsUpdate=true;bgL.attributes.color.needsUpdate=true;
+  bgP.attributes.position.needsUpdate=true;bgP.attributes.aCol.needsUpdate=true;bgP.attributes.aSz.needsUpdate=true;
+  bgL.setDrawRange(0,ns*2);bgP.setDrawRange(0,nv);
 }
 const hitPick=(a,n)=>{if(a.length<=n)return a;const o=a.slice();for(let i=o.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[o[i],o[j]]=[o[j],o[i]];}return o.slice(0,n);};
 function voiceVis(dt){
@@ -2718,26 +2867,33 @@ function voiceVis(dt){
     if(VOICE.n>16000*45)voiceStop(true);
     VOICE.itT-=dt;if(VOICE.itT<=0)voiceInterim();
   }
+  ORBW.value+=((VOICE.wk&&on?1:0)-ORBW.value)*Math.min(1,dt*6);
   const bm=VOICE.boom;
   if(bm){
     bm.t+=dt;const k=bm.t/1.2;
     if(k>=1){VOICE.boom=null;boomPts.visible=false;flash.visible=false;}
     else{
       for(let i=0;i<NBM;i++){const d=Math.pow(.03,dt);bpV[i*3]*=d;bpV[i*3+1]*=d;bpV[i*3+2]*=d;bpP[i*3]+=bpV[i*3]*dt;bpP[i*3+1]+=bpV[i*3+1]*dt;bpP[i*3+2]+=bpV[i*3+2]*dt;}
-      bgB.attributes.position.needsUpdate=true;boomPts.material.opacity=1-k;boomPts.material.size=.004+.012*(1-k);
+      bgB.attributes.position.needsUpdate=true;boomPts.material.opacity=1-k;boomPts.material.size=.006+.02*(1-k);
       flash.scale.setScalar(.08+.9*Math.min(1,bm.t*4));flash.material.opacity=Math.max(0,1-bm.t/.45);
     }
   }
-  const vis=ap_(),boomOn=!!VOICE.boom;
-  function ap_(){return VOICE.ap>.012&&nodes.length>0;}
+  const vis=VOICE.ap>.012,boomOn=!!VOICE.boom;
   ORB.visible=vis;boltLines.visible=boltPts.visible=vis||boomOn;
   if(!vis&&!boomOn){VOICE.fresh=true;return;}
-  const ap=VOICE.ap,lv=VOICE.lv,t=U.uT.value;
+  const ap=VOICE.ap,lv=VOICE.lv,t=U.uT.value,w=ORBW.value,R=.032*ap*(1+.5*lv+.06*Math.sin(t*6));
   if(vis){
     orbTarget();
     if(VOICE.fresh){ORB.position.copy(_vo);VOICE.fresh=false;}else ORB.position.lerp(_vo,Math.min(1,dt*14));
-    orbMesh.scale.setScalar(.034*ap*(1+.55*lv+.07*Math.sin(t*6)));halo.scale.setScalar(.2*ap*(1+1.2*lv));
+    orbBody.scale.setScalar(Math.max(R,1e-4));orbS.value=R;
     orbU.uT.value=t;orbU.uL.value=lv;orbU.uA.value=Math.min(1,ap*1.3);
+    orbInner.rotation.y=t*.5;orbInner.rotation.x=t*.27;
+    orbPiv1.rotation.y=t*.7;orbPiv2.rotation.y=-t*.5;
+    orbSat1.position.set(Math.cos(t*1.7)*1.35,0,Math.sin(t*1.7)*1.35);orbSat2.position.set(Math.cos(-t*1.2+2)*1.65,0,Math.sin(-t*1.2+2)*1.65);
+    orbRing1.material.opacity=.4*ap;orbRing2.material.opacity=.3*ap;miniLines.material.opacity=(.4+.3*lv)*ap;
+    miniLines.material.color.setRGB(.43+.57*w,.9-.2*w,1-.6*w);
+    halo.scale.setScalar(.17*ap*(1+1.1*lv));halo.material.color.setRGB(.7+.3*w,.9-.1*w,1-.6*w);halo.material.opacity=.8;
+    coreSp.scale.setScalar(R*(2.2+1.6*lv));coreSp.material.opacity=Math.min(1,ap*(.5+.5*lv));
   }
   boltT-=dt;if(boltT>0)return;boltT=.055;
   G.updateMatrixWorld();
@@ -2745,15 +2901,15 @@ function voiceVis(dt){
     const f=1-VOICE.boom.t/.7;
     if(f<=0||!VOICE.bhits.length){bgL.setDrawRange(0,0);bgP.setDrawRange(0,0);return;}
     const T=hitPick(VOICE.bhits,MAXB).map(i=>nodeWorld(i,new THREE.Vector3()));
-    zap(VOICE.boom.pos,T,Math.min(1,VOICE.boom.t*6),1.8);
-    boltLines.material.opacity=f*(.6+.4*Math.random());boltPts.material.size=.004+.008*f;
+    zap(VOICE.boom.pos,T,Math.min(1,VOICE.boom.t*6),1.8,.03,0);
+    boltLines.material.opacity=f*(.6+.4*Math.random());boltOp.value=f*(.7+.3*Math.random());
     return;
   }
   const A=ORB.position;let T;
   if(VOICE.hits.length)T=hitPick(VOICE.hits,MAXB).map(i=>nodeWorld(i,new THREE.Vector3()));
-  else{T=[];for(let i=0;i<3;i++){const a=Math.random()*6.2832,u=Math.random()*2-1,r=Math.sqrt(1-u*u),d=.05*(.5+Math.random());T.push(new THREE.Vector3(A.x+r*Math.cos(a)*d,A.y+u*d,A.z+r*Math.sin(a)*d));}}
-  zap(A,T,Math.min(1,ap*1.2),1+lv);
-  boltLines.material.opacity=Math.min(1,.45+.55*ap)*(.5+.5*Math.random()+.3*lv);boltPts.material.size=.005+.004*lv;
+  else{T=[];const n=lv>.25?5:3;for(let i=0;i<n;i++){const a=Math.random()*6.2832,u=Math.random()*2-1,r=Math.sqrt(1-u*u),d=R*(2.4+Math.random()*2.6);T.push(new THREE.Vector3(A.x+r*Math.cos(a)*d,A.y+u*d,A.z+r*Math.sin(a)*d));}}
+  zap(A,T,Math.min(1,ap*1.2),1+lv*.8,R,w);
+  boltLines.material.opacity=Math.min(1,(.5+.5*ap)*(.55+.45*Math.random()+.3*lv));boltOp.value=Math.min(1.3,(.5+.5*ap)*(.55+.45*Math.random()+.3*lv));
 }
 {const b=document.getElementById('micb');
  if(b){b.innerHTML='<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
@@ -2855,7 +3011,7 @@ function relayoutKeys(){const y=Math.round(98+ibHpx*.625+10);KEYS.forEach(k=>{if
 function hud(){
   relayoutKeys();
   hudA='';
-  hudB=xrNote||(sel>=0?`${nodes[sel].adj.length} links \u00b7 A adds to query \u00b7 B clears`:(nodes.length?nodes.length+' concepts \u00b7 pinch to select':'Load text before entering VR'));
+  hudB=xrNote||(sel>=0?`${nodes[sel].adj.length} links \u00b7 A adds to query \u00b7 B clears`:(nodes.length?nodes.length+' concepts \u00b7 pinch to select':'Load text, or say \u201cWikipedia: topic\u201d'));
   kDirty=true;iDirty=true;
 }
 
@@ -3717,6 +3873,13 @@ const dbReq=(st,m,f)=>new Promise(res=>{if(!db)return res(undefined);try{const q
 const dbAll=st=>dbReq(st,'readonly',o=>o.getAll()).then(r=>r||[]);
 const dbPut=(st,v)=>dbReq(st,'readwrite',o=>o.put(v));
 const dbDel=(st,k)=>dbReq(st,'readwrite',o=>o.delete(k));
+// Delete many records in ONE transaction (was: one awaited transaction per record, up to 500+ for history).
+const dbDelMany=ops=>new Promise(res=>{if(!db||!ops.length)return res();
+  try{const tx=db.transaction([...new Set(ops.map(o=>o[0]))],'readwrite');ops.forEach(([st,k])=>tx.objectStore(st).delete(k));
+    tx.oncomplete=tx.onerror=tx.onabort=()=>res();}catch(e){res();}});
+// window.confirm() blocks the whole page and hangs/ejects a Quest immersive session, so inside XR we skip it
+// (the in-VR Clear button already needs a second tap to confirm).
+function askOK(msg){try{if(renderer.xr.isPresenting)return true;}catch(e){}return confirm(msg);}
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
 function hashDocs(docs){let h=2166136261;for(const d of docs){const t=d.name+'\u0001'+d.text+'\u0002';for(let i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,16777619);}}
   return 'c'+(h>>>0).toString(36)+docs.reduce((a,d)=>a+d.text.length,0).toString(36);}
@@ -3765,7 +3928,7 @@ const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 function ago(t){const s=(Date.now()-t)/1000;if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return new Date(t).toLocaleDateString();}
 const cname=id=>{const c=corpora.find(c=>c.id===id);return c?c.name:'deleted file set';};
 const $hist=$('#hist'),$hb=$('#hbody'),$hf=$('#hf');
-let htab='res',hfilter='';
+let htab='res',hfilter='',hlim=60,rhT=0;
 function posHist(){if($hist.dataset.moved)return;const r=$('#hbtn').getBoundingClientRect(),w=Math.min(380,innerWidth-28);
   $hist.style.width=w+'px';$hist.style.height='';$hist.style.right='auto';$hist.style.transform='none';
   $hist.style.left=Math.max(14,Math.min(innerWidth-w-14,r.right-w))+'px';$hist.style.top=(r.bottom+8)+'px';$hist.style.bottom='14px';}
@@ -3781,13 +3944,14 @@ function resHTML(){
   let o='';
   if(rec.length)o+=`<div class="hs">Recurring across results (click to filter)</div><div class="chips">${rec.map(([w,n])=>`<span class="chip hot" data-f="${esc(w)}">${esc(w)} <small>\u00d7${n}</small></span>`).join('')}</div>`;
   o+=`<div class="hs" style="margin:6px 0 8px">${list.length} of ${hist.length} saved results. Amber words appear in more than one result.</div>`;
-  o+=list.map(h=>{
+  o+=list.slice(0,hlim).map(h=>{
     const chip=w=>`<span class="chip${cnt.get(w)>1?' hot':''}" data-w="${esc(w)}">${esc(w)}</span>`;
     return `<div class="he" data-id="${h.id}"><div class="hh"><span class="k ${h.kind==='query'?'q':h.kind==='read'?'r':'s'}">${h.kind==='query'?'QUERY':h.kind==='read'?'READING':'CONCEPT'}</span><b>${esc(h.text)}</b><span class="t">${ago(h.ts)}</span></div>`+
       `<div class="hs">${esc(cname(h.corpus))}${h.prov?' \u00b7 '+esc(h.prov):''}</div>${h.out?`<div class="ro">${esc(h.out.slice(0,260))}${h.out.length>260?'\u2026':''}</div>`:''}<div class="chips">${h.top.slice(0,12).map(t=>chip(t.w)).join('')}</div>`+
       (h.links.length?`<details><summary>Connections (${h.links.length})</summary><ul class="lk">${h.links.map(l=>`<li data-w="${esc(l.a)}"><em>${esc(l.a)} \u2194 ${esc(l.b)}</em><span>${l.v.toFixed(2)}</span></li>`).join('')}</ul></details>`:'')+
       `<div class="ha"><button data-a="open">${h.kind==='read'?'Open':'Restore'}</button><button data-a="del">Delete</button></div></div>`;
   }).join('');
+  if(list.length>hlim)o+='<div class="ha" style="margin:6px 0 2px"><button data-a="more">Show '+Math.min(60,list.length-hlim)+' more</button></div>';
   return o;
 }
 function fileHTML(){
@@ -3797,6 +3961,10 @@ function fileHTML(){
     L.map(c=>`<div class="he" data-c="${c.id}"><div class="hh"><b>${esc(c.name)}</b>${c.id===curCorpus?'<span class="k s">ACTIVE</span>':''}</div><div class="hs">${c.docs.length} file${c.docs.length===1?'':'s'} \u00b7 ${(c.size/1024).toFixed(1)} KB \u00b7 ${ago(c.ts)} \u00b7 ${hist.filter(h=>h.corpus===c.id).length} results</div><div class="ha"><button data-a="load">Load</button><button data-a="delc">Delete</button></div></div>`).join('');
 }
 function renderHist(){
+  if($hist.hidden||rhT)return;
+  rhT=setTimeout(()=>{rhT=0;renderHist0();},30);
+}
+function renderHist0(){
   if($hist.hidden)return;
   $hist.querySelectorAll('.htabs [data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===htab));
   $hf.hidden=htab!=='res';$('#hclr').hidden=htab!=='res';
@@ -3804,21 +3972,22 @@ function renderHist(){
 }
 $('#hbtn').onclick=()=>toggleHist();
 $('#hx').onclick=()=>toggleHist(false);
-$('#hclr').onclick=async()=>{if(!hist.length||!confirm('Delete all saved results? Your files are kept.'))return;for(const h of hist)await dbDel('history',h.id);hist=[];renderHist();};
+$('#hclr').onclick=()=>{if(!hist.length||!askOK('Delete all saved results? Your files are kept.'))return;const ops=hist.map(h=>['history',h.id]);hist=[];renderHist();dbDelMany(ops);};
 $hist.querySelector('.htabs').addEventListener('click',e=>{const t=e.target.closest('[data-t]');if(t){htab=t.dataset.t;renderHist();}});
-$hf.addEventListener('input',()=>{hfilter=$hf.value;renderHist();});
+$hf.addEventListener('input',()=>{hfilter=$hf.value;hlim=60;renderHist();});
 $hb.addEventListener('click',async e=>{
+  if(e.target.closest('[data-a="more"]')){hlim+=60;renderHist();return;}
   const fc=e.target.closest('[data-f]');if(fc){$hf.value=hfilter=fc.dataset.f;renderHist();return;}
-  const fg=e.target.closest('[data-a="forget"]');if(fg){if(confirm('Forget all saved text files and results? The current field is unloaded too.'))await forgetAll();return;}
+  const fg=e.target.closest('[data-a="forget"]');if(fg){if(askOK('Forget all saved text files and results? The current field is unloaded too.'))await forgetAll();return;}
   const card=e.target.closest('.he');if(!card)return;
   const btn=e.target.closest('button[data-a]'),w=e.target.closest('[data-w]');
   if(card.dataset.c){
     const c=corpora.find(x=>x.id===card.dataset.c);if(!c||!btn)return;
     if(btn.dataset.a==='load')await ingest(c.docs,{id:c.id});
-    else if(confirm('Delete these saved files and their saved results?')){
-      corpora=corpora.filter(x=>x!==c);await dbDel('corpora',c.id);await dbDel('fields',c.id);
-      for(const h of hist.filter(h=>h.corpus===c.id))await dbDel('history',h.id);
-      hist=hist.filter(h=>h.corpus!==c.id);
+    else if(askOK('Delete these saved files and their saved results?')){
+      const ops=[['corpora',c.id],['fields',c.id]];hist.forEach(h=>{if(h.corpus===c.id)ops.push(['history',h.id]);});
+      corpora=corpora.filter(x=>x!==c);
+      hist=hist.filter(h=>h.corpus!==c.id);dbDelMany(ops);
       if(curCorpus===c.id){curCorpus=null;try{localStorage.removeItem('cf.last');}catch(_){}}
       renderHist();
     }
@@ -3873,7 +4042,12 @@ function lodSprite(i){
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false,blending:THREE.AdditiveBlending}));
   sp.scale.set(.2*FS,.05*FS,1);sp.renderOrder=10;sp.userData.i=i;sp.position.set(nodes[i].x,nodes[i].y,nodes[i].z);return sp;
 }
-function lodClear(){lodMap.forEach(sp=>{lodGroup.remove(sp);sp.material.map.dispose();sp.material.dispose();});lodMap.clear();}
+var _dq=[],_dt=0;
+function slowDispose(list){for(const o of list)_dq.push(o);if(!_dt)_dt=setTimeout(_dstep,16);}
+function _dstep(){_dt=0;const t0=performance.now();
+  while(_dq.length&&performance.now()-t0<3){const o=_dq.pop();try{if(o.isSprite){if(o.material.map)o.material.map.dispose();o.material.dispose();}else if(o.dispose)o.dispose();}catch(e){}}
+  if(_dq.length)_dt=setTimeout(_dstep,16);}
+function lodClear(){const l=[];lodMap.forEach(sp=>{lodGroup.remove(sp);l.push(sp);});lodMap.clear();slowDispose(l);}
 let lodT=0;
 function lodLabels(dt){
   if(!nodes.length)return;
@@ -3891,33 +4065,36 @@ function lodLabels(dt){
   for(const [i,sp] of lodMap)if(!on.has(i)){if(sp.parent===lodGroup)wvPend=true;lodGroup.remove(sp);if(lodMap.size>150){sp.material.map.dispose();sp.material.dispose();lodMap.delete(i);}}
 }
 function unloadField(){
-  EPOCH++;ingesting=false;ENG.post({t:'reset'});forceWords=[];
+  EPOCH++;ingesting=false;clearTimeout(fsT);ENG.post({t:'reset'});forceWords=[];
   nodes=[];edges=[];word2i=new Map();SS.clear();selV++;sel=-1;Q=null;visible=[];forcedSet=new Set();docCount=0;curCorpus=null;curDocs=[];HLOG=[];renderDocs();
-  if(pts){G.remove(pts,lines,dots);pts.geometry.dispose();lines.geometry.dispose();dots.geometry.dispose();pts=lines=dots=null;}
-  labelGroup.clear();labelCache.forEach(sp=>{sp.material.map.dispose();sp.material.dispose();});labelCache.clear();lodClear();
+  orbs=[];orbHaloGroup.clear();orbHaloGroup.visible=false;crossGroup.visible=false;divergenceGroup.clear();divergenceGroup.visible=false;crossLabelsGroup.clear();
+  if(pts){const g=[pts.geometry,lines.geometry,dots.geometry];G.remove(pts,lines,dots);pts=lines=dots=null;slowDispose(g);}
+  labelGroup.clear();slowDispose([...labelCache.values()]);labelCache.clear();lodClear();
   $ps.hidden=true;PS.seq++;
   $q.value='';$('#file').value='';updateInfo();stat('Attach one or more files to build the field.');
 }
 async function clearCurrent(){
-  const id=curCorpus;
+  // UI first (instant), storage cleanup afterwards in a single background transaction
+  const id=curCorpus,ops=[];
   if(id){
-    if(corpora.some(x=>x.id===id)){corpora=corpora.filter(x=>x.id!==id);await dbDel('corpora',id);}
-    await dbDel('fields',id);
-    for(const h of hist.filter(h=>h.corpus===id))await dbDel('history',h.id);
+    if(corpora.some(x=>x.id===id)){corpora=corpora.filter(x=>x.id!==id);ops.push(['corpora',id]);}
+    ops.push(['fields',id]);
+    hist.forEach(h=>{if(h.corpus===id)ops.push(['history',h.id]);});
     hist=hist.filter(h=>h.corpus!==id);
   }
   try{localStorage.removeItem('cf.last');}catch(e){}
   unloadField();renderHist();
+  dbDelMany(ops);
 }
 async function forgetAll(){
-  for(const c of corpora){await dbDel('corpora',c.id);await dbDel('fields',c.id);}
-  for(const h of hist)await dbDel('history',h.id);
+  const ops=[];for(const c of corpora)ops.push(['corpora',c.id],['fields',c.id]);for(const h of hist)ops.push(['history',h.id]);
   corpora=[];hist=[];try{localStorage.removeItem('cf.last');}catch(e){}
   unloadField();renderHist();
+  dbDelMany(ops);
 }
 const ctxClear=async()=>{
   if(!nodes.length&&!corpora.length){stat('Nothing is attached.');return;}
-  if(confirm('Remove the attached text from the field and delete its saved copy and results? (History > Files > Forget everything wipes all saved text.)'))await clearCurrent();
+  if(askOK('Remove the attached text from the field and delete its saved copy and results? (History > Files > Forget everything wipes all saved text.)'))await clearCurrent();
 };
 const LS=(k,d)=>{try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v);}catch(e){return d;}};
 const PROV={
@@ -4539,7 +4716,7 @@ async function xrWkAdd(){
     for(const t of titles){
       const r = await fetch(WAPI + '?action=query&prop=extracts&explaintext=1&redirects=1&format=json&origin=*&titles=' + encodeURIComponent(t));
       const pg = Object.values((await r.json()).query.pages)[0], tx = (pg.extract || '').replace(/^=+\s*(.*?)\s*=+\s*$/gm, '$1');
-      if(tx.length > 200) docs.push({name: 'Wikipedia: ' + (pg.title || t), text: tx});
+      if(tx.length > 200) docs.push({name: 'Wikipedia: ' + (pg.title || t), text: wikiTrim(tx)});
     }
     if(!docs.length){ wbStatus = 'Those pages had no readable text'; wbLoading = false; wbD = true; return; }
     wkQueue.clear();
@@ -4749,7 +4926,7 @@ function filesAct(k){
   else if(k.id==='next'){ fbPage++; fbPend=null; }
   else if(k.id==='lay'){ setFieldMode(fieldMode==='separated'?'unified':'separated'); }
   else if(k.id==='clear'){
-    if(fbPend==='all'){ fbPend=null; fbStatus='Clearing\u2026'; try{ctxClear();}catch(e){} }
+    if(fbPend==='all'){ fbPend=null; fbStatus='Clearing\u2026'; try{Promise.resolve(ctxClear()).then(()=>{fbStatus='';fbD=true;kDirty=true;});}catch(e){fbStatus='';} }
     else fbPend='all';
   } else if(k.id.startsWith('del_')){
     if(fbPend===k.idx){ fbPend=null; filesRemove(k.idx); }
