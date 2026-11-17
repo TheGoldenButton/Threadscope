@@ -1663,13 +1663,15 @@ const setField=(r,preserveOrbPositions=false)=>{
   const placements=preserveOrbPositions?orbs.map(orbPlacement):null;
   nodes=r.nodes;edges=r.edges;orbs=r.orbs||[];
   fieldMode=r.mode||fieldMode||'unified';
-  if(placements&&fieldMode==='separated')restoreOrbPlacements(placements);
+  let matched=null;
+  if(placements&&fieldMode==='separated')matched=restoreOrbPlacements(placements);
   try{localStorage.setItem('cf.fieldMode',fieldMode);}catch(e){}
   word2i=new Map(nodes.map((n,i)=>[n.id,i]));
   word2all=new Map();
   nodes.forEach((n,i)=>{const l=word2all.get(n.id)||[];l.push(i);word2all.set(n.id,l);});
   forceWords=r.force;
   renderDocs();
+  if(placements&&nodes.length&&renderer.xr.isPresenting&&arMode)try{xrKeepInView(matched);}catch(e){console.warn(e);}
 };
 function updateModeUI(){
   renderDocs();
@@ -2047,14 +2049,17 @@ function resizeOrb(index,scale){
   return true;
 }
 function restoreOrbPlacements(placements){
-  if(!Array.isArray(placements))return;
+  const matched=new Set();
+  if(!Array.isArray(placements))return matched;
   const byName=new Map(placements.filter(p=>p&&Array.isArray(p.center)&&p.center.length===3&&p.center.every(Number.isFinite)).map(p=>[p.name,p]));
   orbs.forEach((orb,index)=>{
     const saved=byName.get(orb.name);if(!saved)return;
+    matched.add(orb.name);
     translateOrb(index,saved.center);
     if(Number.isFinite(saved.scale)&&saved.scale>0)resizeOrb(index,saved.scale);
     if(Array.isArray(saved.rot)&&saved.rot.length===4&&saved.rot.every(Number.isFinite))rotateOrb(index,new THREE.Quaternion().fromArray(saved.rot));
   });
+  return matched;
 }
 function updateMovedOrbs(){
   col.sk=null;orbMoved=true;crossGroup.visible=false;updateGeom();
@@ -2952,13 +2957,14 @@ function palmRead(r,hd){
   if(!w||!mm||!mp||!im||!pm)return null;
   let open=0,closed=0,tot=0;
   for(const f of ['index','middle','ring','pinky']){const t=g(f+'-finger-tip'),k=g(f+'-finger-phalanx-proximal');if(!t||!k)continue;tot++;
-    const q=t.distanceTo(w)/Math.max(.02,k.distanceTo(w));if(q>1.65)open++;if(q<1.4)closed++;}
+    const q=t.distanceTo(w)/Math.max(.02,k.distanceTo(w));if(q>1.9)open++;if(q<1.4)closed++;}
+  const ti=g('index-finger-tip'),tp=g('pinky-finger-tip'),spread=ti&&tp?ti.distanceTo(tp)/Math.max(.02,mp.distanceTo(w)):0;
   const a=im.clone().sub(w),b=pm.clone().sub(w),right=!(r.c.userData.src&&r.c.userData.src.handedness==='left');
-  const n=(right?a.cross(b):b.cross(a)).normalize(),c=w.clone().add(mm).add(mp).multiplyScalar(1/3);
-  const v=hd.clone().sub(c).normalize(),facing=n.y>.35||n.dot(v)>.55;
-  return {open:open>=3&&tot>=3,closed:closed>=3&&tot>=3,n,c,facing};
+  const n=(right?a.cross(b):b.cross(a)).normalize(),c=mp.clone().lerp(mm,.35);
+  const v=hd.clone().sub(c).normalize(),facing=n.y>.55||n.dot(v)>.7;
+  return {open:open>=4&&tot>=4&&spread>.95,closed:closed>=3&&tot>=3,n,c,facing};
 }
-const PALM_HOLD=.75;   
+const PALM_HOLD=.9;   
 function voiceStep(dt){
   if(!renderer.xr.isPresenting)return;
   if(VOICE.cool>0)VOICE.cool-=dt;
@@ -3055,7 +3061,7 @@ const _vo=new THREE.Vector3(),_va=new THREE.Vector3(),_vb=new THREE.Vector3(),_v
 let boltT=0,nearT=0,nearList=[];
 function orbTarget(){
   const xr=renderer.xr.isPresenting,cam=xr?renderer.xr.getCamera():camera;
-  if(xr&&VOICE.hand>=0&&VOICE.pr){_vo.copy(VOICE.pr.c).addScaledVector(VOICE.pr.n,.075);return;}
+  if(xr&&VOICE.hand>=0&&VOICE.pr){_vo.copy(VOICE.pr.c).addScaledVector(VOICE.pr.n,.06);return;}
   cam.getWorldPosition(_vo);cam.getWorldDirection(_vd);_vo.addScaledVector(_vd,xr?.5:.55).addScaledVector(UPV,-.1);
 }
 function nodeWorld(i,o){const n=nodes[i];return o.set(n.x,n.y,n.z).applyMatrix4(G.matrixWorld);}
@@ -5827,6 +5833,35 @@ try{document.fonts&&document.fonts.load('600 40px Inter').then(()=>document.font
   nodes.forEach(n=>{n.hw=undefined;});wvPend=true;kDirty=true;iDirty=true;rdD=true;
   if(nodes.length&&pts){applyState(true);updateOrbHalos();updateCrossVisuals();}
 }).catch(()=>{});}catch(e){}
+// In mixed reality, new fields and new orbs always appear in front of where the person is looking.
+function fieldInView(){
+  const xc=renderer.xr.getCamera(),h=xc.getWorldPosition(new THREE.Vector3()),g=xc.getWorldDirection(new THREE.Vector3());
+  const v=G.position.clone().sub(h),dist=v.length();if(dist<.25||dist>2.5)return false;
+  return Math.acos(Math.min(1,v.normalize().dot(g)))<.75;
+}
+function recenterNow(fit){
+  const xc=renderer.xr.getCamera(),o=xc.getWorldPosition(new THREE.Vector3()),d=xc.getWorldDirection(new THREE.Vector3());d.y=0;
+  if(d.lengthSq()<1e-4)d.set(0,0,-1);d.normalize();
+  const cur=(isFinite(G.scale.x)&&G.scale.x>=.08&&G.scale.x<=4)?G.scale.x:fitScale(.3);
+  G.scale.setScalar(fit?Math.min(cur,fitScale(.32)):cur);
+  G.position.set(o.x+d.x*.7,o.y-.1,o.z+d.z*.7);G.quaternion.identity();G.updateMatrixWorld(true);
+  needCenter=false;
+}
+function xrKeepInView(matched){
+  if(!nodes.length)return;
+  const fresh=!matched||matched.size===0;
+  if(fresh||!fieldInView())recenterNow(true);
+  if(!fresh&&fieldMode==='separated'&&orbs.length>1){
+    const idx=orbs.map((o,i)=>matched.has(o.name)?-1:i).filter(i=>i>=0);
+    if(idx.length){
+      const xc=renderer.xr.getCamera(),h=xc.getWorldPosition(new THREE.Vector3()),f=xc.getWorldDirection(new THREE.Vector3());f.y=0;
+      if(f.lengthSq()<1e-4)f.set(0,0,-1);f.normalize();
+      const r=new THREE.Vector3().crossVectors(f,Y).normalize();G.updateMatrixWorld(true);
+      idx.forEach((i,j)=>{const t=h.clone().addScaledVector(f,.7).addScaledVector(r,(j-(idx.length-1)/2)*.3);t.y=h.y-.05;
+        const l=G.worldToLocal(t);translateOrb(i,[l.x,l.y,l.z]);});
+    }
+  }
+}
 const _ev=new THREE.Vector3();
 function edgeBudget(){
   if(!lines||(!lAmbN&&!lSpec))return;
