@@ -234,12 +234,6 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 
 #pt{left:50%;top:56px;transform:translateX(-50%);width:min(520px,calc(100vw - 20px));z-index:5;font-size:calc(13px*var(--fs,1))}
 #pt textarea{margin-top:8px;min-height:200px}
-#play{display:flex;flex:none;align-items:center;gap:6px;padding:6px 9px 0 0}
-#infof:has(#plbtn:not([hidden])){flex-wrap:wrap;gap:6px}
-#infof #plbtn:not([hidden]){margin-left:auto;white-space:nowrap}
-#infof #plbtn:not([hidden])+#clr{margin-left:0}
-#pltl{flex:1;min-width:0;accent-color:var(--am)}
-#plcnt{font-size:calc(11px*var(--fs,1));opacity:.8;min-width:70px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -264,7 +258,7 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
   <div id="wkr" style="max-height:300px;overflow:auto;margin-top:6px"></div>
   <div class="ha"><button id="wkadd" disabled>Add to field</button></div><div id="wks" class="hs">Search, tap pages to queue them, then add. They join any text already in the field.</div>
 </div>
-<div id="info" class="panel"><div id="infob"></div><div id="infof"><button id="psbtn" title="Show the source passages for the selection or query">Passages</button><button id="cpbtn" title="Copy the LLM prompt (instructions plus the words and passages) to use elsewhere">Copy</button><button id="brain" title="Send the selected concepts and your query to the assistant">Ask LLM</button><label id="autol" title="Auto: run the assistant whenever you ask a query"><input id="auto" type="checkbox">Auto</label><button id="plbtn" hidden>▶ Play</button><button id="clr" title="Clear selection">Clear</button></div><div id="play" hidden><input id="pltl" type="range" min="0" max="0" value="0" step="1" aria-label="Play position"><button id="plsp" title="Speed">1×</button><button id="plst" title="Stop and show everything" hidden>Stop</button><span id="plcnt"></span></div></div>
+<div id="info" class="panel"><div id="infob"></div><div id="infof"><button id="psbtn" title="Show the source passages for the selection or query">Passages</button><button id="cpbtn" title="Copy the LLM prompt (instructions plus the words and passages) to use elsewhere">Copy</button><button id="brain" title="Send the selected concepts and your query to the assistant">Ask LLM</button><label id="autol" title="Auto: run the assistant whenever you ask a query"><input id="auto" type="checkbox">Auto</label><button id="clr" title="Clear selection">Clear</button></div></div>
 <div id="ps" class="panel" hidden><div class="hh"><b id="pst">Passages</b><button id="psc" title="Copy these passages with citations">Copy</button><button id="psx" title="Close">&#10005;</button></div><div id="psm" class="hs"></div><div id="psb"></div><div id="pspg" hidden><button id="pspv" title="Previous 60 passages">‹ Prev</button><span id="pspn"></span><button id="psnx" title="Next 60 passages">Next ›</button></div><div id="pssv"><label title="Only passages scoring at or above the cut-off go to the LLM; the rest stay visible here, dimmed"><input id="pssc" type="checkbox"> Token saver: send to LLM only passages scoring ≥</label><input id="psth" type="text" inputmode="decimal" autocomplete="off" aria-label="Passage relevance cut-off (0 to 1)"><span id="pssn" class="hs"></span></div></div>
 <div id="ur" class="panel" hidden><div class="hh"><b>Web pages</b><button id="urx" title="Close">&#10005;</button></div><textarea id="urt" rows="4" placeholder="One URL per line: web pages, articles, or links to PDFs" style="margin-top:8px"></textarea><label style="display:block;margin-top:6px;font-size:12px;opacity:.85"><input id="urp" type="checkbox" checked> If a site blocks direct access, retry through a public proxy (the URL is sent to it)</label><div class="ha"><button id="urgo">Fetch and add</button></div><div id="urs" class="hs"></div></div>
 <div id="pt" class="panel" hidden><div class="hh"><b>Paste text</b><button id="ptx" title="Close">&#10005;</button></div><input id="ptn" type="text" placeholder="Name (optional)" autocomplete="off" style="margin-top:8px;width:100%"><textarea id="ptt" placeholder="Paste text here (Ctrl/Cmd+V)"></textarea><div class="ha"><button id="ptgo">Add to field</button></div><div id="pts" class="hs"></div></div>
@@ -301,7 +295,7 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 </div>
 <div id="rd" class="panel" hidden><div id="rdh"><button id="rdp" title="Older reading">&#8249;</button><span id="rdn">0/0</span><button id="rdnx" title="Newer reading">&#8250;</button><span id="rdt"></span><button id="rdst" title="Stop generating" hidden>&#9632; Stop</button><button id="rdx" title="Close">&#10005;</button></div><div id="rdb"></div><div id="rdm"></div><form id="rdf"><input id="rdq" type="text" placeholder="Ask a follow-up within this context" autocomplete="off"><button type="submit" id="rds">Send</button></form></div>
 <button id="helpbtn" aria-label="Help" aria-expanded="false" title="Help">?</button>
-<div id="hint" class="panel" hidden>Desktop: drag to orbit, wheel to zoom, WASD/QE to fly, click concepts to select several (selected words pulse; click again to deselect). With words selected, Play puts you inside the current, flying node to node in resonant order. Every word you type is searched, including common words like the or not; only the drawn field hides them. In AR, a query bar, keyboard and a results box float in view (point and pinch or trigger the bar to type). The keyboard's mic key dictates into the bar with Whisper: press it, speak, press it again, then press W for Wikipedia or Ask. Or open your palm (the orb) or tap the mic and say &ldquo;Wikipedia: your topic&rdquo; to pull that page in; add &ldquo;as its own sphere&rdquo; or &ldquo;into the unified space&rdquo; to choose where it lands. Mixed reality (Quest 3): press Enter mixed reality to see your room through the passthrough cameras. Pinch and drag anywhere to carry the data sphere (the right stick spins it), pinch with both hands and spread to resize and twist it, quick pinch on a word to select it (or tap a selected word chip in the list box to deselect it); select several to see how they connect, and pinch a selected word again to deselect it. Two hands pushing out pushes the orbs away; motioning forward pulls them toward you. Pointing at words in the word list highlights them with a SELECT cue for easy clicking. The field remembers where you put it between mixed-reality sessions. A adds the selected concept to the query, B clears. Press Place on the panel to snap the field onto a wall, table or floor. In AR the top buttons are: + paste copied text, \u21C4 switch saved text, W fetch Wikipedia for the typed topic, \u00B6 source passages, and the gear toggles the LLM. Brighter nodes are more frequent words. Zoom out and neighbouring words collapse into the most dominant word of their area (bigger dot, labelled); zoom in and they expand again. The field learns as you use it: words you query or select together are drawn a little closer each time, and the arrangement is saved per text. Line colour is based on how often the words at each end occur in your text: rare words are violet and blue, then green and yellow, and the most frequent words are orange and red, so each line blends between its two ends. Once you have a query or selection, a Play button, timeline and speed button appear: words appear one by one, strongest resonance first (the speed button cycles 0.25x to 4x). The results box scrolls: thumbstick while pointing at it, or (hand tracking) touch it with your index fingertip and slide up or down like a touchscreen, with a flick for momentum; tap a row to select that word. Source passages: select a concept (or click a link line, or press the ¶ button on a row) to see the sentences where the words occur, with the document name; how many are shown adapts to how strongly the words resonate. Voice: hold out an open palm (palm up or toward you) steadily for about three quarters of a second in mixed reality with hand tracking. An orb appears in your hand with lightning arcing to the network; speak, then close your hand or pull it away to send. Whisper runs in your browser (the first use downloads a small model). On desktop, or with controllers, use the mic button. Attach PDF, Word or HTML files, or fetch URLs. Wikipedia takes several voices at once: &ldquo;Wikipedia Nikola Tesla and Aleister Crowley and Edgar Cayce&rdquo; makes one orb each. In Separated Orbs, spread two fingers over an orb or aim a two-hand pinch at it and spread your hands to focus it. Drag to spin, then pinch inward to return to the connected view. The gold threads between orbs are labelled with words that are not in your query but sit beside it in more than one file. In AR the panels stay where they are until you turn your head more than 60&deg; either way, then swing round to face you.</div>
+<div id="hint" class="panel" hidden>Desktop: drag to orbit, wheel to zoom, WASD/QE to fly, click concepts to select several (selected words pulse; click again to deselect). Search skips common filler words, while keeping recognized phrases and negation. In AR, a query bar, keyboard and a results box float in view (point and pinch or trigger the bar to type). The keyboard's mic key dictates into the bar with Whisper: press it, speak, press it again, then press W for Wikipedia or Ask. Or open your palm (the orb) or tap the mic and say &ldquo;Wikipedia: your topic&rdquo; to pull that page in; add &ldquo;as its own sphere&rdquo; or &ldquo;into the unified space&rdquo; to choose where it lands. Mixed reality (Quest 3): press Enter mixed reality to see your room through the passthrough cameras. Pinch and drag anywhere to carry the data sphere (the right stick spins it), pinch with both hands and spread to resize and twist it, quick pinch on a word to select it (or tap a selected word chip in the list box to deselect it); select several to see how they connect, and pinch a selected word again to deselect it. Two hands pushing out pushes the orbs away; motioning forward pulls them toward you. Pointing at words in the word list highlights them with a SELECT cue for easy clicking. The field remembers where you put it between mixed-reality sessions. A adds the selected concept to the query, B clears. Press Place on the panel to snap the field onto a wall, table or floor. In AR the top buttons are: + paste copied text, \u21C4 switch saved text, W fetch Wikipedia for the typed topic, \u00B6 source passages, and the gear toggles the LLM. Brighter nodes are more frequent words. Zoom out and neighbouring words collapse into the most dominant word of their area (bigger dot, labelled); zoom in and they expand again. The field learns as you use it: words you query or select together are drawn a little closer each time, and the arrangement is saved per text. Line colour is based on how often the words at each end occur in your text: rare words are violet and blue, then green and yellow, and the most frequent words are orange and red, so each line blends between its two ends. The results box scrolls: thumbstick while pointing at it, or (hand tracking) touch it with your index fingertip and slide up or down like a touchscreen, with a flick for momentum; tap a row to select that word. Source passages: select a concept (or click a link line, or press the ¶ button on a row) to see the sentences where the words occur, with the document name; how many are shown adapts to how strongly the words resonate. Voice: hold out an open palm (palm up or toward you) steadily for about three quarters of a second in mixed reality with hand tracking. An orb appears in your hand with lightning arcing to the network; speak, then close your hand or pull it away to send. Whisper runs in your browser (the first use downloads a small model). On desktop, or with controllers, use the mic button. Attach PDF, Word or HTML files, or fetch URLs. Wikipedia takes several voices at once: &ldquo;Wikipedia Nikola Tesla and Aleister Crowley and Edgar Cayce&rdquo; makes one orb each. In Separated Orbs, pinch and drag an orb in mixed reality or drag its label on desktop to move it independently. The gold threads between orbs are labelled with words that are not in your query but sit beside it in more than one file. In AR the panels stay where they are until you turn your head more than 60&deg; either way, then swing round to face you.</div>
 <script type="text/plain" id="engine-src">
 
 'use strict';
@@ -403,6 +397,11 @@ function mergeQ(seq){
       if(p>1&&cfreq[p]){hit=L;key=w;}}
     if(hit){o.push(key);i+=hit-1;}else o.push(seq[i]);}
   return [...new Set(o)];
+}
+// Filter after phrase matching so words inside a recognized phrase stay intact.
+const QUERY_NEGATION=new Set(['no','not','nor','never','neither','without']);
+function queryTerms(seq){
+  return mergeQ(seq).filter(term=>QUERY_NEGATION.has(term)||term.endsWith("n't")||(!STOP.has(term)&&!BREAKW.has(term)));
 }
 function recount(){
   cfreq=new Array(vocab.length).fill(0);CN=0;LT=0;
@@ -1593,7 +1592,7 @@ self.onmessage=e=>{
       self.postMessage({rid:m.rid,nodes,edges,orbs:ORBS,mode:fieldMode,force:forceWords(),built});return;}
     if(m.t==='passages'){self.postMessage(Object.assign({rid:m.rid},getPassages(m)));return;}
     if(m.t==='query'){
-      const res=coocc(m.seq?mergeQ(m.seq):m.words);
+      const res=coocc(m.seq?queryTerms(m.seq):m.words);
       if(!res){self.postMessage({rid:m.rid,res:null});return;}
       let rebuilt=null;
       if(!m.again){
@@ -1630,7 +1629,6 @@ const ENG=(()=>{
   return {call(msg,prog){return new Promise((res,rej)=>{const id=++rid;pend.set(id,{res,rej,prog});w.postMessage({cut:cthrOf(),...msg,rid:id});});},
     post(msg){w.postMessage({cut:cthrOf(),...msg,rid:++rid});}};
 })();
-const PLAY={on:false,paused:true,idx:0,rank:null,seq:[],cur:-1,speed:1,t:0,key:''};
 let EPOCH=0,ingesting=false,qSeq=0,forceWords=[],qBusy=0;var wikiBusy=0;
 const thinking=()=>qBusy>0||ingesting||wikiBusy>0||!!rdBusy||VOICE.st==='rec'||VOICE.busy>0;
 let nD=null,eD=null,pulseKey='',pulseOn=0;
@@ -1658,12 +1656,16 @@ function updatePulse(textOnly){
   edges.forEach((e,k)=>{eD[k*2]=nD[e.s];eD[k*2+1]=nD[e.t];});
   pts.geometry.attributes.aD.needsUpdate=true;lines.geometry.attributes.aDv.needsUpdate=true;
 }
-let orbFocus=null;
-const inFocusedOrb=i=>!orbFocus||nodes[i]?.doc===orbFocus.doc;
 let fieldMode=(()=>{try{const s=localStorage.getItem('cf.fieldMode');if(s==='separated'||s==='unified')return s;}catch(e){}return 'unified';})(),orbs=[],word2all=new Map();
-const setField=(r,keepFocus=false)=>{
-  if(!keepFocus)endOrbFocus(false);
+const setField=(r,preserveOrbPositions=false)=>{
+  const centers=preserveOrbPositions?new Map(orbs.map(orb=>[orb.name,orb.center])):null;
   nodes=r.nodes;edges=r.edges;orbs=r.orbs||[];
+  if(centers&&r.mode==='separated'){
+    for(const [index,orb] of orbs.entries()){
+      const center=centers.get(orb.name);
+      if(center)translateOrb(index,center);
+    }
+  }
   fieldMode=r.mode||fieldMode||'unified';
   try{localStorage.setItem('cf.fieldMode',fieldMode);}catch(e){}
   word2i=new Map(nodes.map((n,i)=>[n.id,i]));
@@ -1677,7 +1679,6 @@ function updateModeUI(){
 }
 async function setFieldMode(mode){
   if(mode===fieldMode)return;
-  endOrbFocus();
   fieldMode=mode;
   try{localStorage.setItem('cf.fieldMode',fieldMode);}catch(e){}
   stat(mode==='separated'?'Separating into file orbs\u2026':'Unifying file fields\u2026');
@@ -1919,8 +1920,8 @@ function updateCrossVisuals(){
   if(crossDotsMesh){crossGroup.remove(crossDotsMesh);crossDotsMesh.geometry.dispose();crossDotsMesh=null;}
   crossLabelsGroup.clear();
   updateDivergenceVisuals();
-  if(orbFocus||fieldMode!=='separated'||!Q||!Q.crossBridges||!Q.crossBridges.length){
-    crossGroup.visible=false;orbHaloGroup.visible=!orbFocus&&fieldMode==='separated'&&orbs.length>1;return;
+  if(fieldMode!=='separated'||!Q||!Q.crossBridges||!Q.crossBridges.length){
+    crossGroup.visible=false;orbHaloGroup.visible=fieldMode==='separated'&&orbs.length>1;return;
   }
   crossGroup.visible=true;orbHaloGroup.visible=true;
   const bridges=Q.crossBridges,M=bridges.length;
@@ -2013,11 +2014,16 @@ function updateOrbHalos(){
     grp.add(sp);orbHaloGroup.add(grp);orbHaloObjs[d]=grp;orbLabels.push(sp);
   });
 }
-function moveOrb(d,c){
+function translateOrb(d,c){
   const o=orbs[d];if(!o)return;
   const dx=c[0]-o.center[0],dy=c[1]-o.center[1],dz=c[2]-o.center[2];
   for(const n of nodes)if(n.doc===d){n.x+=dx;n.y+=dy;n.z+=dz;n.orbCenter=c;}
   o.center=[c[0],c[1],c[2]];
+}
+function moveOrb(d,c){
+  const orb=orbs[d];
+  if(!orb||Math.hypot(c[0]-orb.center[0],c[1]-orb.center[1],c[2]-orb.center[2])<1e-6)return;
+  translateOrb(d,c);
   if(orbHaloObjs[d])orbHaloObjs[d].position.set(c[0],c[1],c[2]);
   orbMoved=true;crossGroup.visible=false;
   try{updateGeom();}catch(e){console.warn(e);}
@@ -2037,12 +2043,13 @@ function aimOrb(r,p){
   else return -1;
   const scale=G.matrixWorld.getMaxScaleOnAxis();
   if(fieldMode==='separated'&&orbs.length>=2){
+    const near=p?orbAtWorld(p):-1;
+    if(near>=0)return near;
     let best=-1,minT=1e9;
     for(let idx=0;idx<orbs.length;idx++){
       const orb=orbs[idx];
       _aoC.set(orb.center[0],orb.center[1],orb.center[2]).applyMatrix4(G.matrixWorld);
       const rad=(orb.radius||1.2)*scale*1.15;
-      if(p&&p.distanceTo(_aoC)<=rad*1.05)return idx;
       _aoV.subVectors(_aoC,_aoO);
       const t=_aoV.dot(_aoD);
       if(t>0&&t<minT){
@@ -2102,7 +2109,7 @@ function computeDivergence(){
 
 function updateDivergenceVisuals(){
   divergenceGroup.clear();
-  if(orbFocus||fieldMode!=='separated'||orbs.length<2||!Q||!Q.A){
+  if(fieldMode!=='separated'||orbs.length<2||!Q||!Q.A){
     divergenceGroup.visible=false;return;
   }
   divergenceGroup.visible=true;
@@ -2171,7 +2178,6 @@ function addMorphemeProjections(){
     const groups=new Map();
     for(const id of match.ids){
       for(const i of word2all.get(id)||[]){
-        if(!inFocusedOrb(i))continue;
         const doc=nodes[i].doc;
         if(!groups.has(doc))groups.set(doc,[]);
         groups.get(doc).push(i);
@@ -2225,65 +2231,9 @@ const rainbow=t=>hsv((1-Math.max(0,Math.min(1,t)))*.78,.85,1);
 const cnorm=i=>nodes[i].cr!==undefined?nodes[i].cr:nodes[i].nf;
 const lcol=(i,a)=>rainbow(cnorm(i)).map(v=>v*(.7+.3*a));
 let visible=[],forcedSet=new Set();
-const SPDS=[.25,.5,1,2,4];
-function playSeq(){
-  if(Q&&Q.top&&Q.top.length)return [...new Set([...(Q.fromSel?[...SS]:[]),...Q.top])];
-  return SS.size?[...SS]:[];
-}
-function playUI(){
-  kDirty=true;
-  const b=document.getElementById('plbtn');if(!b)return;
-  b.hidden=PLAY.seq.length<2;
-  document.getElementById('play').hidden=!PLAY.on;
-  b.textContent=(PLAY.on&&!PLAY.paused)?'❚❚ Pause':'▶ Play';
-  const t=document.getElementById('pltl');t.max=Math.max(0,PLAY.seq.length-1);t.value=PLAY.on?PLAY.idx:0;
-  document.getElementById('plsp').textContent=PLAY.speed+'×';
-  document.getElementById('plcnt').textContent=PLAY.on?((PLAY.idx+1)+'/'+PLAY.seq.length+(PLAY.cur>=0&&nodes[PLAY.cur]?' '+nodes[PLAY.cur].word:'')):(PLAY.seq.length+' words');
-  document.getElementById('plst').hidden=!PLAY.on;
-}
-function playSync(){
-  const el=document.getElementById('play');if(!el)return;
-  const seq=nodes.length?playSeq().filter(inFocusedOrb).slice(0,80):[],key=seq.join(',');
-  if(key!==PLAY.key){PLAY.key=key;if(PLAY.on){PLAY.on=false;PLAY.rank=null;PLAY.cur=-1;}PLAY.paused=true;PLAY.seq=seq;PLAY.idx=0;}
-  playUI();
-}
-function playBegin(){PLAY.on=true;PLAY.rank=new Map(PLAY.seq.map((i,k)=>[i,k]));}
-function playSpeed(){
-  PLAY.speed=SPDS[(SPDS.indexOf(PLAY.speed)+1)%SPDS.length];playUI();
-}
-function playSeek(index){
-  if(!PLAY.seq.length)return;
-  index=Math.max(0,Math.min(PLAY.seq.length-1,Math.round(index)));
-  if(PLAY.on&&PLAY.paused&&PLAY.idx===index)return;
-  if(!PLAY.on)playBegin();
-  PLAY.paused=true;PLAY.idx=index;PLAY.t=0;PLAY.cur=PLAY.seq[index];applyState();
-}
-function playToggle(){
-  if(!PLAY.seq.length)return;
-  if(!PLAY.on){playBegin();PLAY.idx=0;PLAY.t=0;PLAY.paused=false;}
-  else if(PLAY.paused){if(PLAY.idx>=PLAY.seq.length-1)PLAY.idx=0;PLAY.paused=false;PLAY.t=0;}
-  else PLAY.paused=true;
-  PLAY.cur=PLAY.seq[PLAY.idx];sfxChime(PLAY.cur);applyState();
-}
-function playStop(){PLAY.on=false;PLAY.paused=true;PLAY.rank=null;PLAY.cur=-1;applyState();}
-function playStep(dt){
-  if(!PLAY.on||PLAY.paused||!PLAY.seq.length)return;
-  PLAY.t+=dt*PLAY.speed;if(PLAY.t<1.1)return;PLAY.t=0;
-  if(PLAY.idx>=PLAY.seq.length-1){PLAY.paused=true;playUI();return;}
-  PLAY.idx++;PLAY.cur=PLAY.seq[PLAY.idx];sfxChime(PLAY.cur);applyState();
-}
-function playFly(dt){
-  if(!PLAY.on||PLAY.cur<0||!nodes[PLAY.cur])return;
-  const n=nodes[PLAY.cur];_cw.set(n.x,n.y,n.z).applyMatrix4(G.matrixWorld);
-  const k=1-Math.exp(-dt*2.2),dir=camera.position.clone().sub(controls.target);
-  let L=dir.length();dir.normalize();
-  const want=.45*Math.max(.3,G.scale.x);L+=(want-L)*k;
-  controls.target.lerp(_cw,k);camera.position.copy(controls.target).addScaledVector(dir,L);
-}
 function applyState(quick){
   const N=nodes.length,E=edges.length;if(!N)return;
   if(Q&&Q.fromSel&&!SS.size)Q=null;
-  playSync();
   const isSep=fieldMode==='separated'&&orbs.length>1;
   const nI=new Float32Array(N),ni=new Float32Array(N),ei=new Float32Array(E),ec=new Uint8Array(E),nc=new Uint8Array(N),er=new Float32Array(E),ea=new Float32Array(N).fill(1);
   const labs=[];
@@ -2320,8 +2270,6 @@ function applyState(quick){
     ea.fill(.3);labs.length=0;
     SS.forEach(s=>{nI[s]=1.3;nc[s]=2;ea[s]=1;labs.push([s,1]);});
   }
-  if(PLAY.on&&PLAY.rank){for(let i=0;i<N;i++){const r=PLAY.rank.get(i);if(r===undefined)continue;
-    if(r>PLAY.idx){nI[i]=.08;ea[i]=.15;nc[i]=0;}else if(r===PLAY.idx){nI[i]=Math.max(nI[i],1.4);nc[i]=2;ea[i]=1;labs.push([i,1]);}else{ea[i]=Math.max(ea[i],.7);labs.push([i,0]);}}}
   const div=(isSep&&Q&&Q.A)?computeDivergence():null;
   const divSet=div?new Set(div.topDivergent.map(d=>d.i)):null;
   const divShownSet=div?new Set(div.topDivergent.slice(0,16).map(d=>d.i)):null;
@@ -2329,9 +2277,8 @@ function applyState(quick){
   const pointIndex=pts.geometry.index;let pointCount=0;
   visible=[];const colOn=!isSep&&!!(col.hide&&col.hide.length===N&&!hasCtx());
   for(let i=0;i<N;i++){
-    if(!inFocusedOrb(i))continue;
     pointIndex.array[pointCount++]=i;
-    nA[i]=nI[i];nP[i]=(SS.has(i)||(PLAY.on&&PLAY.cur===i))?1:0;nF[i]=(SS.size&&(sm||nc[i]>=2))?(nc[i]>=2?1:0):(Q&&Q.A?(nc[i]===1?1:0):.3+.7*ni[i]);nS[i]=.013+.055*ni[i]+(nc[i]===2?.03:nc[i]===1?.012*nI[i]:0);
+    nA[i]=nI[i];nP[i]=SS.has(i)?1:0;nF[i]=(SS.size&&(sm||nc[i]>=2))?(nc[i]>=2?1:0):(Q&&Q.A?(nc[i]===1?1:0):.3+.7*ni[i]);nS[i]=.013+.055*ni[i]+(nc[i]===2?.03:nc[i]===1?.012*nI[i]:0);
     let cc;
     if(divSet&&divSet.has(i)){
       
@@ -2352,7 +2299,6 @@ function applyState(quick){
   pointIndex.needsUpdate=true;pts.geometry.setDrawRange(0,pointCount);
   const flowQ=Q&&Q.A,aT=lines.geometry.attributes.aT;
   edges.forEach((e,k)=>{
-    if(!inFocusedOrb(e.s)||!inFocusedOrb(e.t)){ei[k]=ec[k]=0;}
     eI[k*2]=ei[k]*ea[e.s];eI[k*2+1]=ei[k]*ea[e.t];
     eC.set(lcol(e.s,ea[e.s]),k*6);eC.set(lcol(e.t,ea[e.t]),k*6+3);
     let dir=0;
@@ -2454,6 +2400,8 @@ async function runQuery(text,again,opts){
   psAuto();if(!so)stat(summary());
 }
 function hebbMove(ids){
+  const doc=nodes[ids[0]]?.doc;
+  if(fieldMode==='separated'&&ids.some(i=>nodes[i]?.doc!==doc))return false;
   ids=[...new Set(ids)].filter(i=>nodes[i]);if(ids.length<2)return false;
   let cx=0,cy=0,cz=0;ids.forEach(i=>{cx+=nodes[i].x;cy+=nodes[i].y;cz+=nodes[i].z;});cx/=ids.length;cy/=ids.length;cz/=ids.length;
   ids.forEach(i=>{const n=nodes[i];if(Math.hypot(cx-n.x,cy-n.y,cz-n.z)<.08)return;n.x+=(cx-n.x)*.07;n.y+=(cy-n.y)*.07;n.z+=(cz-n.z)*.07;});
@@ -2461,7 +2409,7 @@ function hebbMove(ids){
 }
 function hebbPull(ids){
   if(!pts||!lines||!dots)return;
-  ids=[...new Set(ids)].filter(i=>nodes[i]&&inFocusedOrb(i));if(!hebbMove(ids))return;
+  ids=[...new Set(ids)].filter(i=>nodes[i]);if(!hebbMove(ids))return;
   HLOG.push(ids.map(i=>nodes[i].word));if(HLOG.length>200)HLOG.shift();
   try{updateGeom();}catch(e){console.warn(e);}
   saveField();
@@ -2475,8 +2423,7 @@ function selQ(){return !!(Q&&Q.fromSel&&SS.size&&Q.sk===[...SS].join(','));}
 function selQuery(){const ws=[...SS].map(i=>nodes[i].word);if(ws.length)runQuery(ws.join(' '),true,{sel:true,words:ws});}
 function toggleSel(i){
   const w=nodes[i]&&nodes[i].word;
-  if(!inFocusedOrb(i))return false;
-  const ks=((w&&word2all&&word2all.get(nodes[i].id))||[i]).filter(inFocusedOrb);
+  const ks=((w&&word2all&&word2all.get(nodes[i].id))||[i]);
   const hasAny=ks.some(k=>SS.has(k));
   ks.forEach(k=>{if(hasAny)SS.delete(k);else SS.add(k);});
   sel=SS.size?[...SS].pop():-1;selV++;
@@ -2492,8 +2439,8 @@ function selectEdge(k){
   const sNodes=(word2all&&word2all.get(nodes[e.s].id))||[e.s];
   const tNodes=(word2all&&word2all.get(nodes[e.t].id))||[e.t];
   SS.clear();
-  sNodes.filter(inFocusedOrb).forEach(i=>SS.add(i));
-  tNodes.filter(inFocusedOrb).forEach(i=>SS.add(i));
+  sNodes.forEach(i=>SS.add(i));
+  tNodes.forEach(i=>SS.add(i));
   sel=e.t;selV++;
   if(Q&&Q.fromSel)Q=null;
   applyState();
@@ -2628,7 +2575,7 @@ async function ingest0(docs,opts={}){
   catch(err){if(my===EPOCH)ingesting=false;stat('Analysis failed: '+err.message);renderDocs();return false;}
   if(my!==EPOCH)return false;
   ingesting=false;
-  docCount=docs.length;curDocs=docs;setField(r);HLOG=r.built?[]:((pre&&pre.h)||[]);
+  docCount=docs.length;curDocs=docs;setField(r,true);HLOG=r.built?[]:((pre&&pre.h)||[]);
   if(r.built&&!(r.mode==='separated'&&docs.length>1))saveField();
   if(nodes.length<3){stat('Not enough repeated concepts. Attach longer text.');renderDocs();return false;}
   buildVisuals();stat(summary());renderDocs();
@@ -2823,13 +2770,13 @@ function sfxQuery(stage,result){
   }else if(stage==='error'){
     tone(180,175,0,.085,.065,'triangle');tone(180,175,.14,.085,.065,'triangle');
   }else{
-    const anchor=[...result.seeds].find(inFocusedOrb);
+    const anchor=result.seeds.values().next().value;
     const root=anchor===undefined?350:nodeFreq(anchor);
     tone(root,root,0,.24,.105,'triangle');
     if(result.inferred)tone(root*.8,root,.045,.22,.06);
     const pitches=new Set([root]);
     for(const i of result.top){
-      if(result.seeds.has(i)||!inFocusedOrb(i))continue;
+      if(result.seeds.has(i))continue;
       const pitch=nodeFreq(i);
       if(pitches.has(pitch))continue;
       tone(pitch,pitch,pitches.size*.094,.22,.055);
@@ -3240,7 +3187,7 @@ function infoData(){
     const out=[],seen=new Set();
     for(const i of indices){
       const w=nodes[i].word;
-      if(!inFocusedOrb(i)||seen.has(w))continue;
+      if(seen.has(w))continue;
       seen.add(w);
       const v=Q.cv?Q.cv[i]:Q.A[i];
       out.push({i,l:w,v,n:v.toFixed(2)});
@@ -3315,7 +3262,7 @@ function drawInfo(){
   x.textAlign='left';
   if(ibHpx!==h){ibHpx=h;relayoutKeys();kDirty=true;}
 }
-function relayoutKeys(){const y=Math.round(98+ibHpx*.625+10);KEYS.forEach(k=>{if(k.ib)k.y=y+(k.timeline?69:0);});}
+function relayoutKeys(){const y=Math.round(98+ibHpx*.625+10);KEYS.forEach(k=>{if(k.ib)k.y=y;});}
 function hud(){
   relayoutKeys();
   hudA='';
@@ -3338,13 +3285,9 @@ function hud(){
     {id:'toggle',x:sbX+8,y:106,w:56,h:56,act:'toggle'},
     {id:'field',x:sbX+72,y:106,w:440,h:56,act:'open'},
     {id:'ask',label:'',x:sbX+524,y:106,w:56,h:56,act:'ask'},
-    {id:'play',x:sbX+608,y:108,w:100,h:48,act:'play',playback:true,ib:true},
-    {id:'scrub',x:sbX+608,y:177,w:220,h:44,act:'scrub',timeline:true,ib:true},
-    {id:'speed',x:sbX+844,y:177,w:80,h:44,act:'speed',timeline:true,ib:true},
-    {id:'stop',label:'Stop',x:sbX+940,y:177,w:80,h:44,act:'stop',timeline:true,ib:true},
-    {id:'clear',label:'Clear',x:sbX+722,y:108,w:110,h:48,act:'clear',ctk:true,ib:true},
-    {id:'brain',x:sbX+840,y:108,w:120,h:48,act:'brain',ctk:true,llm:true,ib:true},
-    {id:'auto',x:sbX+968,y:108,w:92,h:48,act:'auto',ctk:true,llm:true,ib:true},
+    {id:'clear',label:'Clear',x:sbX+608,y:108,w:110,h:48,act:'clear',ctk:true,ib:true},
+    {id:'brain',x:sbX+726,y:108,w:120,h:48,act:'brain',ctk:true,llm:true,ib:true},
+    {id:'auto',x:sbX+854,y:108,w:92,h:48,act:'auto',ctk:true,llm:true,ib:true},
     {id:'help',x:32,y:KH-84,w:64,h:64,act:'help'});
   [['am_paste','Paste copied text'],['am_wiki','Wikipedia pages'],['am_saved','Saved texts (next)'],['am_demo','Demo text']].reverse().forEach(([id,label],i,a)=>KEYS.unshift({id,label,x:sbX+12,y:100+(a.length-1-i)*60,w:396,h:52,act:id,am:true}));
   const u=78,g=6,rows=[
@@ -3357,8 +3300,6 @@ function hud(){
     row.forEach(([l,w,a])=>{KEYS.push({label:l,x,y,w:w*u,h:58,act:a||'ch',kbk:true});x+=w*u+g;});});
 })();
 function rr(x,a,b,w,h,r){x.beginPath();if(x.roundRect)x.roundRect(a,b,w,h,r);else x.rect(a,b,w,h);}
-const playbackKeyVisible=k=>(!k.playback||PLAY.seq.length>1)&&(!k.timeline||(PLAY.on&&PLAY.seq.length>1));
-function seekFromPanel(hit){const k=KEYS.find(k=>k.id==='scrub');playSeek((hit.px-k.x-8)/(k.w-16)*(PLAY.seq.length-1));}
 function drawKB(){
   const x=kctx,F=FNT,ctx=hasCtx();
   x.setTransform(PQ,0,0,PQ,0,0);x.clearRect(0,0,KW,KH);x.textBaseline='middle';x.textAlign='left';
@@ -3370,7 +3311,7 @@ function drawKB(){
   for(const k of KEYS){
     if(HUIDE&&k.id!=='hideui'&&!k.ib)continue;
     if(k.kbk&&!kbOpen)continue;
-    if(k.am||!playbackKeyVisible(k))continue;
+    if(k.am)continue;
     if(k.dk&&!curDocs.length)continue;
     if((k.tlk||k.ctk)&&!ctx)continue;
     if(k.llm&&!CFG.on)continue;
@@ -3400,15 +3341,7 @@ function drawKB(){
     rr(x,k.x,k.y,k.w,k.h,10);
     x.fillStyle=(fl||(k.id==='move'&&MOVE)||(k.act==='kmic'&&VOICE.dict&&(VOICE.st==='rec'||VOICE.st==='starting')))?'rgba(255,179,71,.6)':on?'rgba(255,255,255,.3)':'rgba(255,255,255,.12)';x.fill();
     x.strokeStyle=on?'rgba(255,255,255,.8)':'rgba(255,255,255,.42)';x.lineWidth=2;x.stroke();
-    if(k.id==='scrub'){
-      const y=k.y+13,f=PLAY.idx/Math.max(1,PLAY.seq.length-1);
-      x.fillStyle='rgba(214,246,255,.4)';x.fillRect(k.x+8,y,k.w-16,3);
-      x.fillStyle='#ffb347';x.beginPath();x.arc(k.x+8+f*(k.w-16),y+1,5,0,Math.PI*2);x.fill();
-      x.fillStyle='#d6fbff';x.font='19px '+F;x.textAlign='center';
-      x.fillText((PLAY.idx+1)+' / '+PLAY.seq.length+' words',k.x+k.w/2,k.y+31);
-      continue;
-    }
-    const lab=k.id==='dcnt'?curDocs.length+(fbOpen?' \u25b4':' \u25be'):(k.kbk&&k.act==='ask'&&wbOpen)?'Search':k.id==='auto'?'':k.id==='brain'?'Ask LLM':k.id==='play'?(PLAY.on&&!PLAY.paused?'Pause':'Play'):k.id==='speed'?(PLAY.speed+'×'):k.id==='place'?'Place':k.id==='move'?(MOVE?'Move':'Spin'):k.id==='toggle'?(kbOpen?'hide':'keys'):k.id==='hideui'?(HUIDE?'Show UI':'Hide UI'):k.act==='kmic'?(VOICE.dict&&(VOICE.st==='rec'||VOICE.st==='starting')?'\u25CF':'\uD83C\uDFA4'):k.label;
+    const lab=k.id==='dcnt'?curDocs.length+(fbOpen?' \u25b4':' \u25be'):(k.kbk&&k.act==='ask'&&wbOpen)?'Search':k.id==='auto'?'':k.id==='brain'?'Ask LLM':k.id==='place'?'Place':k.id==='move'?(MOVE?'Move':'Spin'):k.id==='toggle'?(kbOpen?'hide':'keys'):k.id==='hideui'?(HUIDE?'Show UI':'Hide UI'):k.act==='kmic'?(VOICE.dict&&(VOICE.st==='rec'||VOICE.st==='starting')?'\u25CF':'\uD83C\uDFA4'):k.label;
     x.font=(k.kbk?'600 30px ':'600 24px ')+F;x.fillStyle=k.act==='ask'?'#ffb347':'#d6fbff';x.textAlign='center';
     x.fillText(lab,k.x+k.w/2,k.y+k.h/2+1,k.w-10);
     if(k.id==='auto'){const bx=k.x+12,by=k.y+k.h/2-11;
@@ -3435,7 +3368,7 @@ function drawKBIfDirty(){
 }
 function keyAt(px,py){
   if(px<0||px>KW||py<0||py>KH)return null;
-  const k=KEYS.find(k=>playbackKeyVisible(k)&&(!HUIDE||k.id==='hideui'||k.ib)&&(!k.kbk||kbOpen)&&(!k.am||amOpen)&&(!k.dk||curDocs.length)&&(!(k.tlk||k.ctk)||hasCtx())&&(!k.llm||CFG.on)&&px>=k.x-(k.kbk||k.playback||k.timeline||k.id==='clear'?3:16)&&px<=k.x+k.w+(k.kbk||k.playback||k.timeline||k.id==='clear'?3:16)&&py>=k.y-(k.kbk||k.playback||k.timeline||k.id==='clear'?3:16)&&py<=k.y+k.h+(k.kbk||k.playback||k.timeline||k.id==='clear'?3:16));
+  const k=KEYS.find(k=>(!HUIDE||k.id==='hideui'||k.ib)&&(!k.kbk||kbOpen)&&(!k.am||amOpen)&&(!k.dk||curDocs.length)&&(!(k.tlk||k.ctk)||hasCtx())&&(!k.llm||CFG.on)&&px>=k.x-(k.kbk?3:16)&&px<=k.x+k.w+(k.kbk?3:16)&&py>=k.y-(k.kbk?3:16)&&py<=k.y+k.h+(k.kbk?3:16));
   return {k:k||null,px,py};
 }
 const rc=new THREE.Raycaster(),_o=new THREE.Vector3(),_d=new THREE.Vector3(),_q=new THREE.Quaternion();
@@ -3444,7 +3377,7 @@ function panelNear(c){
   rayOf(c);_d.set(0,0,-1).applyQuaternion(_q);rc.set(_o,_d);
   const h=rc.intersectObject(kb,false)[0];if(!h||!h.uv)return false;
   const px=h.uv.x*KW,py=(1-h.uv.y)*KH,m=28;
-  return KEYS.some(k=>playbackKeyVisible(k)&&(!HUIDE||k.id==='hideui'||k.ib)&&(!k.kbk||kbOpen)&&(!k.am||amOpen)&&(!k.dk||curDocs.length)&&(!(k.tlk||k.ctk)||hasCtx())&&(!k.llm||CFG.on)&&px>=k.x-m&&px<=k.x+k.w+m&&py>=k.y-m&&py<=k.y+k.h+m);
+  return KEYS.some(k=>(!HUIDE||k.id==='hideui'||k.ib)&&(!k.kbk||kbOpen)&&(!k.am||amOpen)&&(!k.dk||curDocs.length)&&(!(k.tlk||k.ctk)||hasCtx())&&(!k.llm||CFG.on)&&px>=k.x-m&&px<=k.x+k.w+m&&py>=k.y-m&&py<=k.y+k.h+m);
 }
 let RAYOV=null;
 function rayOf(c){if(RAYOV&&RAYOV.c===c){_o.copy(RAYOV.o);_q.copy(RAYOV.q);}else{c.getWorldPosition(_o);c.getWorldQuaternion(_q);}}
@@ -3468,9 +3401,6 @@ function keyAct(k,r){
   else if(k.act==='toggle')kbOpen=!kbOpen;
   else if(k.act==='ask'){if(wbOpen){xrWkSearch($q.value.trim());kbOpen=false;wbD=true;}else if($q.value.trim()){runQuery($q.value).then(autoBrain);kbOpen=false;}}
   else if(k.act==='clear')clearAll();
-  else if(k.act==='play')playToggle();
-  else if(k.act==='speed')playSpeed();
-  else if(k.act==='stop')playStop();
   else if(k.act==='auto'){AUTO=!AUTO;try{localStorage.setItem('cf.auto',AUTO?'1':'0');}catch(e){}$('#auto').checked=AUTO;}
   else if(k.act==='move'){MOVE=!MOVE;xrNote=MOVE?'Pinch and drag to move the field':'Pinch and drag to spin the field';hud();}
   else if(k.act==='mic')voiceToggle();
@@ -3487,7 +3417,7 @@ function keyAct(k,r){
   else if(k.act==='pass'){if(psXR){psXR=false;rdD=true;}else{const sp=curSpec()||(SS.size?specSel():null);if(!sp){xrNote='Select a word or ask a question first';hud();}else{psXR=true;PS.auto=true;rdD=true;showPassages(sp);}}}
   else if(k.act==='set')toggleSettingsXR();
   else if(k.act==='reset')resetReq=true;
-  else if(k.act==='help'){xrNote='Pinch to select. Drag to move the field (Spin turns it). Two hands resize and turn it.';hud();}
+  else if(k.act==='help'){xrNote=fieldMode==='separated'?'Pinch and drag to move each orb independently. Tap a concept to select it.':'Pinch to select. Drag to move the field. Two hands resize and turn it.';hud();}
   else if(k.act==='hist'){psXR=false;rdD=true;if(reads().length||!$rd.hidden){$rd.hidden=!$rd.hidden;if(!$rd.hidden){rdLive=null;rdIdx=0;paintRd();}}else{xrNote='No readings yet';hud();}}
   else if(k.act==='brain')brain();
   else if(k.act==='place')beginPlacing();
@@ -3589,7 +3519,6 @@ function pickFieldSpot(E){
 }
 /*RESET-END*/
 function xrResetField(frame){
-  endOrbFocus();
   resetReq=false;if(!nodes.length||!frame)return;
   const ref=renderer.xr.getReferenceSpace(),xc=renderer.xr.getCamera(),h=new THREE.Vector3(),g=new THREE.Vector3();
   xc.getWorldPosition(h);xc.getWorldDirection(g);
@@ -3719,7 +3648,7 @@ function uiStep(){
       while(H.length>2&&nw-H[1].t>260)H.shift();
       if(r.pin&&!r.tp){let e=null;for(const x of H){if(nw-x.t>=80)e=x;}if(e)RAYOV={c:r.c,o:e.o,q:e.q};}
     }
-    let hit=panelHit(r.c,r.slide),ih=infoHit(r.c,r),rh=rdHit(r.c);
+    let hit=panelHit(r.c),ih=infoHit(r.c,r),rh=rdHit(r.c);
     let sh=r.bd?null:settingsHit(r.c),wh=r.bd?null:wikiHit(r.c);
     let fh=r.bd?null:filesHit(r.c);
     {const m=Math.min(sh?sh.d:1e9,wh?wh.d:1e9,fh?fh.d:1e9);if(sh&&sh.d>m)sh=null;if(wh&&wh.d>m)wh=null;if(fh&&fh.d>m)fh=null;}
@@ -3728,7 +3657,7 @@ function uiStep(){
     
     const nr=!hit&&(r.c.userData.isHand?r.pin:r.c.userData.tr)&&!r.tp?panelNear(r.c):false;RAYOV=null;
     
-    if(r.slide&&hit){ih=null;rh=null;}else if(r.ibd&&ih){hit=null;rh=null;}else if(r.rds&&rh){hit=null;ih=null;}else if(hit&&hit.k&&!(rh&&rh.k)){ih=null;rh=null;}
+    if(r.ibd&&ih){hit=null;rh=null;}else if(r.rds&&rh){hit=null;ih=null;}else if(hit&&hit.k&&!(rh&&rh.k)){ih=null;rh=null;}
     else{const dh=hit?hit.d:1e9,di=ih?ih.d:1e9,dr=rh?rh.d:1e9,m=Math.min(dh,di,dr);if(dh>m)hit=null;if(di>m)ih=null;if(dr>m)rh=null;}
     r.hk=hit?hit.k:null;
     if(sh)sbHov=sh.k;if(wh)wbHov=wh.k;if(fh)fbHov=fh.k;
@@ -3747,14 +3676,13 @@ function uiStep(){
     const trig=r.c.userData.isHand?r.pin:r.c.userData.tr,press=trig&&!r.tp;r.tp=trig;
     if(press&&((hit&&hit.k)||(rh&&rh.k)||ih))sfxTick(1);
     if(press&&(sh||wh||fh)){r.uiHold=true;const b=sh||wh||fh;if(b.k){if(sh)settingsAct(b.k);else if(wh)wikiAct(b.k);else filesAct(b.k);}else r.bd={m:sh?sb:wh?wb:fb,d:b.d};}
-    else if(press&&hit){r.uiHold=true;if(hit.k?.id==='scrub')r.slide=true;else if(hit.k)keyAct(hit.k,r);}
+    else if(press&&hit){r.uiHold=true;if(hit.k)keyAct(hit.k,r);}
     else if(press&&ih){
       const hRow=(ih.py>=HV&&infoCache)?Math.floor((ih.py-HV)/ROW+iScroll):-1;
       const hChip=(ih.py<HV)?ibChips.find(c=>ih.px>=c.x-10&&ih.px<=c.x+c.w+10&&ih.py>=c.y-10&&ih.py<=c.y+c.h+10):null;
       r.uiHold=true;r.ibd={px:ih.px,py:ih.py,row:hRow,chip:hChip,off:iScroll,mv:false,t:performance.now()};
     }
     else if(press&&rh){r.uiHold=true;if(rh.k)rdAct(rh.k);else if(rh.py<68||rh.py>RH-52)r.rdd=rh.d;else r.rds={py:rh.py,off:rdSy,mv:false};}else if(press&&kd){r.uiHold=true;kbDragStart(r,kd.d);sfxTick(.4);}else if(press&&nr){r.uiHold=true;sfxTick(.4);}else if(press&&placing)confirmPlace();
-    if(trig&&r.slide&&hit&&PLAY.on)seekFromPanel(hit);
     if(trig&&r.rdd)rdDrag(r);
     if(trig&&r.bd)boardDrag(r);
     if(trig&&r.kd)kbDrag(r);
@@ -3780,7 +3708,7 @@ function uiStep(){
           }
         }
       }
-      r.uiHold=false;r.slide=false;r.ibd=null;r.rdd=null;r.rds=null;r.bd=null;r.kd=null;
+      r.uiHold=false;r.ibd=null;r.rdd=null;r.rds=null;r.bd=null;r.kd=null;
     }
   });
   if(rbHov!==rbHov0)rdD=true;
@@ -3955,11 +3883,10 @@ function arCommit(frame){
   }).catch(()=>{}).finally(()=>{arBusy=false;});
 }
 function arFlush(){
-  if(orbFocus?.xr)return;
   if(arLast&&arRest===0&&nodes.length&&arDiff(arPose(),arLast)){arSaved={p:G.position.toArray(),q:G.quaternion.toArray(),s:G.scale.x};arWrite();}
 }
 function arPersist(frame,dt){
-  if(!nodes.length||orbFocus?.xr)return;
+  if(!nodes.length)return;
   const s=renderer.xr.getSession(),ref=renderer.xr.getReferenceSpace();
   if(!arRest&&!arTried&&arSaved&&!needCenter&&!placing&&mode==='none'&&arBegin()){xrNote='Field restored to where you left it. Pinch and drag to move it';hud();}
   if(arRest){
@@ -4039,119 +3966,6 @@ renderer.domElement.addEventListener('pointerup',e=>{
   if(!ray.ray.intersectPlane(pl,hp))return;const l=G.worldToLocal(hp).add(od.g);moveOrb(od.d,[l.x,l.y,l.z]);lastAct=performance.now();});
  const end=()=>{if(!od)return;od=null;controls.enabled=!renderer.xr.isPresenting;orbFinish();};
  addEventListener('pointerup',end);addEventListener('pointercancel',end);}
-const canFocusOrb=()=>fieldMode==='separated'&&orbs.length>1;
-function orbRayHit(aim){
-  if(!canFocusOrb())return -1;
-  G.updateMatrixWorld(true);
-  const sphere=new THREE.Sphere(),hit=new THREE.Vector3();
-  const scale=G.matrixWorld.getMaxScaleOnAxis();
-  let best=-1,dist=Infinity;
-  for(const [i,orb] of orbs.entries()){
-    if(!orb.nodeCount)continue;
-    sphere.center.fromArray(orb.center).applyMatrix4(G.matrixWorld);
-    sphere.radius=(orb.radius||1.2)*scale;
-    const p=aim.intersectSphere(sphere,hit);
-    if(p&&p.distanceToSquared(aim.origin)<dist){best=i;dist=p.distanceToSquared(aim.origin);}
-  }
-  return best;
-}
-function handPinchOrb(midpoint){
-  G.updateMatrixWorld(true);
-  const nearby=orbAtWorld(midpoint);
-  if(nearby>=0)return nearby;
-  const viewer=renderer.xr.getCamera();
-  const eye=viewer.getWorldPosition(new THREE.Vector3());
-  // Hands can be held below the orb while the viewer looks straight at it.
-  const lookedAt=orbRayHit(new THREE.Ray(eye,viewer.getWorldDirection(new THREE.Vector3())));
-  if(lookedAt>=0)return lookedAt;
-  return orbRayHit(new THREE.Ray(eye,midpoint.clone().sub(eye).normalize()));
-}
-function clearControlMomentum(){
-  const damping=controls.enableDamping;
-  controls.enableDamping=false;controls.update();controls.enableDamping=damping;
-}
-function startOrbFocus(index,xr){
-  const orb=orbs[index];
-  if(orbFocus||!orb||!canFocusOrb())return;
-  const center=new THREE.Vector3().fromArray(orb.center);
-  const world=G.localToWorld(center.clone());
-  orbFocus={doc:orb.doc,center,xr};
-  if(xr){
-    Object.assign(orbFocus,{position:G.position.clone(),rotation:G.quaternion.clone(),scale:G.scale.x,dolly:dolly.position.clone()});
-    const cam=renderer.xr.getCamera(),eye=cam.getWorldPosition(new THREE.Vector3());
-    const direction=world.sub(eye);
-    if(direction.lengthSq()<.01)cam.getWorldDirection(direction);
-    const distance=Math.min(1.45,Math.max(.75,direction.length()*.8));
-    const pivot=eye.addScaledVector(direction.normalize(),distance);
-    G.scale.setScalar(THREE.MathUtils.clamp(distance*.48/(orb.radius||1.2),.08,8));
-    setOrbPivot(pivot);
-    xrNote='Orb focused. Pinch and drag to spin. Pinch inward to return';hud();
-  }else{
-    clearControlMomentum();
-    Object.assign(orbFocus,{position:camera.position.clone(),target:controls.target.clone()});
-    const direction=camera.position.clone().sub(controls.target).normalize();
-    const halfFov=Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*Math.min(1,camera.aspect));
-    const distance=(orb.radius||1.2)*G.scale.x/Math.sin(halfFov)*1.15;
-    controls.target.copy(world);camera.position.copy(world).addScaledVector(direction,distance);controls.update();
-    stat('Orb focused. Drag to spin. Pinch inward to return.');
-  }
-  G.updateMatrixWorld(true);lodClear();applyState();
-}
-function setOrbPivot(world){
-  G.position.copy(world).sub(orbFocus.center.clone().multiplyScalar(G.scale.x).applyQuaternion(G.quaternion));
-}
-function endOrbFocus(refresh=true){
-  if(!orbFocus)return;
-  const saved=orbFocus;orbFocus=null;
-  if(saved.xr){
-    G.position.copy(saved.position);G.quaternion.copy(saved.rotation);G.scale.setScalar(saved.scale);
-    dolly.position.copy(saved.dolly);
-    xrNote='';hud();
-  }else{
-    clearControlMomentum();
-    camera.position.copy(saved.position);controls.target.copy(saved.target);controls.update();
-    if(refresh)stat('Returned to the connected orb view.');
-  }
-  G.updateMatrixWorld(true);lodClear();
-  if(refresh)applyState();
-}
-{
-  const canvas=renderer.domElement,touches=new Map();
-  let pinch=null;
-  const pair=()=>[...touches.values()];
-  const span=([a,b])=>Math.hypot(a.x-b.x,a.y-b.y);
-  canvas.addEventListener('pointerdown',e=>{
-    if(e.pointerType!=='touch'||!canFocusOrb()||renderer.xr.isPresenting)return;
-    touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
-    if(touches.size<2)return;
-    down=null;
-    if(touches.size!==2)return;
-    const [a,b]=pair();
-    camera.updateMatrixWorld();
-    ray.setFromCamera(new THREE.Vector2((a.x+b.x)/innerWidth-1,1-(a.y+b.y)/innerHeight),camera);
-    const index=orbFocus?-1:orbRayHit(ray.ray);
-    if(!orbFocus&&index<0)return;
-    pinch={span:Math.max(1,span([a,b])),index,focused:!!orbFocus,action:controls.touches.TWO};
-    controls.touches.TWO=null;
-  },true);
-  canvas.addEventListener('pointermove',e=>{
-    if(!touches.has(e.pointerId))return;
-    touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
-    if(!pinch||pinch.done||touches.size!==2||!canFocusOrb())return;
-    const ratio=span(pair())/pinch.span;
-    if(!pinch.focused&&!orbFocus&&ratio>=1.18){startOrbFocus(pinch.index,false);pinch.done=true;}
-    else if(pinch.focused&&orbFocus&&ratio<=.85){endOrbFocus();pinch.done=true;}
-  },true);
-  const end=e=>{
-    if(!touches.delete(e.pointerId))return;
-    if(pinch&&touches.size<2){
-      controls.touches.TWO=pinch.action;pinch=null;
-    }
-  };
-  addEventListener('pointerup',end,true);
-  addEventListener('pointercancel',end,true);
-  canvas.addEventListener('lostpointercapture',end);
-}
 addEventListener('keydown',e=>{if(!/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))keys[e.code]=true;});
 addEventListener('keyup',e=>keys[e.code]=false);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
@@ -4231,7 +4045,7 @@ function enterARLook(){
   arBtn.textContent='Exit';
 }
 function fieldBad(){
-  if(!nodes.length||orbFocus?.xr)return false;
+  if(!nodes.length)return false;
   renderer.xr.getCamera().getWorldPosition(_hv);
   return !isFinite(G.position.x+G.position.y+G.position.z+G.scale.x)||G.scale.x<.05||G.scale.x>12||G.position.distanceTo(_hv)>5.5;
 }
@@ -4266,7 +4080,6 @@ function watchSession(s){
   });
 }
 renderer.xr.addEventListener('sessionstart',()=>{
-  endOrbFocus();
   const s=renderer.xr.getSession();
   controls.enabled=false;kb.visible=true;kInit=false;kOffL.set(0,0,0);kbOpen=false;HUIDE=false;U.uX.value=1;needCenter=false;lostT=0;arRest=0;arTried=false;arAnchor=null;arLast=null;arDirty=false;arBusy=false;
   try{renderer.xr.setFoveation(0);}catch(e){}
@@ -4276,13 +4089,12 @@ renderer.xr.addEventListener('sessionstart',()=>{
   enterARLook();
   xrNote='';
   {
-    if(nodes.length){setupHit(s);const rest=arBegin();if(!rest){centerS=fitScale(.28);needCenter=true;seatWanted=false;seatT0=0;seat=null;}xrNote=rest?'Field restored to where you left it. Pinch and drag to move it':'Pinch and drag to move the field. Two hands resize and turn it';}else{xrNote='Load text before entering mixed reality';}
+    if(nodes.length){setupHit(s);const rest=arBegin();if(!rest){centerS=fitScale(.28);needCenter=true;seatWanted=false;seatT0=0;seat=null;}xrNote=rest?'Field restored to where you left it. Pinch and drag to move it':(fieldMode==='separated'?'Pinch and drag each orb to move it':'Pinch and drag to move the field. Two hands resize and turn it');}else{xrNote='Load text before entering mixed reality';}
   }
   watchSession(s);
   hud();
 });
 renderer.xr.addEventListener('sessionend',()=>{
-  endOrbFocus();
   if(arMode)arFlush();
   try{voiceStop(false);}catch(e){}VOICE.hand=-1;
   amOpen=false;controls.enabled=true;kb.visible=false;ib.visible=false;rb.visible=false;rbPlaced=false;sbOpen=false;sb.visible=false;wbOpen=false;wb.visible=false;fbOpen=false;fb.visible=false;psXR=false;G.visible=true;arRest=0;arAnchor=null;arBusy=false;
@@ -4359,28 +4171,26 @@ function gestures(dt){
   if(act.length)seatWanted=false;
   if(act.length===2){
     const a=P[0],b=P[1],d=a.distanceTo(b),M=a.clone().add(b).multiplyScalar(.5),v=b.clone().sub(a);
-    const handPinch=rig.every(r=>r.h?.userData.on&&r.rawPin);
-    if(!handPinch&&rig.every(r=>r.h?.userData.on)){
-      // Release the two-hand gesture even while the hand tracker debounces the pinch.
-      mode='none';grabbing=false;
+    const fresh=()=>({d:Math.max(d,.05),v:v.clone(),M,P:G.position.clone(),s:G.scale.x,q:G.quaternion.clone()});
+    if(fieldMode==='separated'&&orbs.length>1){
+      if(mode!=='two'){
+        orbFinish();grabbing=false;mode='two';
+        const taken=new Set();
+        g0={grabs:P.map((point,i)=>{
+          const index=aimOrb(rig[i],point);
+          if(index<0||taken.has(index))return null;
+          taken.add(index);
+          return {index,point:G.worldToLocal(point.clone()),center:new THREE.Vector3().fromArray(orbs[index].center)};
+        })};
+      }
+      g0.grabs?.forEach((grab,i)=>{
+        if(!grab)return;
+        const center=G.worldToLocal(P[i].clone()).sub(grab.point).add(grab.center);
+        moveOrb(grab.index,center.toArray());
+      });
       return;
     }
-    const fresh=()=>({d:Math.max(d,.05),v:v.clone(),M,P:G.position.clone(),s:G.scale.x,q:G.quaternion.clone()});
-    if(mode!=='two'){
-      orbFinish();if(g1)g1.moved=true;
-      const index=handPinch&&!orbFocus&&canFocusOrb()?handPinchOrb(M):-1;
-      g0=Object.assign(fresh(),{on:false,index,span:Math.max(d,.05),focused:handPinch&&!!orbFocus});
-      mode='two';
-    }else if(g0.done){
-      // Wait for release before accepting another pinch.
-    }else if(g0.focused&&orbFocus&&handPinch&&d/g0.span<=.82){
-      endOrbFocus();g0.done=true;
-    }else if(!orbFocus&&g0.index>=0&&handPinch&&d/g0.span>=1.18){
-      G.position.copy(g0.P);G.quaternion.copy(g0.q);G.scale.setScalar(g0.s);
-      G.updateMatrixWorld(true);startOrbFocus(g0.index,true);g0.done=true;
-    }else if((g0.focused&&orbFocus)||(!orbFocus&&g0.index>=0)){
-      // Reserve a pinch aimed at one orb for switching views.
-    }
+    if(mode!=='two'){orbFinish();if(g1)g1.moved=true;g0=Object.assign(fresh(),{on:false});mode='two';}
     else if(!g0.on){
       if(Math.abs(d/g0.d-1)>.1||v.clone().normalize().angleTo(g0.v.clone().normalize())>.15||(MOVE&&M.distanceTo(g0.M)>.05))g0=Object.assign(fresh(),{on:true});
     }else{
@@ -4400,23 +4210,15 @@ function gestures(dt){
         k=nearestWorld(p,.09);
         if(k<0){const o=rig[i].c.getWorldPosition(new THREE.Vector3()),d=new THREE.Vector3(0,0,-1).applyQuaternion(rig[i].c.getWorldQuaternion(new THREE.Quaternion()));k=pick(o,d,.1);}
       }
-      let ob=-1;if(!wasTwo&&MOVE&&k<0)ob=aimOrb(rig[i],p);
+      let ob=-1;if(!wasTwo&&(MOVE||fieldMode==='separated'))ob=k>=0&&fieldMode==='separated'&&orbs.length>1?nodes[k].doc:aimOrb(rig[i],p);
       g1={p:p.clone(),P:G.position.clone(),q:G.quaternion.clone(),k,ob,moved:false};
-      if(orbFocus?.xr)g1.pivot=G.localToWorld(orbFocus.center.clone());
     }else if(grabbing){
       if(!g1.moved){
         if(p.distanceTo(g1.p)>(g1.k>=0?.1:.05)){
           g1.moved=true;g1.p=p.clone();g1.P=G.position.clone();g1.q=G.quaternion.clone();
           if(g1.ob>=0&&fieldMode==='separated'&&orbs[g1.ob]){g1.pl=G.worldToLocal(p.clone());g1.c0=orbs[g1.ob].center.slice();}
         }
-      }else if(orbFocus?.xr&&g1.pivot){
-        const v0=g1.p.clone().sub(g1.pivot),v1=p.clone().sub(g1.pivot);
-        if(v0.lengthSq()>.0016&&v1.lengthSq()>.0016){
-          const q=new THREE.Quaternion().setFromUnitVectors(v0.normalize(),v1.normalize()).multiply(g1.q);
-          G.quaternion.slerp(q,1-Math.exp(-dt*20));
-          setOrbPivot(g1.pivot);
-        }
-      }else if(MOVE&&g1.ob>=0){
+      }else if((MOVE||fieldMode==='separated')&&g1.ob>=0){
         if(fieldMode==='separated'&&g1.pl&&orbs[g1.ob]){
           const l=G.worldToLocal(p.clone());moveOrb(g1.ob,[g1.c0[0]+l.x-g1.pl.x,g1.c0[1]+l.y-g1.pl.y,g1.c0[2]+l.z-g1.pl.z]);
         }else{
@@ -4436,11 +4238,6 @@ function gestures(dt){
 function endTap(){orbFinish();
   if(mode==='one'&&g1&&!g1.moved&&grabbing&&nodes.length){
     if(g1.k>=0)select(g1.k);
-    else if(orbFocus?.xr){
-      const hand=rig[gi].c,o=hand.getWorldPosition(new THREE.Vector3());
-      const d=new THREE.Vector3(0,0,-1).applyQuaternion(hand.getWorldQuaternion(new THREE.Quaternion()));
-      const edge=edgePickRay(o,d,.06);if(edge>=0)selectEdge(edge);
-    }
   }
 }
 function sticks(dt){
@@ -4455,9 +4252,7 @@ function sticks(dt){
       if(rbHot)rdSc(dz(ax[1])*dt*700);else if(ibHot)setScroll(iScroll+dz(ax[1])*dt*8);
     }else{
       if(rbHot)rdSc(dz(ax[1])*dt*700);else if(ibHot)setScroll(iScroll+dz(ax[1])*dt*8);else{
-        const pivot=orbFocus?.xr?G.localToWorld(orbFocus.center.clone()):null;
         G.rotateOnWorldAxis(Y,dz(ax[0])*dt*2);G.rotateOnWorldAxis(side,dz(ax[1])*dt*2);
-        if(pivot)setOrbPivot(pivot);
       }
       const a=gp.buttons[4]?.pressed,b=gp.buttons[5]?.pressed;
       if(a&&!prevBtn.a&&SS.size){const t=($q.value+' '+[...SS].map(i=>nodes[i].word).join(' ')).trim();$q.value=t;runQuery(t);}
@@ -4626,7 +4421,6 @@ function updateGeom(){
   labelGroup.children.forEach(sp=>sp.userData.projection?positionMorphemeProjection(sp):mv(sp));lodMap.forEach(mv);divergenceGroup.children.forEach(mv);
 }
 function platform(){
-  if(orbFocus){ringsG.visible=false;return;}
   ringsG.visible=!arMode;
   let r=0.3;for(const n of nodes){const d=Math.hypot(n.x,n.y,n.z);if(d>r)r=d;}
   const sc=G.scale.x,y=G.position.y-(r+.15)*sc-.05;
@@ -4669,7 +4463,6 @@ function lodLabels(dt){
   for(const [i,sp] of lodMap)if(!on.has(i)){if(sp.parent===lodGroup)wvPend=true;lodGroup.remove(sp);if(lodMap.size>150){sp.material.map.dispose();sp.material.dispose();lodMap.delete(i);}}
 }
 function unloadField(){
-  endOrbFocus(false);
   EPOCH++;ingesting=false;clearTimeout(fsT);ENG.post({t:'reset'});forceWords=[];
   nodes=[];edges=[];word2i=new Map();SS.clear();selV++;sel=-1;Q=null;visible=[];forcedSet=new Set();docCount=0;curCorpus=null;curDocs=[];HLOG=[];renderDocs();
   orbs=[];orbHaloGroup.clear();orbHaloGroup.visible=false;crossGroup.visible=false;divergenceGroup.clear();divergenceGroup.visible=false;crossLabelsGroup.clear();
@@ -4677,7 +4470,7 @@ function unloadField(){
   slowDispose(labelGroup.children.filter(s=>s.userData.projection));
   labelGroup.clear();slowDispose([...labelCache.values()]);labelCache.clear();lodClear();
   $ps.hidden=true;PS.seq++;
-  $q.value='';$('#file').value='';updateInfo();playSync();stat('Attach one or more files to build the field.');
+  $q.value='';$('#file').value='';updateInfo();stat('Attach one or more files to build the field.');
 }
 async function clearCurrent(){
   const id=curCorpus,ops=[];
@@ -5883,7 +5676,7 @@ function edgeBudget(){
   if(cnt!==lastLN){lastLN=cnt;lines.geometry.setDrawRange(0,cnt);}
 }
 ['pointerdown','pointermove','wheel','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>{lastAct=performance.now();},{passive:true}));
-const perfBusy=t=>(PLAY.on&&!PLAY.paused)||t-lastAct<4000||U.uK.value>.01||thinking();
+const perfBusy=t=>t-lastAct<4000||U.uK.value>.01||thinking();
 let pAcc=0,pN=0,pUp=0;
 function perfSample(r){
   if(r>.25)return;pAcc+=r;pN++;if(pAcc<1.5)return;const avg=pAcc/pN;pAcc=0;pN=0;
@@ -5906,7 +5699,7 @@ renderer.setAnimationLoop((t,frame)=>{
   const raw=clock.getDelta(),dt=Math.min(raw,.05);
   if(!xr){if(!idle)perfSample(raw);edgeBudget();}U.uT.value+=dt;
   {const tk=thinking()?1:0;if(tk&&!pulseOn)U.uP0.value=U.uT.value;pulseOn=tk;U.uK.value+=(tk-U.uK.value)*Math.min(1,dt*(tk?4:2.5));if(U.uK.value<.005&&!tk)U.uK.value=0;}
-  G.updateMatrixWorld(true);voiceStep(dt);voiceVis(dt);platform();lodLabels(dt);colUpdate(dt);playStep(dt);
+  G.updateMatrixWorld(true);voiceStep(dt);voiceVis(dt);platform();lodLabels(dt);colUpdate(dt);
   if(needCenter&&renderer.xr.isPresenting&&frame){const xc=renderer.xr.getCamera(),o=xc.getWorldPosition(new THREE.Vector3()),d=xc.getWorldDirection(new THREE.Vector3());d.y=0;if(d.lengthSq()>1e-4){d.normalize();G.scale.setScalar(centerS);const dist=.7;G.position.set(o.x+d.x*dist,o.y-.1,o.z+d.z*dist);G.quaternion.identity();needCenter=false;}}
   if(renderer.xr.isPresenting){xrPerf(raw);xrWatch(dt);placeKB(dt);if(resetReq)xrResetField(frame);gestures(dt);sticks(dt);if(arMode&&frame){arPersist(frame,dt);arFrame(frame);}drawKBIfDirty();drawRdIfDirty();drawSbIfDirty();drawWbIfDirty();drawFbIfDirty();}
   else{
@@ -5917,15 +5710,11 @@ renderer.setAnimationLoop((t,frame)=>{
       if(keys.KeyW)m.add(v);if(keys.KeyS)m.sub(v);if(keys.KeyD)m.add(r);if(keys.KeyA)m.sub(r);if(keys.KeyE)m.y+=1;if(keys.KeyQ)m.y-=1;
       m.multiplyScalar(sp);camera.position.add(m);controls.target.add(m);
     }
-    if(!orbFocus)playFly(dt);controls.update();
+    controls.update();
   }
   renderer.render(scene,camera);
 });
 
-$('#plbtn').onclick=playToggle;
-$('#plst').onclick=playStop;
-$('#plsp').onclick=playSpeed;
-$('#pltl').oninput=e=>playSeek(+e.target.value);
 const fmUni=$('#fm-uni'),fmSep=$('#fm-sep');
 if(fmUni)fmUni.onclick=()=>setFieldMode('unified');
 if(fmSep)fmSep.onclick=()=>setFieldMode('separated');
