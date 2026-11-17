@@ -442,30 +442,24 @@ function recount(){
 
 
 function ideaBounds(ids){
-  const T=ids.length,W=100;
-  if(T<250)return Uint32Array.of(0);
-  const pos=[],sim=[],A=new Map(),B=new Map();
-  let nA=0,nB=0,dot=0;
-  const addA=(x,d)=>{if(x<=FILL||!(cIdf[x]>0))return;const w=cIdf[x],old=A.get(x)||0,nw=old+d;
-    nw>0?A.set(x,nw):A.delete(x);nA+=(nw*nw-old*old)*w*w;dot+=d*w*w*(B.get(x)||0);};
-  const addB=(x,d)=>{if(x<=FILL||!(cIdf[x]>0))return;const w=cIdf[x],old=B.get(x)||0,nw=old+d;
-    nw>0?B.set(x,nw):B.delete(x);nB+=(nw*nw-old*old)*w*w;dot+=d*w*w*(A.get(x)||0);};
-  for(let t=0;t<W;t++)addA(ids[t],1);
-  for(let t=W;t<2*W;t++)addB(ids[t],1);
-  for(let a=W;;){
-    const na=Math.sqrt(Math.max(0,nA))||1,nb=Math.sqrt(Math.max(0,nB))||1;
-    pos.push(a);sim.push(dot/(na*nb));
-    if(a+25>T-W)break;
-    for(let t=0;t<25;t++){addA(ids[a-W+t],-1);addA(ids[a+t],1);addB(ids[a+t],-1);addB(ids[a+W+t],1);}
-    a+=25;
+  // Topic boundaries from the text's own association pattern. Units are sentences (spans between break tokens).
+  // A unit starts a new topic when it deviates from the running profile of the topic so far, i.e. it is less
+  // cohesive with it than adjacent sentences typically are in this text. No fixed window sizes.
+  const T=ids.length,U=[];let s=-1;
+  for(let t=0;t<=T;t++){if(t===T||ids[t]===0){if(s>=0)U.push([s,t]);s=-1;}else if(s<0)s=t;}
+  if(U.length<3)return Uint32Array.of(0);
+  const V=U.map(([a,b])=>{const m=new Map();for(let t=a;t<b;t++){const x=ids[t];if(x>FILL&&cIdf[x]>0)m.set(x,(m.get(x)||0)+cIdf[x]);}return m;});
+  const cos=(A,B)=>{if(!A.size||!B.size)return 0;let d=0,na=0,nb=0;A.forEach(v=>{na+=v*v;});B.forEach((v,k)=>{nb+=v*v;const u=A.get(k);if(u)d+=u*v;});return d/(Math.sqrt(na*nb)||1);};
+  const adj=[];for(let k=1;k<V.length;k++)if(V[k-1].size&&V[k].size)adj.push(cos(V[k-1],V[k]));
+  if(!adj.length)return Uint32Array.of(0);
+  const M=adj.reduce((x,y)=>x+y,0)/adj.length,out=[0];
+  let P=new Map(V[0]);
+  for(let k=1;k<V.length;k++){
+    if(!V[k].size)continue;
+    const R=new Map(V[k]);if(k+1<V.length)V[k+1].forEach((v,x)=>R.set(x,(R.get(x)||0)+v));
+    if(P.size&&cos(P,R)<M){out.push(U[k][0]);P=new Map(V[k]);}
+    else V[k].forEach((v,x)=>P.set(x,(P.get(x)||0)+v));
   }
-  const u=sim.length,depth=sim.map((v,t)=>{let l=t,r=t;
-    for(;l>0&&sim[l-1]>=sim[l];)l--;for(;r<u-1&&sim[r+1]>=sim[r];)r++;return sim[l]+sim[r]-2*v;});
-  const mean=depth.reduce((x,y)=>x+y,0)/u,sd=Math.sqrt(depth.reduce((x,y)=>x+(y-mean)*(y-mean),0)/u),
-    thr=Math.max(.1,mean+.5*sd),out=[0];
-  for(let e=0;e<u;e++)
-    depth[e]>=thr&&depth[e]>=(depth[e-1]||0)&&depth[e]>(depth[e+1]||0)&&
-    pos[e]-out[out.length-1]>=200&&T-pos[e]>=200&&out.push(pos[e]);
   return Uint32Array.from(out);
 }
 function eachFwd(l,t,fn,end,pb){const a=Math.min(end-1,t+HZ);let o=0,i=1;
@@ -564,15 +558,15 @@ function leapScan(terms,excl){
   }
   const DW=2*DEC.reduce((x,y)=>x+y,0);
   return keys.map(k=>{
-    const c=ent.get(k),p=new Map(),hits=c.hits,rare=[],NEARV=DEC[Math.min(HZ,Math.round(HZ*.6))]||0;let a=0;
+    const c=ent.get(k),p=new Map(),hits=c.hits,rare=[];let a=0;
     for(let i=0;i<c.ids.length;i++){
       const r=c.ids[i];if(excl[r])continue;
       const rareW=WDF&&WDF[r]>0&&WDF[r]<=3;if(hits>=20&&CN>3e3&&c.raw[i]*c.stride<2&&!rareW)continue;
       const o=cIdf[r];if(!(o>.08))continue;
       const v=c.acc[i],ex=Math.ceil(hits/c.stride)*DW*cfreq[r]/Math.max(1,LT);
       const sc=Math.log(1+v)*o*(GEN.get(vocab[r])||1)*Math.log(1+v/(ex+1));
-      p.set(r,sc);if(sc>a)a=sc;if(rareW&&c.acc[i]>=NEARV)rare.push(r);}
-    if(rare.length&&a>0){const fl=.45*a;for(const q of rare)if(p.get(q)<fl)p.set(q,fl);}
+      p.set(r,sc);if(sc>a)a=sc;if(rareW)rare.push(r);}
+    if(rare.length&&a>0){const fl=.3*a;for(const q of rare)if(p.get(q)<fl)p.set(q,fl);}
     p.forEach((v,r)=>p.set(r,v/(a||1)));
     
     return {p,hits,
