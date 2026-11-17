@@ -537,7 +537,7 @@ function leapScan(terms,excl){
     for(let i=0;i<c.ids.length;i++){
       const r=c.ids[i];if(excl[r])continue;
       const rareW=WDF&&WDF[r]>0&&WDF[r]<=3;if(hits>=20&&CN>3e3&&c.raw[i]*c.stride<2&&!rareW)continue;
-      const o=cIdf[r];if(!(o>.08))continue;
+      const o=cIdf[r];if(!(o>.08))continue;if(NWIN>=60&&WDF[r]/NWIN>.08)continue;/* very common words (in >8% of text windows) carry little signal */
       const v=c.acc[i],ex=Math.ceil(hits/c.stride)*DW*cfreq[r]/Math.max(1,LT);
       const sc=Math.log(1+v)*o*(GEN.get(vocab[r])||1)*Math.log(1+v/(ex+1));
       p.set(r,sc);if(sc>a)a=sc;if(rareW)rare.push(r);}
@@ -2957,14 +2957,14 @@ function palmRead(r,hd){
   if(!w||!mm||!mp||!im||!pm)return null;
   let open=0,closed=0,tot=0;
   for(const f of ['index','middle','ring','pinky']){const t=g(f+'-finger-tip'),k=g(f+'-finger-phalanx-proximal');if(!t||!k)continue;tot++;
-    const q=t.distanceTo(w)/Math.max(.02,k.distanceTo(w));if(q>1.9)open++;if(q<1.4)closed++;}
+    const q=t.distanceTo(w)/Math.max(.02,k.distanceTo(w));if(q>1.6)open++;if(q<1.4)closed++;}
   const ti=g('index-finger-tip'),tp=g('pinky-finger-tip'),spread=ti&&tp?ti.distanceTo(tp)/Math.max(.02,mp.distanceTo(w)):0;
   const a=im.clone().sub(w),b=pm.clone().sub(w),right=!(r.c.userData.src&&r.c.userData.src.handedness==='left');
   const n=(right?a.cross(b):b.cross(a)).normalize(),c=mp.clone().lerp(mm,.35);
-  const v=hd.clone().sub(c).normalize(),facing=n.y>.55||n.dot(v)>.7;
-  return {open:open>=4&&tot>=4&&spread>.95,closed:closed>=3&&tot>=3,n,c,facing};
+  const v=hd.clone().sub(c).normalize(),facing=n.y>.4||n.dot(v)>.6;
+  return {open:open>=3&&tot>=3&&spread>.65,closed:closed>=3&&tot>=3,n,c,facing};
 }
-const PALM_HOLD=.9;   
+const PALM_HOLD=.8;   
 function voiceStep(dt){
   if(!renderer.xr.isPresenting)return;
   if(VOICE.cool>0)VOICE.cool-=dt;
