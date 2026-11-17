@@ -1733,7 +1733,7 @@ float h=pow(1.-d*2.,2.);float c=smoothstep(.22,.0,d);float k=smoothstep(.3,.26,d
 float sharp=h*(1.1-.6*uX)+c*1.9+ring*.7+uX*(k*.8+rim*.7);float soft=pow(1.-d*2.,1.4)*.9;float rp=fract(uT*.8);float rg=vP*(1.-rp)*smoothstep(.06,.0,abs(d-(.14+.34*rp)))*1.8;float bp=1.+vP*.6*(.5+.5*sin(uT*5.5));gl_FragColor=vec4((vC*mix(soft,sharp,vF)*bp+vec3(1.,.8,.45)*rg)*vI*uG,1.);}`});
 const edgeMat=new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,...ADD,
 vertexShader:`attribute float aT;attribute float aI;attribute float aPh;attribute vec3 aCol;attribute vec3 aO;attribute float aW;attribute float aDv;uniform float uT;varying float vA;varying vec3 vC;varying float vD;
-void main(){vD=aDv;vA=aI>0.?min(1.,aI*3.4+.1)*mix(.8,1.,aT):0.;vC=aCol;
+void main(){vD=aDv;vA=aI>0.?min(.8,aI*2.3+.05)*mix(.75,1.,aT):0.;vC=aCol;
 vec4 va=modelViewMatrix*vec4(position,1.);vec4 vb=modelViewMatrix*vec4(aO,1.);float sc=length(modelViewMatrix[0].xyz);
 vec2 dd=vb.xy-va.xy;float L=length(dd)+1e-6;vec2 n=dd/L;
 float tr=aW>0.?min(aW*sc/max(abs(n.x),1e-3),.016*sc/max(abs(n.y),1e-3)):0.;
@@ -2198,7 +2198,7 @@ function label(i,kind,projection){
     let tw=x.measureText(word).width;
     if(tw>920){fs=Math.max(48,Math.floor(fs*(920/tw)));x.font='700 '+fs+'px Inter,system-ui,-apple-system,sans-serif';}
     x.textAlign='center';x.textBaseline='middle';
-    x.lineJoin='round';x.lineWidth=16;x.strokeStyle='rgba(0,6,16,.95)';x.strokeText(word,512,128);x.shadowColor=kind===1?'#ffb347':'#5df0ff';x.shadowBlur=22;x.fillStyle=kind===1?'#fff0c8':'#f2fdff';x.fillText(word,512,128);
+    x.fillStyle='rgba(0,6,16,.62)';x.beginPath();x.roundRect(512-tw/2-40,128-fs*.64,tw+80,fs*1.28,fs*.42);x.fill();x.lineJoin='round';x.lineWidth=16;x.strokeStyle='rgba(0,6,16,.95)';x.strokeText(word,512,128);x.shadowColor=kind===1?'#ffb347':'#5df0ff';x.shadowBlur=22;x.fillStyle=kind===1?'#fff0c8':'#f2fdff';x.fillText(word,512,128);
     const tx=new THREE.CanvasTexture(c);tx.anisotropy=renderer.capabilities.getMaxAnisotropy();tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
     const m=new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false});
     s=new THREE.Sprite(m);s.scale.set(.2*FS,.05*FS,1);s.renderOrder=10;if(!projection)labelCache.set(key,s);
@@ -2287,7 +2287,7 @@ function applyState(quick){
     Q.top.forEach(i=>labs.push([i,1]));
   }else{
     for(let i=0;i<N;i++)nI[i]=.18+1.9*Math.pow(ni[i],1.2);
-    for(let e=0;e<E;e++){ei[e]=(.09+.26*edges[e].wn)*(.6+.9*(nodes[edges[e].s].nf+nodes[edges[e].t].nf)/2);er[e]=edges[e].wn;}
+    for(let e=0;e<E;e++){ei[e]=(.06+.18*edges[e].wn)*(.5+.8*(nodes[edges[e].s].nf+nodes[edges[e].t].nf)/2);er[e]=edges[e].wn;}
     if(isSep){
       orbs.forEach(orb=>{
         const docNodes=[];
@@ -4579,7 +4579,7 @@ function lodSprite(i){
   let tw=x.measureText(nodes[i].word).width;
   if(tw>920){fs=Math.max(48,Math.floor(fs*(920/tw)));x.font='700 '+fs+'px Inter,system-ui,-apple-system,sans-serif';}
   x.textAlign='center';x.textBaseline='middle';
-  x.lineJoin='round';x.lineWidth=16;x.strokeStyle='rgba(0,6,16,.95)';x.strokeText(nodes[i].word,512,128);x.shadowColor='#5df0ff';x.shadowBlur=20;x.fillStyle='#f2fdff';x.fillText(nodes[i].word,512,128);
+  x.fillStyle='rgba(0,6,16,.62)';x.beginPath();x.roundRect(512-tw/2-40,128-fs*.64,tw+80,fs*1.28,fs*.42);x.fill();x.lineJoin='round';x.lineWidth=16;x.strokeStyle='rgba(0,6,16,.95)';x.strokeText(nodes[i].word,512,128);x.shadowColor='#5df0ff';x.shadowBlur=20;x.fillStyle='#f2fdff';x.fillText(nodes[i].word,512,128);
   const tx=new THREE.CanvasTexture(c);tx.anisotropy=renderer.capabilities.getMaxAnisotropy();tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false}));
   sp.scale.set(.2*FS,.05*FS,1);sp.renderOrder=10;sp.userData.i=i;sp.position.set(nodes[i].x,nodes[i].y,nodes[i].z);return sp;
