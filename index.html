@@ -117,7 +117,7 @@ input[type=text],input[type=password],select,textarea{background:rgba(255,255,25
 #rd{background:rgba(20,28,42,.6);border-radius:16px}
 #helpbtn{background:var(--glass);border-radius:50%}
 #VRButton{background:var(--glass)!important;border:1px solid var(--glass-b)!important;color:var(--ink)!important;border-radius:10px!important}
-#qf{position:fixed;left:4px;bottom:4px;transform:none;width:min(400px,calc(100vw - 60px));margin:0;display:flex;gap:8px;z-index:4}
+#qf{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(520px,calc(100vw - 28px));margin:0;display:flex;gap:8px;z-index:4}
 #top{position:fixed;background:none;border:0;box-shadow:none;padding:0}
 #attl{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;padding:0;font-size:calc(24px*var(--fs,1));line-height:1;position:relative}
 #wikibtn{height:38px;padding:0 14px}
@@ -211,21 +211,17 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 #micb svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #micb.on{background:rgba(93,240,255,.35);border-color:#5df0ff;box-shadow:0 0 18px rgba(93,240,255,.7)}
 
-
 .fmode-pill{display:inline-flex;align-items:center;background:rgba(0,0,0,.45);border:1px solid rgba(93,240,255,.32);border-radius:20px;padding:2px;gap:2px;margin-left:6px;vertical-align:middle}
 .fmode-pill .fm-btn{background:transparent;border:0;color:var(--ink);opacity:.65;padding:4px 10px;font-size:calc(12px*var(--fs,1));border-radius:14px;cursor:pointer;transition:all .18s;line-height:1}
 .fmode-pill .fm-btn:hover{opacity:.95;color:#fff}
 .fmode-pill .fm-btn.active{background:rgba(93,240,255,.24);color:var(--cy);opacity:1;font-weight:600;box-shadow:0 0 10px rgba(93,240,255,.35)}
-
 
 .fmode-row{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-bottom:1px solid rgba(93,240,255,.14);font-size:calc(12px*var(--fs,1))}
 .fmode-toggle{display:inline-flex;background:rgba(0,0,0,.35);border:1px solid rgba(93,240,255,.25);border-radius:14px;padding:2px;gap:2px}
 .fmode-toggle button{background:transparent;border:0;padding:3px 8px;font-size:calc(11px*var(--fs,1));border-radius:10px;color:var(--ink);opacity:.65;cursor:pointer}
 .fmode-toggle button.active{background:rgba(93,240,255,.24);color:var(--cy);opacity:1;font-weight:600}
 
-
 @keyframes dhPulse{0%,100%{transform:scale(1);box-shadow:0 0 14px rgba(93,240,255,.25)}50%{transform:scale(1.05);box-shadow:0 0 24px rgba(93,240,255,.45)}}
-
 
 .xoverlap-box{background:linear-gradient(135deg,rgba(93,240,255,.09),rgba(255,179,71,.09));border:1px solid rgba(93,240,255,.35);border-radius:8px;padding:8px 9px;margin-bottom:8px;box-shadow:0 0 14px rgba(93,240,255,.08) inset}
 .xoverlap-hd{display:flex;align-items:center;gap:6px;font-size:calc(11px*var(--fs,1));color:var(--am);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
@@ -310,7 +306,6 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 <div id="hint" class="panel" hidden>Desktop: drag to orbit, wheel to zoom, WASD/QE to fly, click concepts to select several (selected words pulse; click again to deselect). With words selected, Play puts you inside the current, flying node to node in resonant order. Every word you type is searched, including common words like the or not; only the drawn field hides them. VR: a query bar, keyboard and a results box float in view (point and pinch or trigger the bar to type). The keyboard's mic key dictates into the bar with Whisper: press it, speak, press it again, then press W for Wikipedia or Ask. Or open your palm (the orb) or tap the mic and say &ldquo;Wikipedia: your topic&rdquo; to pull that page in; add &ldquo;as its own sphere&rdquo; or &ldquo;into the unified space&rdquo; to choose where it lands. Mixed reality (Quest 3): press Enter mixed reality to see your room through the passthrough cameras. Pinch and drag anywhere to carry the data sphere (the right stick spins it), pinch with both hands and spread to resize and twist it, quick pinch on a word to select it (or tap a selected word chip in the list box to deselect it); select several to see how they connect, and pinch a selected word again to deselect it. Two hands pushing out pushes the orbs away; motioning forward pulls them toward you. Pointing at words in the word list highlights them with a SELECT cue for easy clicking. The field remembers where you put it between mixed-reality sessions. Sticks fly in VR. A adds the selected concept to the query, B clears. Press Place on the panel to snap the field onto a wall, table or floor. In VR the top buttons are: + paste copied text, \u21C4 switch saved text, W fetch Wikipedia for the typed topic, \u00B6 source passages, and the gear toggles the LLM. Brighter nodes are more frequent words. Zoom out and neighbouring words collapse into the most dominant word of their area (bigger dot, labelled); zoom in and they expand again. The field learns as you use it: words you query or select together are drawn a little closer each time, and the arrangement is saved per text. Line colour is based on how often the words at each end occur in your text: rare words are violet and blue, then green and yellow, and the most frequent words are orange and red, so each line blends between its two ends. The cog (top right) can switch lines to colour by link strength instead. Once you have a query or selection, a Play button, timeline and speed button appear: words appear one by one, strongest resonance first (the speed button cycles 0.25x to 4x). The results box scrolls: thumbstick while pointing at it, or (hand tracking) touch it with your index fingertip and slide up or down like a touchscreen, with a flick for momentum; tap a row to select that word. Source passages: select a concept (or click a link line, or press the ¶ button on a row) to see the sentences where the words occur, with the document name; how many are shown adapts to how strongly the words resonate. Voice: hold out an open palm (palm up or toward you) steadily for about three quarters of a second in mixed reality or VR with hand tracking. An orb appears in your hand with lightning arcing to the network; speak, then close your hand or pull it away to send. Whisper runs in your browser (the first use downloads a small model). On desktop, or with controllers, use the mic button. Attach PDF, Word or HTML files, or fetch URLs.</div>
 <script type="text/plain" id="engine-src">
 
-
 'use strict';
 let CUR=null;
 const PROG=t=>{if(CUR!==null)self.postMessage({rid:CUR,prog:t});};
@@ -364,8 +359,6 @@ function foldPlurals(){
       const j=s&&rawId.get(s);if(j>1&&j!==i){rm[i]=j;any=true;break;}}}
   if(any)corp.forEach(d=>{for(let k=0;k<d.ids.length;k++)d.ids[k]=rm[d.ids[k]];});
 }
-
-
 
 const MAXW=5;
 function mergePhrases(){for(let pass=0;pass<4;pass++)if(!mergePass())break;}
@@ -438,13 +431,7 @@ function recount(){
   for(let e=1;e<vocab.length;e++)if(vocab[e].charCodeAt(0)<58||STRUCT.has(vocab[e]))exclC[e]=1;exclC[FILL]=1;
 }
 
-
-
-
 function ideaBounds(ids){
-  // Topic boundaries from the text's own association pattern. Units are sentences (spans between break tokens).
-  // A unit starts a new topic when it deviates from the running profile of the topic so far, i.e. it is less
-  // cohesive with it than adjacent sentences typically are in this text. No fixed window sizes.
   const T=ids.length,U=[];let s=-1;
   for(let t=0;t<=T;t++){if(t===T||ids[t]===0){if(s>=0)U.push([s,t]);s=-1;}else if(s<0)s=t;}
   if(U.length<3)return Uint32Array.of(0);
@@ -480,13 +467,7 @@ function buildSPost(d){
   d.spost=m;
 }
 
-
 function ensurePost(){for(const d of corp)buildPost(d);}
-
-
-
-
-
 
 const LSC=new Map();let lscN=0;const LSC_MAX=4e6;
 function lscGet(k){const v=LSC.get(k);if(v){LSC.delete(k);LSC.set(k,v);}return v;}
@@ -500,11 +481,6 @@ function packScan(w){
   for(const [r,v] of w.acc){ids[i]=r;acc[i]=v;raw[i]=w.raw.get(r);const f=w.fw.get(r);if(f)fw[i]=f;i++;}
   return {hits:w.hits,stride:w.stride,ids,acc,raw,fw};
 }
-
-
-
-
-
 
 function scanRaw(items){
   const n=vocab.length,s=new Int32Array(n),ss=new Int32Array(svocab.length),SD=new Map();
@@ -867,7 +843,6 @@ function wvec(e){
   m.forEach(q=>{const f=Math.min(1,q.s/top),w=vocab[q.id];t[w]=(t[w]||0)+f;});
   let n=0;for(const k in t)n+=t[k]*t[k];n=Math.sqrt(n)||1;for(const k in t)t[k]/=n;return t;
 }
-
 
 class PairSet{
   constructor(){this.cap=1024;this.n=0;this.H=new Uint32Array(1024);this.C=new Uint32Array(1024);}
@@ -1272,9 +1247,6 @@ function edgeSeq(){
   edges.forEach(e=>{e.g=Math.max(.4,Math.min(2.5,e.gap/Math.max(1,med)));});
 }
 
-
-
-
 const BH_MIN=1500,BH_THETA=.6,BH_MAXD=24,BH_LEAF=8;
 let bhCap=0,bhCh,bhSx,bhSy,bhSz,bhMx,bhMy,bhMz,bhCx,bhCy,bhCz,bhHw,bhCnt,bhHead,bhLeaf,bhNxt;
 function bhAlloc(cap){
@@ -1342,7 +1314,6 @@ function bhRepulse(P,D,N,k2){
     D[i*3]+=fx;D[i*3+1]+=fy;D[i*3+2]+=fz;
   }
 }
-
 
 function communities(subNodes,subEdges,N){
   if(!subNodes)subNodes=nodes;if(!subEdges)subEdges=edges;if(N===undefined)N=subNodes.length;
@@ -1531,8 +1502,6 @@ function fmtPass(r,ps,wi){
   return {doc:doc.name,pct:Math.round(100*(ps.a+segStart)/Math.max(1,doc.text.length)),text:t,m:mk,mc:r.mc,s:r.s};
 }
 
-
-
 function getPassages(m){
   if(!PASS)buildPass();
   const wi=new Map(),mustS=new Set(m.must||[]);
@@ -1634,7 +1603,6 @@ let EPOCH=0,ingesting=false,qSeq=0,forceWords=[],qBusy=0;var wikiBusy=0;
 const thinking=()=>qBusy>0||ingesting||wikiBusy>0||!!rdBusy||VOICE.st==='rec'||VOICE.busy>0;
 let nD=null,eD=null,pulseKey='',pulseOn=0;
 const txtWords=()=>{const a=$q.value.toLowerCase().match(/[\p{L}\d'-]+/gu)||[],s=new Set(a);for(let i=0;i+1<a.length;i++)s.add(a[i]+' '+a[i+1]);return s;};
-
 
 function updatePulse(textOnly){
   if(!nD||!nodes.length||nD.length!==nodes.length)return;
@@ -1753,7 +1721,6 @@ const CY=[.36,.94,1],VI=[.6,.48,1],AM=[1,.7,.28],WH=[.92,1,1],GO=[1,.84,.45];
 const mix=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
 const RAMP=[[0,[.42,.3,1]],[.3,CY],[.55,[.45,1,.72]],[.78,AM],[1,[1,.96,.86]]];
 function ramp(t){t=Math.max(0,Math.min(1,t));for(let i=1;i<RAMP.length;i++)if(t<=RAMP[i][0]){const a=RAMP[i-1],b=RAMP[i];return mix(a[1],b[1],(t-a[0])/(b[0]-a[0]));}return RAMP[RAMP.length-1][1];}
-
 
 const DOC_PALETTE = [
   { name: 'Amber',   rgb: [1.0, 0.76, 0.28], hex: '#ffc247' },  
@@ -1962,7 +1929,6 @@ function orbAtWorld(p){
   orbs.forEach((o,d)=>{const dist=Math.hypot(l.x-o.center[0],l.y-o.center[1],l.z-o.center[2]);if(dist<(o.radius||1.2)*1.1&&dist<bd){bd=dist;b=d;}});
   return b;
 }
-
 
 function computeDivergence(){
   if(fieldMode!=='separated'||orbs.length<2||!Q||!Q.A)return {docBlindSpots:new Map(),topDivergent:[]};
@@ -2510,15 +2476,12 @@ $('#wkadd').onclick=async()=>{
   }catch(e){wkS.textContent='Wikipedia request failed: '+(e&&e.message||e);}
 };
 
-// ---- "Wikipedia: topic" command (spoken into the orb, dictated, or typed) ----
-// Drops reference/see-also tails and caps very long pages so the field builds fast instead of stalling the headset.
 function wikiTrim(tx){
   tx=tx.replace(/\n[ \t]*(?:See also|References|External links|Further reading|Notes|Bibliography|Sources|Citations)[ \t]*\n[\s\S]*$/,'');
   const CAP=LOW?45000:110000;
   if(tx.length>CAP){const k=tx.lastIndexOf('\n',CAP);tx=tx.slice(0,k>CAP*.6?k:CAP);}
   return tx;
 }
-// Returns {topic, how} where how is 'separated' (own sphere), 'unified', or null (keep the current layout mode).
 function parseWiki(text){
   const m=/^\W*(?:wiki(?:pedia)?|wicky(?:pedia)?|wikipeedia)\b(.*)$/is.exec(String(text||'').trim());
   if(!m)return null;
@@ -2745,10 +2708,8 @@ function voiceStep(dt){
 }
 
 const ORB=new THREE.Group();ORB.visible=false;scene.add(ORB);
-// Energy orb: a plasma shell, a tiny rotating "node brain" inside it (glowing nodes, links, signals travelling the links),
-// two orbiting rings with satellites, and a soft aura. Same cyan / violet / mint / amber language as the main field.
-const ORBW={value:0};                         // 0 = cyan/violet, 1 = amber (a Wikipedia command was heard)
-const orbS={value:.03};                        // current orb radius in metres (drives point sizes)
+const ORBW={value:0};
+const orbS={value:.03};
 const orbU={uT:{value:0},uL:{value:0},uA:{value:0},uW:ORBW};
 const orbBody=new THREE.Group();ORB.add(orbBody);
 const orbMesh=new THREE.Mesh(new THREE.SphereGeometry(1,40,28),new THREE.ShaderMaterial({uniforms:orbU,transparent:true,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending,
@@ -2771,7 +2732,6 @@ const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:haloTex,transparent:tr
 const coreSp=new THREE.Sprite(new THREE.SpriteMaterial({map:haloTex,color:0xffffff,transparent:true,depthTest:false,depthWrite:false,blending:THREE.AdditiveBlending}));coreSp.renderOrder=43;
 ORB.add(halo,coreSp);
 
-// glowing node sprite, same look as the field's nodes (soft body, bright core, thin ring)
 const miniNodeMat=new THREE.ShaderMaterial({uniforms:{uT:orbU.uT,uL:orbU.uL,uA:orbU.uA,uW:ORBW,uH:U.uH,uS:orbS},transparent:true,depthWrite:false,depthTest:false,...ADD,
   vertexShader:`attribute float aSz;attribute float aPh;uniform float uT;uniform float uL;uniform float uA;uniform float uW;uniform float uH;uniform float uS;varying vec3 vC;varying float vI;
 void main(){vec4 mv=modelViewMatrix*vec4(position,1.);float tw=.62+.38*sin(uT*2.6+aPh*40.);float h=fract(aPh*3.7);
@@ -2808,8 +2768,6 @@ function mkSat(ph){const g=new THREE.BufferGeometry();g.setAttribute('position',
 const orbRing1=mkRing(1.35,0x5df0ff),orbRing2=mkRing(1.65,0xa98cff),orbPiv1=new THREE.Group(),orbPiv2=new THREE.Group(),orbSat1=mkSat(.12),orbSat2=mkSat(.46);
 orbRing1.rotation.x=1.15;orbRing2.rotation.x=.55;orbRing2.rotation.z=.4;orbRing1.add(orbSat1);orbRing2.add(orbSat2);orbPiv1.add(orbRing1);orbPiv2.add(orbRing2);orbBody.add(orbPiv1,orbPiv2);
 
-// ---- electricity: coherent jagged bolts with side forks, white-hot at the orb fading to cyan/violet (amber for Wikipedia),
-// drawn as vertex-coloured lines plus glowing beads on every vertex.
 const MAXB=9,SEG=20,FSEG=6,FPB=2,SPB=SEG+FPB*FSEG,VPB=SEG+1+FPB*FSEG;
 const bL=new Float32Array(MAXB*SPB*6),bLC=new Float32Array(MAXB*SPB*6),bP=new Float32Array(MAXB*VPB*3),bPC=new Float32Array(MAXB*VPB*3),bPS=new Float32Array(MAXB*VPB);
 const bgL=new THREE.BufferGeometry(),bgP=new THREE.BufferGeometry();
@@ -2891,7 +2849,7 @@ function zap(A,T,reach,jit,R,w){
     if(nb>=MAXB)return;
     _vd.copy(B0).sub(A);const L=_vd.length();if(L<1e-4)return;nb++;
     _vd.divideScalar(L);
-    _va.copy(A).addScaledVector(_vd,R*.85);                       // leave from the orb's skin
+    _va.copy(A).addScaledVector(_vd,R*.85);
     const Lr=Math.max(1e-4,(L-R*.85)*reach);
     _vb.copy(_va).addScaledVector(_vd,Lr);
     _vu.set(_vd.z,0,-_vd.x);if(_vu.lengthSq()<1e-4)_vu.set(1,0,0);_vu.normalize();_vv.crossVectors(_vd,_vu);
@@ -2907,7 +2865,7 @@ function zap(A,T,reach,jit,R,w){
       if(k>0){const o=ns*6;bL[o]=px;bL[o+1]=py;bL[o+2]=pz;bL[o+3]=x;bL[o+4]=y;bL[o+5]=z;boltCol((k-1)/SEG,1,bLC,o);boltCol(f,1,bLC,o+3);ns++;}
       px=x;py=y;pz=z;
     }
-    for(let q=0;q<FPB;q++){                                         // short side forks
+    for(let q=0;q<FPB;q++){
       const m=4+((Math.random()*(SEG-8))|0),sx=_mp[m*3],sy=_mp[m*3+1],sz=_mp[m*3+2],a1=Math.random()*2-1,a2=Math.random()*2-1;
       let dx=_vd.x*.55+_vu.x*a1*.9+_vv.x*a2*.9,dy=_vd.y*.55+_vu.y*a1*.9+_vv.y*a2*.9,dz=_vd.z*.55+_vu.z*a1*.9+_vv.z*a2*.9;
       const dl=Math.hypot(dx,dy,dz)||1;dx/=dl;dy/=dl;dz/=dl;
@@ -2982,7 +2940,7 @@ function voiceVis(dt){
  if(b){b.innerHTML='<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
   b.onclick=()=>{if(VOICE.st==='rec'||VOICE.st==='starting')voiceStop(true);else voiceStart('ui');};}}
 
-const KW=2400,KH=1100,KEYS=[],PQ=2;
+const KW=2400,KH=1100,KEYS=[],PQ=2,sbX=(KW-596)/2;
 const kc=document.createElement('canvas');kc.width=KW*PQ;kc.height=KH*PQ;
 const kctx=kc.getContext('2d'),ktex=new THREE.CanvasTexture(kc);ktex.colorSpace=THREE.SRGBColorSpace;ktex.anisotropy=8;
 const kb=new THREE.Mesh(new THREE.PlaneGeometry(KW/1000,KH/1000),new THREE.MeshBasicMaterial({map:ktex,transparent:true,depthTest:false}));
@@ -3082,26 +3040,25 @@ function hud(){
   kDirty=true;iDirty=true;
 }
 
-
 (function buildKeys(){
   const B=KW-32;
   KEYS.push(
     {id:'hideui',x:(KW-320)/2,y:14,w:320,h:50,act:'hideui'},
-    {id:'plus',x:32,y:20,w:66,h:66,act:'plus'},
+    {id:'plus',x:sbX-140,y:106,w:56,h:56,act:'plus'},
+    {id:'snd',x:sbX-210,y:106,w:56,h:56,act:'snd'},
+    {id:'mic',x:sbX-280,y:106,w:56,h:56,act:'mic'},
+    {id:'dcnt',x:sbX-390,y:106,w:96,h:56,act:'dcnt',dk:true},
     {id:'pass',x:B-66-16-66-16-66,y:20,w:66,h:66,act:'pass'},
-    {id:'snd',x:114,y:20,w:66,h:66,act:'snd'},
-    {id:'mic',x:196,y:20,w:66,h:66,act:'mic'},
-    {id:'dcnt',x:278,y:20,w:96,h:66,act:'dcnt',dk:true},
     {id:'hist',x:B-66-16-66,y:20,w:66,h:66,act:'hist'},
     {id:'set',x:B-66,y:20,w:66,h:66,act:'set'},
-    {id:'toggle',x:32,y:106,w:56,h:56,act:'toggle'},
-    {id:'field',x:100,y:106,w:440,h:56,act:'open'},
-    {id:'ask',label:'',x:552,y:106,w:56,h:56,act:'ask'},
-    {id:'help',x:32,y:KH-84,w:64,h:64,act:'help'},
-    {id:'clear',label:'Clear',x:B-110,y:108,w:110,h:48,act:'clear',ctk:true,ib:true},
-    {id:'brain',x:B-110-8-120,y:108,w:120,h:48,act:'brain',ctk:true,llm:true,ib:true},
-    {id:'auto',x:B-110-8-120-8-92,y:108,w:92,h:48,act:'auto',ctk:true,llm:true,ib:true});
-  [['am_paste','Paste copied text'],['am_wiki','Wikipedia pages'],['am_saved','Saved texts (next)'],['am_demo','Demo text']].reverse().forEach(([id,label],i,a)=>KEYS.unshift({id,label,x:36,y:100+(a.length-1-i)*60,w:396,h:52,act:id,am:true}));
+    {id:'toggle',x:sbX+8,y:106,w:56,h:56,act:'toggle'},
+    {id:'field',x:sbX+72,y:106,w:440,h:56,act:'open'},
+    {id:'ask',label:'',x:sbX+524,y:106,w:56,h:56,act:'ask'},
+    {id:'clear',label:'Clear',x:sbX+608,y:108,w:110,h:48,act:'clear',ctk:true,ib:true},
+    {id:'brain',x:sbX+726,y:108,w:120,h:48,act:'brain',ctk:true,llm:true,ib:true},
+    {id:'auto',x:sbX+854,y:108,w:92,h:48,act:'auto',ctk:true,llm:true,ib:true},
+    {id:'help',x:32,y:KH-84,w:64,h:64,act:'help'});
+  [['am_paste','Paste copied text'],['am_wiki','Wikipedia pages'],['am_saved','Saved texts (next)'],['am_demo','Demo text']].reverse().forEach(([id,label],i,a)=>KEYS.unshift({id,label,x:sbX+12,y:100+(a.length-1-i)*60,w:396,h:52,act:id,am:true}));
   const u=78,g=6,rows=[
     [...'1234567890'].map(c=>[c,1]).concat([['\u232b',1.6,'bs']]),
     [...'qwertyuiop'].map(c=>[c,1]),
@@ -3118,9 +3075,9 @@ function drawKB(){
   const hov=new Set(rig.map(r=>r.hk).filter(Boolean)),now=performance.now();
   const pane=(a,b,w,h,r,al)=>{rr(x,a,b,w,h,r);x.fillStyle='rgba(30,42,60,'+al+')';x.fill();x.strokeStyle='rgba(255,255,255,.4)';x.lineWidth=2.5;x.stroke();};
   if(!HUIDE){
-  pane(24,96,596,76,16,.5);
+  pane(sbX,96,596,76,16,.5);
   if(kbOpen)pane((KW-1060)/2,634,1060,350,18,.82);}
-  if(hudB&&!HUIDE){x.font='20px '+F;x.fillStyle='rgba(214,246,255,.8)';x.fillText(hudB,28,ctx?272:178,720);}
+  if(hudB&&!HUIDE){x.font='20px '+F;x.fillStyle='rgba(214,246,255,.8)';x.textAlign='center';x.fillText(hudB,KW/2,ctx?272:178,1000);x.textAlign='left';}
   for(const k of KEYS){
     if(HUIDE&&k.id!=='hideui'&&!k.ib)continue;
     if(k.kbk&&!kbOpen)continue;
@@ -3164,7 +3121,7 @@ function drawKB(){
     x.globalAlpha=1;
   }
   if(amOpen&&!HUIDE){
-    pane(24,90,420,254,16,.92);
+    pane(sbX,90,420,254,16,.92);
     for(const k of KEYS){if(!k.am)continue;const on=hov.has(k),fl=pressK===k&&now-pressT<170;
       rr(x,k.x,k.y,k.w,k.h,10);x.fillStyle=fl?'rgba(255,179,71,.6)':on?'rgba(255,255,255,.3)':'rgba(255,255,255,.1)';x.fill();
       x.strokeStyle=on?'rgba(255,255,255,.8)':'rgba(255,255,255,.35)';x.lineWidth=2;x.stroke();
@@ -3261,10 +3218,8 @@ function placeKB(dt){
   if(_f.lengthSq()>1e-4){
     _f.normalize();const yaw=Math.atan2(-_f.x,-_f.z);if(!kInit)kYaw=yaw;
     const df=Math.atan2(Math.sin(yaw-kYaw),Math.cos(yaw-kYaw));
-    if(Math.abs(df)>.75)kMove=true;if(Math.abs(df)<.05)kMove=false;
-    if(kMove)kYaw+=df*Math.min(1,dt*3);
+    kYaw+=df*Math.min(1,dt*6);
   }
-  
   const SC=.78*VS,sy=Math.sin(kYaw),cy=Math.cos(kYaw),D=1.0,lx=((KW-260)/1000 - (KW/2000))*SC,ly=(.55-(106+187.5)/1000)*SC;kb.scale.setScalar(SC);ib.scale.setScalar(SC);
   _t.set(_h.x-sy*D,_h.y-.05,_h.z-cy*D);kBase.copy(_t);_t.x+=cy*kOffL.x+sy*kOffL.z;_t.y+=kOffL.y;_t.z+=-sy*kOffL.x+cy*kOffL.z;
   _t2.set(_t.x+cy*lx+sy*.01,_t.y+ly,_t.z-sy*lx+cy*.01);
@@ -3498,7 +3453,6 @@ function previewAt(p,n){
   reticle.matrix.copy(hM);reticle.matrixWorldNeedsUpdate=true;rFoot.scale.setScalar(s*1.3);reticle.visible=true;
 }
 
-
 let PLN=[],plT=0,seatWanted=false,seatT0=0,seat=null;
 const _ph=new THREE.Vector3(),_pf=new THREE.Vector3(),_pl=new THREE.Vector3();
 const seatRing=new THREE.Group();seatRing.visible=false;seatRing.renderOrder=5;dolly.add(seatRing);
@@ -3720,7 +3674,6 @@ async function startXR(look,quiet){
 }
 arBtn.onclick=()=>startXR('mr');vrB.onclick=()=>startXR('vr');
 
-
 const QUEST=/OculusBrowser|Quest/i.test(navigator.userAgent);
 async function offerXR(){
   if(!navigator.xr||!navigator.xr.offerSession||renderer.xr.getSession())return;
@@ -3823,7 +3776,7 @@ renderer.xr.addEventListener('sessionstart',()=>{
   const envAR=!!s.environmentBlendMode&&s.environmentBlendMode!=='opaque';
   sessAR=reqLook!==null||envAR;
   const pass=reqLook!==null?reqLook==='mr':envAR;reqLook=null;
-  controls.enabled=false;kb.visible=true;kInit=false;kbOpen=false;HUIDE=false;U.uX.value=1;needCenter=false;lostT=0;arRest=0;arAnchor=null;arLast=null;arDirty=false;arBusy=false;
+  controls.enabled=false;kb.visible=true;kInit=false;kOffL.set(0,0,0);kbOpen=false;HUIDE=false;U.uX.value=1;needCenter=false;lostT=0;arRest=0;arAnchor=null;arLast=null;arDirty=false;arBusy=false;
   try{renderer.xr.setFoveation(0);}catch(e){}
   {const bl=s.renderState&&s.renderState.baseLayer;U.uH.value=bl&&bl.framebufferHeight?bl.framebufferHeight:2000;}
   dolly.position.set(0,0,0);dolly.rotation.set(0,0,0);
@@ -3893,8 +3846,6 @@ function gestures(dt){
   GDT=dt;
   const P=rig.map(r=>{const v=handPoint(r);return v&&isFinite(v.x+v.y+v.z)?v:null;});
   uiStep();
-
-  // (two-hand push/pull removed: it reacted to false hand signals and made the field fly around)
 
   const act=[0,1].filter(i=>P[i]&&rig[i].pin&&!rig[i].uiHold&&!placing);
   if(act.length)seatWanted=false;
@@ -3974,12 +3925,9 @@ const dbReq=(st,m,f)=>new Promise(res=>{if(!db)return res(undefined);try{const q
 const dbAll=st=>dbReq(st,'readonly',o=>o.getAll()).then(r=>r||[]);
 const dbPut=(st,v)=>dbReq(st,'readwrite',o=>o.put(v));
 const dbDel=(st,k)=>dbReq(st,'readwrite',o=>o.delete(k));
-// Delete many records in ONE transaction (was: one awaited transaction per record, up to 500+ for history).
 const dbDelMany=ops=>new Promise(res=>{if(!db||!ops.length)return res();
   try{const tx=db.transaction([...new Set(ops.map(o=>o[0]))],'readwrite');ops.forEach(([st,k])=>tx.objectStore(st).delete(k));
     tx.oncomplete=tx.onerror=tx.onabort=()=>res();}catch(e){res();}});
-// window.confirm() blocks the whole page and hangs/ejects a Quest immersive session, so inside XR we skip it
-// (the in-VR Clear button already needs a second tap to confirm).
 function askOK(msg){try{if(renderer.xr.isPresenting)return true;}catch(e){}return confirm(msg);}
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
 function hashDocs(docs){let h=2166136261;for(const d of docs){const t=d.name+'\u0001'+d.text+'\u0002';for(let i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,16777619);}}
@@ -4175,7 +4123,6 @@ function unloadField(){
   $q.value='';$('#file').value='';updateInfo();playSync();stat('Attach one or more files to build the field.');
 }
 async function clearCurrent(){
-  // UI first (instant), storage cleanup afterwards in a single background transaction
   const id=curCorpus,ops=[];
   if(id){
     if(corpora.some(x=>x.id===id)){corpora=corpora.filter(x=>x.id!==id);ops.push(['corpora',id]);}
@@ -4546,7 +4493,6 @@ function drawRdIfDirty(){
   rtex.needsUpdate=true;
 }
 
-// --- shared placement / drag helpers for the in-AR boards ---
 function placeBoard(m){
   const xc=renderer.xr.getCamera();xc.getWorldPosition(_h);xc.getWorldDirection(_f);_f.y=0;
   if(_f.lengthSq()<1e-4)_f.set(0,0,-1);_f.normalize();
@@ -4558,7 +4504,6 @@ function boardDrag(r){
   const m=r.bd.m;m.position.copy(_o).addScaledVector(_d,r.bd.d);
   renderer.xr.getCamera().getWorldPosition(_h);m.rotation.set(0,Math.atan2(_h.x-m.position.x,_h.z-m.position.z),0);m.updateMatrixWorld(true);
 }
-// --- In-AR Settings Board (sb) ---
 const SW=820, SH=730, SK=[
   {id:'x', x:SW-68, y:16, w:52, h:46},
   {id:'fmode', x:32, y:80, w:SW-64, h:52},
@@ -4749,7 +4694,6 @@ function drawSbIfDirty(){
   stex.needsUpdate=true;
 }
 
-// --- In-AR Wikipedia Board (wb) ---
 const WBW=900, WBH=680, WK_BTNS=[
   {id:'x', x:WBW-68, y:16, w:52, h:46},
   {id:'field', x:32, y:76, w:WBW-240, h:50},
@@ -4981,7 +4925,6 @@ function drawWbIfDirty(){
   x.fillText(addTxt, WBW/2, 608);
   wtex.needsUpdate = true;
 }
-// --- In-AR Files Board (fb): the XR version of the desktop file-count button ---
 const FBW=900, FBH=640, FB_ROWS=5;
 const fcv=document.createElement('canvas'); fcv.width=FBW*PQ; fcv.height=FBH*PQ;
 const fx=fcv.getContext('2d'), ftex=new THREE.CanvasTexture(fcv); ftex.colorSpace=THREE.SRGBColorSpace; ftex.anisotropy=8;
@@ -5105,7 +5048,6 @@ function colUpd(dt){
     el.style.width=d.w+'px';if(id==='hist')el.style.height=d.h+'px';el.style.right='auto';el.style.bottom='auto';el.style.transform='none';el.dataset.moved='1';try{el.setPointerCapture(e.pointerId);}catch(_){}}
    el.style.left=Math.max(0,Math.min(innerWidth-60,e.clientX-d.x))+'px';el.style.top=Math.max(0,Math.min(innerHeight-40,e.clientY-d.y))+'px';});
   const end=()=>{d=null;};el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);});})();
-
 
 const $ps=$('#ps'),PS={auto:true,seq:0,spec:null,res:null};
 const hlText=(t,m)=>{let o='',p=0;m.forEach(([a,b,k])=>{if(a<p)return;o+=esc(t.slice(p,a))+`<mark${k?' class="hot"':''}>${esc(t.slice(a,b))}</mark>`;p=b;});return o+esc(t.slice(p));};
