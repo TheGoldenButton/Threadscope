@@ -3891,7 +3891,7 @@ function arFrame(frame){
 hud();
 const AR_KEY='cf.ar';
 let arTried=false,arSaved=null,arAnchor=null,arRest=0,arRestT=0,arDirty=false,arSettle=0,arBusy=false,arLast=null;
-try{arSaved=JSON.parse(localStorage.getItem(AR_KEY)||'null');}catch(e){}
+arSaved=null;try{localStorage.removeItem(AR_KEY);}catch(e){}
 if(!arSaved||!Array.isArray(arSaved.p)||!Array.isArray(arSaved.q)||!isFinite(arSaved.s)||![...arSaved.p,...arSaved.q].every(isFinite))arSaved=null;
 const arPose=()=>[G.position.x,G.position.y,G.position.z,G.quaternion.x,G.quaternion.y,G.quaternion.z,G.quaternion.w,G.scale.x];
 const arDiff=(a,b)=>!a||!b||a.some((v,i)=>Math.abs(v-b[i])>(i===7?.002:.003));
@@ -3935,6 +3935,7 @@ function arAnchorPose(frame,ref){
 }
 function arApply(t){G.position.set(t.position.x,t.position.y,t.position.z);G.quaternion.set(t.orientation.x,t.orientation.y,t.orientation.z,t.orientation.w);arLast=arPose();}
 function arCommit(frame){
+  return;
   const oldA=arAnchor,oldU=arSaved&&arSaved.uuid,s=renderer.xr.getSession(),ref=renderer.xr.getReferenceSpace();
   const mine=arSaved=arSnapshot();arLast=arPose();arWrite();
   if(mine.uuid)return;
@@ -3951,6 +3952,7 @@ function arCommit(frame){
   }).catch(()=>{}).finally(()=>{arBusy=false;});
 }
 function arFlush(){
+  return;
   if(arRest===0&&nodes.length&&arHasChanges()){arSaved=arSnapshot();arLast=arPose();arWrite();}
 }
 function arPersist(frame,dt){
