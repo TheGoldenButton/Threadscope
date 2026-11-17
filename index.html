@@ -4454,7 +4454,8 @@ const COPYI='<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" r
 let AUTO=false;try{AUTO=localStorage.getItem('cf.auto')==='1';}catch(e){}
 $('#auto').checked=AUTO;
 $('#auto').onchange=e=>{AUTO=e.target.checked;try{localStorage.setItem('cf.auto',AUTO?'1':'0');}catch(_){}};
-function autoBrain(){if(!CFG.on||!AUTO||!nodes.length||!$q.value.trim())return;if(rdBusy)stopAll();setTimeout(brain,80);}
+function llmReady(){const p=CFG.prov;return !!CFG.on&&(p==='webgpu'?!!(CFG.wl&&navigator.gpu):!!(CFG.keys&&CFG.keys[p]));}
+function autoBrain(){if(!llmReady()||!AUTO||!nodes.length||!$q.value.trim())return;if(rdBusy)stopAll();setTimeout(brain,80);}
 $('#ssys').onchange=e=>{const v=e.target.value.trim();CFG.sys=v===DEF_SYS?'':v;saveCfg();};
 $('#sthr').onchange=e=>{const v=parseFloat(e.target.value);CFG.thr=isFinite(v)?Math.max(0,Math.min(1,v)):.5;saveCfg();e.target.value=thrOf().toFixed(2);};
 $('#scut').onchange=e=>{const v=parseFloat(e.target.value);CFG.cthr=isFinite(v)?Math.max(0,Math.min(1,v)):.35;saveCfg();e.target.value=cthrOf().toFixed(2);if(Q&&$q.value.trim())runQuery($q.value,true);};
@@ -4509,6 +4510,7 @@ addEventListener('keydown',e=>{if(e.key==='Escape'){$rd.hidden=true;$set.hidden=
   h.addEventListener('pointerup',()=>{d=null;});})();
 async function brain(){
   if(!CFG.on)return;
+  if(!llmReady()){stat('LLM is not set up yet. Open Settings (gear) and pick a model or add an API key.');return;}
   const bb=$('#brain');
   if(rdBusy){stopAll();return;}
   if(brain.pend)return;brain.pend=true;let b;try{b=await bundle();}finally{brain.pend=false;}
