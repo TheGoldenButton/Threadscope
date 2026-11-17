@@ -3194,7 +3194,7 @@ function keyAct(k,r){
   kDirty=true;if(wbOpen)wbD=true;pressK=k;pressT=performance.now();
   try{r.c.userData.src?.gamepad?.hapticActuators?.[0]?.pulse(.35,30);}catch(e){}
 }
-const _h=new THREE.Vector3(),_f=new THREE.Vector3(),_t=new THREE.Vector3(),_t2=new THREE.Vector3(),kHeadPos=new THREE.Vector3();let kYaw=0,kInit=false,kMoving=false,kWait=0;
+const _h=new THREE.Vector3(),_f=new THREE.Vector3(),_t=new THREE.Vector3(),_t2=new THREE.Vector3(),kHeadPos=new THREE.Vector3();let kYaw=0,kInit=false;
 const kOffL=new THREE.Vector3(),kBase=new THREE.Vector3();
 function kbPaneHit(c){
   if(!kb.visible||HUIDE)return null;
@@ -3214,26 +3214,10 @@ function kbDrag(r){
   kOffL.set(w.x*cy-w.z*sy,w.y,w.x*sy+w.z*cy);
 }
 function placeKB(dt){
-  const xc=renderer.xr.getCamera();xc.getWorldPosition(_h);xc.getWorldDirection(_f);_f.y=0;
-  if(_f.lengthSq()>1e-4){
-    _f.normalize();const yaw=Math.atan2(-_f.x,-_f.z);
-    if(!kInit){kYaw=yaw;kHeadPos.copy(_h);kInit=true;kMoving=false;kWait=0;}
-    const df=Math.atan2(Math.sin(yaw-kYaw),Math.cos(yaw-kYaw)),dist=_h.distanceTo(kHeadPos),drag=rig.some(r=>r.kd);
-    if(drag){kWait=0;kMoving=false;}
-    else{
-      if(Math.abs(df)>0.82||dist>0.5){
-        kWait+=dt;
-        if(kWait>0.45)kMoving=true;
-      }else if(!kMoving){
-        kWait=0;
-      }
-      if(kMoving){
-        const s=1-Math.exp(-dt*3.5);
-        kYaw+=df*s;
-        kHeadPos.lerp(_h,s);
-        if(Math.abs(df)<0.03&&dist<0.04){kMoving=false;kWait=0;}
-      }
-    }
+  if(!kInit){
+    const xc=renderer.xr.getCamera();xc.getWorldPosition(_h);xc.getWorldDirection(_f);_f.y=0;
+    if(_f.lengthSq()>1e-4){_f.normalize();kYaw=Math.atan2(-_f.x,-_f.z);}
+    kHeadPos.copy(_h);kInit=true;
   }
   const SC=.78*VS,sy=Math.sin(kYaw),cy=Math.cos(kYaw),D=1.0,lx=((KW-260)/1000-(KW/2000))*SC,ly=(.55-(106+187.5)/1000)*SC;kb.scale.setScalar(SC);ib.scale.setScalar(SC);
   _t.set(kHeadPos.x-sy*D,kHeadPos.y-.05,kHeadPos.z-cy*D);kBase.copy(_t);_t.x+=cy*kOffL.x+sy*kOffL.z;_t.y+=kOffL.y;_t.z+=-sy*kOffL.x+cy*kOffL.z;
@@ -5104,14 +5088,14 @@ function paintPass(){
 async function showPassages(sp,off){
   if(!sp||!nodes.length)return;
   const my=++PS.seq,ep=EPOCH;PS.spec=sp;PS.off=off|0;$ps.hidden=false;placePs();$('#pst').textContent=sp.title;$('#psm').textContent='Searching passages\u2026';
-  if(renderer.xr.isPresenting){if(!(psXR&&rb.visible))rbPlaced=false;psXR=true;rdD=true;}
+  if(renderer.xr.isPresenting&&psXR){rbPlaced=false;rdD=true;}
   let r;try{r=await ENG.call({t:'passages',ids:sp.ids,w:sp.w,must:sp.must,need:sp.need,all:sp.all,R:sp.R,cap:60,full:true,off:off|0,qg:sp.qg,cut:sp.cut});}
   catch(e){if(my===PS.seq)$('#psm').textContent='Passage search failed: '+(e&&e.message||e);return;}
   if(my!==PS.seq||ep!==EPOCH)return;
   r.ps=r.ps.filter((p,i)=>!r.ps.some((q,j)=>j!==i&&q.doc===p.doc&&(q.text.length>p.text.length||(q.text.length===p.text.length&&j<i))&&q.text.includes(p.text)));
   PS.res=r;paintPass();
   $('#psb').scrollTop=0;
-  if(renderer.xr.isPresenting){psXR=true;rdD=true;drawRdIfDirty();}
+  if(renderer.xr.isPresenting&&psXR){rdD=true;drawRdIfDirty();}
 }
 
 function placePs(){const t=document.getElementById('top');if(!t)return;document.documentElement.style.setProperty('--pstop',Math.round(t.getBoundingClientRect().bottom+10)+'px');}
@@ -5128,7 +5112,7 @@ function psAuto(){
   clearTimeout(psT);
   if(!hasCtx()){PS.seq++;$ps.hidden=true;if(psXR){psXR=false;rdD=true;}return;}
   if(!PS.auto)return;
-  psT=setTimeout(()=>{const sp=curSpec()||(renderer.xr.isPresenting&&SS.size?specSel():null);if(sp)showPassages(sp);},140);
+  psT=setTimeout(()=>{if(renderer.xr.isPresenting)return;const sp=curSpec();if(sp)showPassages(sp);},140);
 }
 $('#psx').onclick=()=>{PS.auto=false;PS.seq++;$ps.hidden=true;};
 $('#psbtn').onclick=()=>{PS.auto=true;const sp=curSpec();if(sp)showPassages(sp);else stat('Select a concept or run a query first.');};
