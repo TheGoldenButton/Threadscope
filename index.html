@@ -1693,7 +1693,7 @@ async function setFieldMode(mode){
   }catch(e){stat('Mode switch failed: '+e.message);}
 }
 
-let FS=1,VS=1;try{const v=parseFloat(localStorage.getItem('cf.fs'));if(isFinite(v))FS=Math.max(.8,Math.min(1.6,v));}catch(e){}
+let FS=1.25,VS=1;try{const v=parseFloat(localStorage.getItem('cf.fs'));if(isFinite(v))FS=Math.max(.8,Math.min(1.6,v));}catch(e){}
 let nodes=[],edges=[],word2i=new Map(),sel=-1,Q=null;const SS=new Set();let selV=0;
 let curDocs=[],curCorpus=null,replaying=false,hist=[],corpora=[];
 const col={lv:null,f:0,n:-1,hide:null,cnt:null,t:0,sk:null};
@@ -1733,7 +1733,7 @@ float h=pow(1.-d*2.,2.);float c=smoothstep(.22,.0,d);float k=smoothstep(.3,.26,d
 float sharp=h*(1.1-.6*uX)+c*1.9+ring*.7+uX*(k*.8+rim*.7);float soft=pow(1.-d*2.,1.4)*.9;float rp=fract(uT*.8);float rg=vP*(1.-rp)*smoothstep(.06,.0,abs(d-(.14+.34*rp)))*1.8;float bp=1.+vP*.6*(.5+.5*sin(uT*5.5));gl_FragColor=vec4((vC*mix(soft,sharp,vF)*bp+vec3(1.,.8,.45)*rg)*vI*uG,1.);}`});
 const edgeMat=new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,...ADD,
 vertexShader:`attribute float aT;attribute float aI;attribute float aPh;attribute vec3 aCol;attribute vec3 aO;attribute float aW;attribute float aDv;uniform float uT;varying float vA;varying vec3 vC;varying float vD;
-void main(){vD=aDv;vA=aI>0.?min(1.,aI*1.9+.035)*mix(.7,1.,aT):0.;vC=aCol;
+void main(){vD=aDv;vA=aI>0.?min(1.,aI*3.4+.1)*mix(.8,1.,aT):0.;vC=aCol;
 vec4 va=modelViewMatrix*vec4(position,1.);vec4 vb=modelViewMatrix*vec4(aO,1.);float sc=length(modelViewMatrix[0].xyz);
 vec2 dd=vb.xy-va.xy;float L=length(dd)+1e-6;vec2 n=dd/L;
 float tr=aW>0.?min(aW*sc/max(abs(n.x),1e-3),.016*sc/max(abs(n.y),1e-3)):0.;
@@ -1772,7 +1772,7 @@ function getDocColor(d){ return DOC_PALETTE[(d||0)%DOC_PALETTE.length]; }
 
 let nL=null,nHW=null,wvPend=false,wvT=0;
 const _mc=document.createElement('canvas').getContext('2d');
-function wordHW(n){if(n.hw===undefined){_mc.font='600 133px Inter,system-ui,-apple-system,sans-serif';const tw=_mc.measureText(n.word).width;const effW=Math.min(tw,920);n.hw=(effW/1024)*.2*FS/2+.008;}return n.hw;}
+function wordHW(n){if(n.hw===undefined){_mc.font='700 133px Inter,system-ui,-apple-system,sans-serif';const tw=_mc.measureText(n.word).width;const effW=Math.min(tw,920);n.hw=(effW/1024)*.2*FS/2+.008;}return n.hw;}
 function refreshWV(){
   if(!pts||!nHW||nHW.length!==nodes.length)return;
   nHW.fill(0);nL.fill(0);
@@ -2194,13 +2194,13 @@ function label(i,kind,projection){
   if(!s){
     const word=projection?projection.word:nodes[i].word;
     const c=document.createElement('canvas');c.width=1024;c.height=256;const x=c.getContext('2d');
-    let fs=133;x.font='600 '+fs+'px Inter,system-ui,-apple-system,sans-serif';
+    let fs=133;x.font='700 '+fs+'px Inter,system-ui,-apple-system,sans-serif';
     let tw=x.measureText(word).width;
-    if(tw>920){fs=Math.max(48,Math.floor(fs*(920/tw)));x.font='600 '+fs+'px Inter,system-ui,-apple-system,sans-serif';}
+    if(tw>920){fs=Math.max(48,Math.floor(fs*(920/tw)));x.font='700 '+fs+'px Inter,system-ui,-apple-system,sans-serif';}
     x.textAlign='center';x.textBaseline='middle';
-    x.shadowColor=kind===1?'#ffb347':'#5df0ff';x.shadowBlur=30;x.fillStyle=kind===1?'#ffe2a8':'#d6fbff';x.fillText(word,512,128);
+    x.lineJoin='round';x.lineWidth=16;x.strokeStyle='rgba(0,6,16,.95)';x.strokeText(word,512,128);x.shadowColor=kind===1?'#ffb347':'#5df0ff';x.shadowBlur=22;x.fillStyle=kind===1?'#fff0c8':'#f2fdff';x.fillText(word,512,128);
     const tx=new THREE.CanvasTexture(c);tx.anisotropy=renderer.capabilities.getMaxAnisotropy();tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
-    const m=new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false,blending:THREE.AdditiveBlending});
+    const m=new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false});
     s=new THREE.Sprite(m);s.scale.set(.2*FS,.05*FS,1);s.renderOrder=10;if(!projection)labelCache.set(key,s);
   }
   if(projection){s.userData.projection=projection.weights;return s;}
@@ -2287,7 +2287,7 @@ function applyState(quick){
     Q.top.forEach(i=>labs.push([i,1]));
   }else{
     for(let i=0;i<N;i++)nI[i]=.18+1.9*Math.pow(ni[i],1.2);
-    for(let e=0;e<E;e++){ei[e]=(.04+.14*edges[e].wn)*(.45+.9*(nodes[edges[e].s].nf+nodes[edges[e].t].nf)/2);er[e]=edges[e].wn;}
+    for(let e=0;e<E;e++){ei[e]=(.09+.26*edges[e].wn)*(.6+.9*(nodes[edges[e].s].nf+nodes[edges[e].t].nf)/2);er[e]=edges[e].wn;}
     if(isSep){
       orbs.forEach(orb=>{
         const docNodes=[];
@@ -2342,7 +2342,7 @@ function applyState(quick){
   pointIndex.needsUpdate=true;pts.geometry.setDrawRange(0,pointCount);
   const flowQ=Q&&Q.A,aT=lines.geometry.attributes.aT;
   edges.forEach((e,k)=>{
-    eI[k*2]=ei[k]*ea[e.s];eI[k*2+1]=ei[k]*ea[e.t];
+    eI[k*2]=ei[k]*(.45+.55*ea[e.s]);eI[k*2+1]=ei[k]*(.45+.55*ea[e.t]);
     eC.set(lcol(e.s,ea[e.s]),k*6);eC.set(lcol(e.t,ea[e.t]),k*6+3);
     let dir=0;
     aT.array[k*2]=dir;aT.array[k*2+1]=1-dir;
@@ -4575,13 +4575,13 @@ const lodGroup=new THREE.Group();G.add(lodGroup);
 const lodMap=new Map(),_cl=new THREE.Vector3(),_cw=new THREE.Vector3();
 function lodSprite(i){
   const c=document.createElement('canvas');c.width=1024;c.height=256;const x=c.getContext('2d');
-  let fs=133;x.font='600 '+fs+'px Inter,system-ui,-apple-system,sans-serif';
+  let fs=133;x.font='700 '+fs+'px Inter,system-ui,-apple-system,sans-serif';
   let tw=x.measureText(nodes[i].word).width;
-  if(tw>920){fs=Math.max(48,Math.floor(fs*(920/tw)));x.font='600 '+fs+'px Inter,system-ui,-apple-system,sans-serif';}
+  if(tw>920){fs=Math.max(48,Math.floor(fs*(920/tw)));x.font='700 '+fs+'px Inter,system-ui,-apple-system,sans-serif';}
   x.textAlign='center';x.textBaseline='middle';
-  x.shadowColor='#5df0ff';x.shadowBlur=24;x.fillStyle='#d6fbff';x.fillText(nodes[i].word,512,128);
+  x.lineJoin='round';x.lineWidth=16;x.strokeStyle='rgba(0,6,16,.95)';x.strokeText(nodes[i].word,512,128);x.shadowColor='#5df0ff';x.shadowBlur=20;x.fillStyle='#f2fdff';x.fillText(nodes[i].word,512,128);
   const tx=new THREE.CanvasTexture(c);tx.anisotropy=renderer.capabilities.getMaxAnisotropy();tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
-  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false,blending:THREE.AdditiveBlending}));
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false}));
   sp.scale.set(.2*FS,.05*FS,1);sp.renderOrder=10;sp.userData.i=i;sp.position.set(nodes[i].x,nodes[i].y,nodes[i].z);return sp;
 }
 var _dq=[],_dt=0;
