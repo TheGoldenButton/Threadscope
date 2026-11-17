@@ -2388,16 +2388,18 @@ async function runQuery(text,again,opts){
   if(!nodes.length){stat('Build the field first. Say \u201cWikipedia: a topic\u201d to load one.');return;}
   const seq=[...text.toLowerCase().replace(/[\u2018\u2019]/g,"'").matchAll(TOKRE)].map(m=>/^\d/.test(m[0])?m[0].replace(/,/g,''):m[0]).filter(w=>/^[\p{L}\p{M}\d]/u.test(w)),words=[...new Set(seq)];
   if(ingesting){stat('The field is still building. Try again in a moment.');return;}
+  const queryAudio=!so&&!again&&!replaying&&words.length>0;
   if(!so)LASTQ=text.trim();
   const sk=so?[...SS].join(','):'',wl=so?opts.words:words;
   const my=++qSeq,ep=EPOCH,tm=so?0:setTimeout(()=>stat('Searching…'),250);
-  if(!so){pulseKey='';updatePulse(true);}let rr;qBusy++;try{rr=await ENG.call({t:'query',words:wl,seq:so?undefined:seq,again:so||!!again});}catch(err){qBusy--;clearTimeout(tm);stat('Query failed: '+err.message);return;}qBusy--;
+  if(queryAudio)sfxQuery('submit');
+  if(!so){pulseKey='';updatePulse(true);}let rr;qBusy++;try{rr=await ENG.call({t:'query',words:wl,seq:so?undefined:seq,again:so||!!again});}catch(err){qBusy--;clearTimeout(tm);if(my===qSeq&&ep===EPOCH){if(queryAudio)sfxQuery('error');stat('Query failed: '+err.message);}return;}qBusy--;
   clearTimeout(tm);
   if(my!==qSeq||ep!==EPOCH)return;
   if(so&&[...SS].join(',')!==sk)return;
   if(rr.rebuilt){setField(rr.rebuilt,true);replayHebb();saveField();buildVisuals();}
   const res=rr.res;
-  if(!res){if(so)return;Q=null;applyState();stat('None of those words occur in your text. Try terms from it.');return;}
+  if(!res){if(so)return;if(queryAudio)sfxQuery('empty');Q=null;applyState();stat('None of those words occur in your text. Try terms from it.');return;}
   const N=nodes.length,E=edges.length,A=new Float32Array(N),show=new Uint8Array(N),pq=new Array(N);let miss=0,n1=0,n2=0;const seedK=new Set();
   const getKs=id=>word2all&&word2all.has(id)?word2all.get(id):([word2i.get(id)].filter(x=>x!==undefined));
   res.seeds.forEach(sd=>sd.ids.forEach(id=>{
@@ -2440,7 +2442,6 @@ async function runQuery(text,again,opts){
     ov=(ov+.25*Math.min(A[e.s],A[e.t]))*(.4+.6*e.wn);eIv[k]=ov;mo=Math.max(mo,ov);});
   for(let k=0;k<E;k++)eIv[k]=eIv[k]>0?.1+.95*Math.pow(eIv[k]/mo,.8):.03;
   if(!replaying&&!so)hebbPull([...seedK,...top.slice(0,4)]);
-  if(!so)sfxWash();
   let crossBridges=[];
   if(fieldMode==='separated'&&orbs.length>1){
     crossBridges=computeCrossBridges(A,show,pq,cv,seedK,res.seeds);
@@ -2449,6 +2450,7 @@ async function runQuery(text,again,opts){
     q:s.q,ids:s.ids,
     related:res.M.map(e=>({id:e.id,weight:e.pq.get(s.q)||0})).filter(e=>e.weight>0).sort((a,b)=>b.weight-a.weight).slice(0,4)
   }));
+  if(queryAudio)sfxQuery('result',{seeds:seedK,top,bridges:crossBridges,inferred:morphology.length>0});
   Q={A,show,top,eI:eIv,terms:res.seeds.map(s=>s.q),seed:seedK,cv,sg:res.seeds.map(s=>s.ids.slice()),fromSel:so,sk,crossBridges,morphology};if(!so){SS.clear();selV++;sel=-1;}updatePulse(false);applyState();if(!replaying&&!so){pushHist(queryEntry(text,top,A,eIv));}
   psAuto();if(!so)stat(summary());
 }
@@ -2792,6 +2794,47 @@ function nodeFreq(i){
   const fq=Math.log(1+(n.freq||1))/Math.log(1+mf),oct=2-Math.round(fq*2);
   const midi=48+PENT[(n.adj?n.adj.length:0)%5]+12*oct;
   return 440*Math.pow(2,(midi-69)/12);
+}
+let querySound=null;
+function sfxQuery(stage,result){
+  const c=auCtx();if(!c)return;
+  if(stage==='submit'&&querySound){querySound.output.disconnect();clearTimeout(querySound.timer);querySound=null;}
+  const now=c.currentTime;
+  const output=querySound?.output||c.createGain();
+  if(!querySound)output.connect(AU.out);
+  const time=stage==='submit'?now:Math.max(now,querySound?.after||0);
+  const tone=(from,to,delay,length,volume,type='sine')=>{
+    const start=time+delay,end=start+length,o=c.createOscillator(),g=c.createGain();
+    o.type=type;o.frequency.setValueAtTime(from,start);o.frequency.exponentialRampToValueAtTime(to,end);
+    g.gain.setValueAtTime(.0001,start);g.gain.exponentialRampToValueAtTime(volume,start+.012);
+    g.gain.exponentialRampToValueAtTime(.0001,end);
+    o.connect(g);g.connect(output);o.start(start);o.stop(end);
+  };
+  if(stage==='submit'){
+    tone(290,510,0,.12,.085,'triangle');
+  }else if(stage==='empty'){
+    tone(310,215,0,.17,.075);tone(215,160,.11,.2,.05);
+  }else if(stage==='error'){
+    tone(180,175,0,.085,.065,'triangle');tone(180,175,.14,.085,.065,'triangle');
+  }else{
+    const anchor=[...result.seeds].find(inFocusedOrb);
+    const root=anchor===undefined?350:nodeFreq(anchor);
+    tone(root,root,0,.24,.105,'triangle');
+    if(result.inferred)tone(root*.8,root,.045,.22,.06);
+    const pitches=new Set([root]);
+    for(const i of result.top){
+      if(result.seeds.has(i)||!inFocusedOrb(i))continue;
+      const pitch=nodeFreq(i);
+      if(pitches.has(pitch))continue;
+      tone(pitch,pitch,pitches.size*.094,.22,.055);
+      pitches.add(pitch);
+      if(pitches.size===4)break;
+    }
+    if(result.bridges.length)tone(root*1.5,root*2,.32,.26,.045,'triangle');
+  }
+  clearTimeout(querySound?.timer);
+  const timer=setTimeout(()=>{output.disconnect();if(querySound?.output===output)querySound=null;},950);
+  querySound={output,timer,after:time+.14};
 }
 function sfxChime(i){
   const c=auCtx();if(!c)return;const t=c.currentTime;if(t-AU.last.c<.06)return;AU.last.c=t;
