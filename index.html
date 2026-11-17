@@ -3194,7 +3194,7 @@ function keyAct(k,r){
   kDirty=true;if(wbOpen)wbD=true;pressK=k;pressT=performance.now();
   try{r.c.userData.src?.gamepad?.hapticActuators?.[0]?.pulse(.35,30);}catch(e){}
 }
-const _h=new THREE.Vector3(),_f=new THREE.Vector3(),_t=new THREE.Vector3(),_t2=new THREE.Vector3();let kYaw=0,kInit=false,kMove=false;
+const _h=new THREE.Vector3(),_f=new THREE.Vector3(),_t=new THREE.Vector3(),_t2=new THREE.Vector3(),kHeadPos=new THREE.Vector3();let kYaw=0,kInit=false,kMoving=false,kWait=0;
 const kOffL=new THREE.Vector3(),kBase=new THREE.Vector3();
 function kbPaneHit(c){
   if(!kb.visible||HUIDE)return null;
@@ -3216,15 +3216,30 @@ function kbDrag(r){
 function placeKB(dt){
   const xc=renderer.xr.getCamera();xc.getWorldPosition(_h);xc.getWorldDirection(_f);_f.y=0;
   if(_f.lengthSq()>1e-4){
-    _f.normalize();const yaw=Math.atan2(-_f.x,-_f.z);if(!kInit)kYaw=yaw;
-    const df=Math.atan2(Math.sin(yaw-kYaw),Math.cos(yaw-kYaw));
-    kYaw+=df*Math.min(1,dt*6);
+    _f.normalize();const yaw=Math.atan2(-_f.x,-_f.z);
+    if(!kInit){kYaw=yaw;kHeadPos.copy(_h);kInit=true;kMoving=false;kWait=0;}
+    const df=Math.atan2(Math.sin(yaw-kYaw),Math.cos(yaw-kYaw)),dist=_h.distanceTo(kHeadPos),drag=rig.some(r=>r.kd);
+    if(drag){kWait=0;kMoving=false;}
+    else{
+      if(Math.abs(df)>0.82||dist>0.5){
+        kWait+=dt;
+        if(kWait>0.45)kMoving=true;
+      }else if(!kMoving){
+        kWait=0;
+      }
+      if(kMoving){
+        const s=1-Math.exp(-dt*3.5);
+        kYaw+=df*s;
+        kHeadPos.lerp(_h,s);
+        if(Math.abs(df)<0.03&&dist<0.04){kMoving=false;kWait=0;}
+      }
+    }
   }
-  const SC=.78*VS,sy=Math.sin(kYaw),cy=Math.cos(kYaw),D=1.0,lx=((KW-260)/1000 - (KW/2000))*SC,ly=(.55-(106+187.5)/1000)*SC;kb.scale.setScalar(SC);ib.scale.setScalar(SC);
-  _t.set(_h.x-sy*D,_h.y-.05,_h.z-cy*D);kBase.copy(_t);_t.x+=cy*kOffL.x+sy*kOffL.z;_t.y+=kOffL.y;_t.z+=-sy*kOffL.x+cy*kOffL.z;
+  const SC=.78*VS,sy=Math.sin(kYaw),cy=Math.cos(kYaw),D=1.0,lx=((KW-260)/1000-(KW/2000))*SC,ly=(.55-(106+187.5)/1000)*SC;kb.scale.setScalar(SC);ib.scale.setScalar(SC);
+  _t.set(kHeadPos.x-sy*D,kHeadPos.y-.05,kHeadPos.z-cy*D);kBase.copy(_t);_t.x+=cy*kOffL.x+sy*kOffL.z;_t.y+=kOffL.y;_t.z+=-sy*kOffL.x+cy*kOffL.z;
   _t2.set(_t.x+cy*lx+sy*.01,_t.y+ly,_t.z-sy*lx+cy*.01);
-  if(!kInit){kb.position.copy(_t);ib.position.copy(_t2);}else{const a=Math.min(1,dt*8);kb.position.lerp(_t,a);ib.position.lerp(_t2,a);}
-  kInit=true;kb.rotation.set(0,kYaw,0,'YXZ');ib.rotation.set(0,kYaw,0,'YXZ');kb.updateMatrixWorld(true);ib.updateMatrixWorld(true);
+  kb.position.copy(_t);ib.position.copy(_t2);
+  kb.rotation.set(0,kYaw,0,'YXZ');ib.rotation.set(0,kYaw,0,'YXZ');kb.updateMatrixWorld(true);ib.updateMatrixWorld(true);
 }
 function xrDone(m){xrNote=m;hud();}
 async function xrPaste(){
