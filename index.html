@@ -239,6 +239,11 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 .xchip.hidden .xc-arr{color:var(--cy)}
 .xchip .xc-score{opacity:.65;font-size:calc(9px*var(--fs,1));margin-left:2px}
 
+#pt{left:50%;top:56px;transform:translateX(-50%);width:min(520px,calc(100vw - 20px));z-index:5;font-size:calc(13px*var(--fs,1))}
+#pt textarea{margin-top:8px;min-height:200px}
+#play{left:4px;bottom:64px;width:min(400px,calc(100vw - 60px));display:flex;align-items:center;gap:8px;padding:8px 10px;z-index:4}
+#pltl{flex:1;min-width:0;accent-color:var(--am)}
+#plcnt{font-size:calc(11px*var(--fs,1));opacity:.8;min-width:70px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -254,7 +259,7 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
   <div id="docs" hidden></div>
   <div id="stat"></div>
 </div>
-<div id="addm" class="panel" role="menu" hidden><button data-a="file" role="menuitem">Files <small>text, PDF, Word, HTML</small></button><button data-a="wiki" role="menuitem">Wikipedia pages</button><button data-a="demo" role="menuitem">Demo text <small>oceans and climate</small></button><button data-a="url" role="menuitem">Web page / PDF by URL</button></div>
+<div id="addm" class="panel" role="menu" hidden><button data-a="file" role="menuitem">Files <small>text, PDF, Word, HTML</small></button><button data-a="wiki" role="menuitem">Wikipedia pages</button><button data-a="paste" role="menuitem">Paste text</button><button data-a="demo" role="menuitem">Demo text <small>oceans and climate</small></button><button data-a="url" role="menuitem">Web page / PDF by URL</button></div>
 <form id="qf" class="panel"><input id="q" type="text" placeholder="Ask about your text, e.g. how does heat affect the ocean?" autocomplete="off"><button type="button" id="micb" aria-label="Speak" title="Speak a query (Whisper). Click again to send."></button><button type="submit" id="askb" aria-label="Ask" title="Ask"></button></form>
 <button id="hbtn" title="History" aria-label="History">🌳</button>
 <button id="sbtn" title="Settings" aria-label="Settings">&#9881;</button>
@@ -267,6 +272,8 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 <div id="info" class="panel"><div id="infob"></div><div id="infof"><button id="psbtn" title="Show the source passages for the selection or query">Passages</button><button id="cpbtn" title="Copy the LLM prompt (instructions plus the words and passages) to use elsewhere">Copy</button><button id="brain" title="Send the selected concepts and your query to the assistant">Ask LLM</button><label id="autol" title="Auto: run the assistant whenever you ask a query"><input id="auto" type="checkbox">Auto</label><button id="clr" title="Clear selection">Clear</button></div></div>
 <div id="ps" class="panel" hidden><div class="hh"><b id="pst">Passages</b><button id="psc" title="Copy these passages with citations">Copy</button><button id="psx" title="Close">&#10005;</button></div><div id="psm" class="hs"></div><div id="psb"></div><div id="pspg" hidden><button id="pspv" title="Previous 60 passages">‹ Prev</button><span id="pspn"></span><button id="psnx" title="Next 60 passages">Next ›</button></div><div id="pssv"><label title="Only passages scoring at or above the cut-off go to the LLM; the rest stay visible here, dimmed"><input id="pssc" type="checkbox"> Token saver: send to LLM only passages scoring ≥</label><input id="psth" type="text" inputmode="decimal" autocomplete="off" aria-label="Passage relevance cut-off (0 to 1)"><span id="pssn" class="hs"></span></div></div>
 <div id="ur" class="panel" hidden><div class="hh"><b>Web pages</b><button id="urx" title="Close">&#10005;</button></div><textarea id="urt" rows="4" placeholder="One URL per line: web pages, articles, or links to PDFs" style="margin-top:8px"></textarea><label style="display:block;margin-top:6px;font-size:12px;opacity:.85"><input id="urp" type="checkbox" checked> If a site blocks direct access, retry through a public proxy (the URL is sent to it)</label><div class="ha"><button id="urgo">Fetch and add</button></div><div id="urs" class="hs"></div></div>
+<div id="pt" class="panel" hidden><div class="hh"><b>Paste text</b><button id="ptx" title="Close">&#10005;</button></div><input id="ptn" type="text" placeholder="Name (optional)" autocomplete="off" style="margin-top:8px;width:100%"><textarea id="ptt" placeholder="Paste text here (Ctrl/Cmd+V)"></textarea><div class="ha"><button id="ptgo">Add to field</button></div><div id="pts" class="hs"></div></div>
+<div id="play" class="panel" hidden><button id="plbtn">\u25b6 Play</button><input id="pltl" type="range" min="0" max="0" value="0" step="1" aria-label="Play position"><button id="plsp" title="Speed">1\u00d7</button><span id="plcnt"></span><button id="plst" title="Stop and show everything" hidden>\u25a0</button></div>
 <div id="hist" class="panel" hidden>
   <div class="htabs"><button data-t="res">Results</button><button data-t="files">Files</button><button id="hclr" title="Delete all saved results">Clear all</button><button id="hx" title="Close">✕</button></div>
   <input id="hf" type="text" placeholder="Filter by word or query…" autocomplete="off">
@@ -318,6 +325,7 @@ const STOP=new Set(`the and for with are there was were been has had have did do
  `ll ve re em th tis twas twere twill twould twixt yeah yep yup nope okay ok oh ah aha ahh hmm hm um uh er erm huh hey hello hi ooh oops wow whoa yay ugh aw gee lol lmao omg btw etc eh ha haha hehe ya gonna gotta wanna gimme lemme dunno kinda sorta outta cuz coz thee thou thy thine ye hast hath doth dost wilt shalt wert wast didst hadst canst couldst wouldst shouldst ere nay yea prithee methinks wherefore whence hither thither whilst ma'am y'all o'clock e'en ne'er o'er ain't`.split(' ').forEach(w=>STOP.add(w));}
 const STRUCT=new Set(`today tonight yesterday tomorrow later earlier twice ago soon already often always sometimes usually rarely seldom recently formerly lately meanwhile afterward afterwards ever year years month months week weeks day days decade decades century centuries hour hours minute minutes time times period second third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth fifteenth sixteenth seventeenth eighteenth nineteenth twentieth hundredth four five seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty thirty forty fifty sixty seventy eighty ninety hundred hundreds thousand thousands million millions billion billions dozen dozens slightly rather fairly nearly mostly largely mainly partly entirely completely totally extremely highly greatly especially particularly generally typically merely roughly approximately many much several numerous various enough plenty every somehow anyway toward towards across around beyond against beside besides amid back forward throughout within inside outside among amongst along alongside despite regarding concerning versus via beneath behind ahead apart aside away nearby therein thereof thereafter herein wherein whereby whereas whereupon hence accordingly consequently furthermore moreover nevertheless nonetheless otherwise instead indeed perhaps maybe namely respectively additionally together altogether forth onward however become becomes became becoming remain remains remained remaining seem seems appear appears appeared called named referred considered regarded contain contains contained consist consists consisting begin begins began begun started continue continues continued tend tends tended allow allows allowed require requires required involve involves involved live lives lived thing things way ways kind kinds sort sorts part parts number numbers amount lot lots bit case cases example examples fact facts large larger largest small smaller smallest big bigger biggest little huge tiny major minor main chief principal whole entire high higher highest low lower lowest long longer longest short early late latest recent current old young middle top previous former latter common general usual normal typical available necessary important significant simple basic real full said says say saying told tell tells telling asked ask asks replied reply answered cried exclaimed whispered shouted`.split(' '));
 const GEN=new Map();`able actually almost although art automatically basically bring brought came certain chapter come comes coming currently eventually far finally find first following found gave give given gives go gone good great immediately include included includes including keep kept knew know known knows last least leave less like look looked looks made make makes making man mean means meant men more most near need needs never new next now obtain obtained own potentially previously probably provide provides put really refer refers same saw see seemed seen show showed shown shows simply six specifically start still suddenly take taken takes therefore think thought three thus took tried try two use used uses using want wanted well whether will value values type types line version file result list set form view valid return returns returned single multiple different possible similar specific particular exactly indicate indicates indicating contents users user due argument arguments default defaults instance instances object objects`.split(' ').forEach(w=>GEN.set(w,.25));
+'over until unless though although whilst whereas across within without upon onto toward towards via per than then thus nor yet so if or and but as at by for in of on to with from into about above below off out up down under through between during before after while when where which who whom whose whether either neither both each also just only even still such very'.split(' ').forEach(w=>STRUCT.add(w));
 const BREAKW=new Set('but however although though yet whereas while nevertheless nonetheless instead'.split(' '));
 const WHW=new Set('what when where who whom whose which why how'.split(' '));
 const okw=e=>e.length<=(e.indexOf(' ')>0?36:24)&&!/(.)\1\1/.test(e)&&!WHW.has(e);
@@ -556,14 +564,15 @@ function leapScan(terms,excl){
   }
   const DW=2*DEC.reduce((x,y)=>x+y,0);
   return keys.map(k=>{
-    const c=ent.get(k),p=new Map(),hits=c.hits;let a=0;
+    const c=ent.get(k),p=new Map(),hits=c.hits,rare=[],NEARV=DEC[Math.min(HZ,Math.round(HZ*.6))]||0;let a=0;
     for(let i=0;i<c.ids.length;i++){
       const r=c.ids[i];if(excl[r])continue;
-      if(hits>=20&&CN>3e3&&c.raw[i]*c.stride<2)continue;
+      const rareW=WDF&&NWIN>=3&&WDF[r]>0&&WDF[r]<=3;if(hits>=20&&CN>3e3&&c.raw[i]*c.stride<2&&!rareW)continue;
       const o=cIdf[r];if(!(o>.08))continue;
       const v=c.acc[i],ex=Math.ceil(hits/c.stride)*DW*cfreq[r]/Math.max(1,LT);
       const sc=Math.log(1+v)*o*(GEN.get(vocab[r])||1)*Math.log(1+v/(ex+1));
-      p.set(r,sc);if(sc>a)a=sc;}
+      p.set(r,sc);if(sc>a)a=sc;if(rareW&&c.acc[i]>=NEARV)rare.push(r);}
+    if(rare.length&&a>0){const fl=.45*a;for(const q of rare)if(p.get(q)<fl)p.set(q,fl);}
     p.forEach((v,r)=>p.set(r,v/(a||1)));
     
     return {p,hits,
@@ -1552,8 +1561,8 @@ function getPassages(m){
   const qreq=nG>1?Math.max(1,Math.ceil(.5*rows.reduce((a,r)=>r.qc>a?r.qc:a,0))):0;
   const ok=rows.filter(r=>r.mc>=req&&r.qc>=qreq).sort((a,b)=>b.s-a.s||b.mc-a.mc),total=ok.length;
   const budget=Math.max(Math.min(2,cap),Math.min(cap,Math.round(1+R*(cap-1)))),frac=m.full?0:.7-.5*R,top=ok[0]?ok[0].s:0;
-  if(m.full){const u=[],sn=new Set();
-    for(const r of ok.slice().sort((a,b)=>b.mc-a.mc||b.s-a.s)){const ps=PASS[r.p],key=DOCS[ps.d].text.slice(ps.a,ps.b).trim().toLowerCase().slice(0,100);if(sn.has(key))continue;sn.add(key);if(m.cut&&top&&r.s<m.cut*top)continue;u.push(r);}
+  if(m.full){const u=[],sn=new Set(),kept=[];
+    for(const r of ok.slice().sort((a,b)=>b.mc-a.mc||b.s-a.s)){const ps=PASS[r.p],key=DOCS[ps.d].text.slice(ps.a,ps.b).trim().toLowerCase().slice(0,100);if(sn.has(key))continue;sn.add(key);if(m.cut&&top&&r.s<m.cut*top)continue;if(kept.some(k=>k.d===ps.d&&Math.min(k.b,ps.b)-Math.max(k.a,ps.a)>.3*Math.min(k.b-k.a,ps.b-ps.a)))continue;kept.push(ps);u.push(r);}
     const off=Math.max(0,(m.off|0)),pg=u.slice(off,off+cap).map(r=>{const o=fmtPass(r,PASS[r.p],wi);o.rel=top?Math.min(1,r.s/top):1;o.qc=r.qc;return o;});
     return {ps:pg,total:u.length,off,R,budget,req,mustN,nq:nG};}
   const out=[],seen=new Set();
@@ -1614,7 +1623,7 @@ import {VRButton} from 'three/addons/webxr/VRButton.js';
 import {XRHandModelFactory} from 'three/addons/webxr/XRHandModelFactory.js';
 import {XRControllerModelFactory} from 'three/addons/webxr/XRControllerModelFactory.js';
 const TOKRE=/[\p{L}\p{M}]+(?:['-][\p{L}\p{M}]+)*|\d+(?:[.,]\d+)*|[.!?;:()\u2014\u2013]+|,|\n[ \t\r]*\n/gu;
-
+const FUNCW=new Set('over until unless though although whilst whereas across within without upon onto toward towards via per than then thus nor yet so if or and but as at by for in of on to with from into about above below off out up down under through between during before after while when where which who whom whose whether either neither both each also just only even still such very the a an is are was were be been am it its this that these those there here not no yes can could would should may might must will shall do does did has have had i you he she we they me him her us them my your his our their'.split(' '));
 
 const ENG=(()=>{
   const w=new Worker(URL.createObjectURL(new Blob([document.getElementById('engine-src').textContent],{type:'text/javascript'})));
@@ -1626,6 +1635,7 @@ const ENG=(()=>{
   return {call(msg,prog){return new Promise((res,rej)=>{const id=++rid;pend.set(id,{res,rej,prog});w.postMessage({...msg,rid:id});});},
     post(msg){w.postMessage({...msg,rid:++rid});}};
 })();
+const PLAY={on:false,paused:true,idx:0,rank:null,seq:[],cur:-1,speed:1,t:0,key:''};
 let EPOCH=0,ingesting=false,qSeq=0,forceWords=[],qBusy=0;var wikiBusy=0;
 const thinking=()=>qBusy>0||ingesting||wikiBusy>0||!!rdBusy||VOICE.st==='rec'||VOICE.busy>0;
 let nD=null,eD=null,pulseKey='',pulseOn=0;
@@ -2084,9 +2094,52 @@ const rainbow=t=>hsv((1-Math.max(0,Math.min(1,t)))*.78,.85,1);
 const cnorm=i=>nodes[i].cr!==undefined?nodes[i].cr:nodes[i].nf;
 const lcol=(i,cl,a)=>RB?rainbow(cnorm(i)).map(v=>v*(.7+.3*a)):cl;
 let visible=[],forcedSet=new Set();
+const SPDS=[.25,.5,1,2,4];
+function playSeq(){
+  if(Q&&Q.top&&Q.top.length)return [...new Set([...(Q.fromSel?[...SS]:[]),...Q.top])];
+  return SS.size?[...SS]:[];
+}
+function playUI(){
+  const b=document.getElementById('plbtn');if(!b)return;
+  b.textContent=(PLAY.on&&!PLAY.paused)?'❚❚ Pause':'▶ Play';
+  const t=document.getElementById('pltl');t.max=Math.max(0,PLAY.seq.length-1);t.value=PLAY.on?PLAY.idx:0;
+  document.getElementById('plsp').textContent=PLAY.speed+'×';
+  document.getElementById('plcnt').textContent=PLAY.on?((PLAY.idx+1)+'/'+PLAY.seq.length+(PLAY.cur>=0&&nodes[PLAY.cur]?' '+nodes[PLAY.cur].word:'')):(PLAY.seq.length+' words');
+  document.getElementById('plst').hidden=!PLAY.on;
+}
+function playSync(){
+  const el=document.getElementById('play');if(!el)return;
+  const seq=nodes.length?playSeq().slice(0,80):[],key=seq.join(',');
+  if(key!==PLAY.key){PLAY.key=key;if(PLAY.on){PLAY.on=false;PLAY.rank=null;PLAY.cur=-1;}PLAY.paused=true;PLAY.seq=seq;PLAY.idx=0;}
+  el.hidden=seq.length<2;playUI();
+}
+function playBegin(){PLAY.on=true;PLAY.rank=new Map(PLAY.seq.map((i,k)=>[i,k]));}
+function playToggle(){
+  if(!PLAY.seq.length)return;
+  if(!PLAY.on){playBegin();PLAY.idx=0;PLAY.t=0;PLAY.paused=false;}
+  else if(PLAY.paused){if(PLAY.idx>=PLAY.seq.length-1)PLAY.idx=0;PLAY.paused=false;PLAY.t=0;}
+  else PLAY.paused=true;
+  PLAY.cur=PLAY.seq[PLAY.idx];sfxChime(PLAY.cur);applyState();
+}
+function playStop(){PLAY.on=false;PLAY.paused=true;PLAY.rank=null;PLAY.cur=-1;applyState();}
+function playStep(dt){
+  if(!PLAY.on||PLAY.paused||!PLAY.seq.length)return;
+  PLAY.t+=dt*PLAY.speed;if(PLAY.t<1.1)return;PLAY.t=0;
+  if(PLAY.idx>=PLAY.seq.length-1){PLAY.paused=true;playUI();return;}
+  PLAY.idx++;PLAY.cur=PLAY.seq[PLAY.idx];sfxChime(PLAY.cur);applyState();
+}
+function playFly(dt){
+  if(!PLAY.on||PLAY.cur<0||!nodes[PLAY.cur])return;
+  const n=nodes[PLAY.cur];_cw.set(n.x,n.y,n.z).applyMatrix4(G.matrixWorld);
+  const k=1-Math.exp(-dt*2.2),dir=camera.position.clone().sub(controls.target);
+  let L=dir.length();dir.normalize();
+  const want=.45*Math.max(.3,G.scale.x);L+=(want-L)*k;
+  controls.target.lerp(_cw,k);camera.position.copy(controls.target).addScaledVector(dir,L);
+}
 function applyState(quick){
   const N=nodes.length,E=edges.length;if(!N)return;
   if(Q&&Q.fromSel&&!SS.size)Q=null;
+  playSync();
   const isSep=fieldMode==='separated'&&orbs.length>1;
   const nI=new Float32Array(N),ni=new Float32Array(N),ei=new Float32Array(E),ec=new Uint8Array(E),nc=new Uint8Array(N),er=new Float32Array(E),ea=new Float32Array(N).fill(1);
   const labs=[];
@@ -2123,13 +2176,15 @@ function applyState(quick){
     ea.fill(.3);labs.length=0;
     SS.forEach(s=>{nI[s]=1.3;nc[s]=2;ea[s]=1;labs.push([s,1]);});
   }
+  if(PLAY.on&&PLAY.rank){for(let i=0;i<N;i++){const r=PLAY.rank.get(i);if(r===undefined)continue;
+    if(r>PLAY.idx){nI[i]=.08;ea[i]=.15;nc[i]=0;}else if(r===PLAY.idx){nI[i]=Math.max(nI[i],1.4);nc[i]=2;ea[i]=1;labs.push([i,1]);}else{ea[i]=Math.max(ea[i],.7);labs.push([i,0]);}}}
   const div=(isSep&&Q&&Q.A)?computeDivergence():null;
   const divSet=div?new Set(div.topDivergent.map(d=>d.i)):null;
   const divShownSet=div?new Set(div.topDivergent.slice(0,16).map(d=>d.i)):null;
   const hid=new Uint8Array(N);let newest=-1;
   visible=[];const colOn=!isSep&&!!(col.hide&&col.hide.length===N&&!hasCtx());
   for(let i=0;i<N;i++){
-    nA[i]=nI[i];nP[i]=SS.has(i)?1:0;nF[i]=(SS.size&&(sm||nc[i]>=2))?(nc[i]>=2?1:0):(Q&&Q.A?(nc[i]===1?1:0):.3+.7*ni[i]);nS[i]=.013+.055*ni[i]+(nc[i]===2?.03:nc[i]===1?.012*nI[i]:0);
+    nA[i]=nI[i];nP[i]=(SS.has(i)||(PLAY.on&&PLAY.cur===i))?1:0;nF[i]=(SS.size&&(sm||nc[i]>=2))?(nc[i]>=2?1:0):(Q&&Q.A?(nc[i]===1?1:0):.3+.7*ni[i]);nS[i]=.013+.055*ni[i]+(nc[i]===2?.03:nc[i]===1?.012*nI[i]:0);
     let cc;
     if(divSet&&divSet.has(i)){
       
@@ -2218,7 +2273,7 @@ async function runQuery(text,again,opts){
    res.M.forEach(e=>{
      const ks=getKs(e.id);
      ks.forEach(k=>{
-       if(!seedK.has(k)&&cv[k]<cut){show[k]=0;A[k]=0;}
+       if(!seedK.has(k)&&(cv[k]<cut||FUNCW.has(nodes[k].word))){show[k]=0;A[k]=0;}
      });
    });
   }
@@ -2325,10 +2380,11 @@ function updateInfo(){
   }else $info.style.display='none';
   hud();
 }
+const baseDocs=()=>curCorpus===DEMO_ID?[]:curDocs;
 async function load(files){
   const nw=await readFiles(files);
   if(!nw.length)return;
-  const keep=curDocs.filter(d=>!nw.some(n=>n.name===d.name));
+  const keep=baseDocs().filter(d=>!nw.some(n=>n.name===d.name));
   await ingest([...keep,...nw]);
   $('#file').value='';
 }
@@ -2453,7 +2509,7 @@ $('#wkadd').onclick=async()=>{
     }
     if(!docs.length){wkS.textContent='Those pages had no readable text.';return;}
     wkQueue.clear();wkR.querySelectorAll('.wm.on').forEach(x=>x.classList.remove('on'));wkUpd();
-    const keep=curDocs.filter(d=>!docs.some(n=>n.name===d.name));
+    const keep=baseDocs().filter(d=>!docs.some(n=>n.name===d.name));
     wkS.textContent='Building field\u2026';
     const ok=await ingest([...keep,...docs]);
     wkS.textContent=ok?`Added ${docs.length} page${docs.length>1?'s':''}. Search again to add more.`:'Not enough repeated concepts in those pages.';
@@ -2504,7 +2560,7 @@ async function wikiCommand(w){
     vnote('Wikipedia: looking up \u201c'+w.topic+'\u201d\u2026',0);
     let pg;try{pg=await wikiFetch(w.topic);}catch(e){vnote('Wikipedia request failed: '+(e&&e.message||e),6000);return false;}
     if(!pg){vnote('No Wikipedia page found for \u201c'+w.topic+'\u201d.',6000);return false;}
-    const name='Wikipedia: '+pg.title,keep=curDocs.filter(d=>d.name!==name);
+    const name='Wikipedia: '+pg.title,keep=baseDocs().filter(d=>d.name!==name);
     if(w.how&&keep.length&&w.how!==fieldMode){fieldMode=w.how;try{localStorage.setItem('cf.fieldMode',fieldMode);}catch(e){}}
     vnote('Building \u201c'+pg.title+'\u201d'+(pg.capped?' (long page trimmed)':'')+'\u2026',0);
     const ok=await ingest([...keep,{name,text:pg.text}]);
@@ -4058,7 +4114,7 @@ $hb.addEventListener('click',async e=>{
   if(c&&!nodes.length&&!curCorpus){if(await ingest(c.docs,{id:c.id,noSave:true}))stat(summary()+' Restored from your last session.');}
   else if(!nodes.length&&!curCorpus&&!ingesting){
     
-    const rec=corpora.slice().sort((a,b)=>b.ts-a.ts)[0];
+    const Ls=corpora.slice().sort((a,b)=>b.ts-a.ts),rec=Ls.find(c=>c.id!==DEMO_ID)||Ls[0];
     if(rec){if(await ingest(rec.docs,{id:rec.id,noSave:true}))stat(summary()+' Restored your most recent text.');}
     else await loadDemo(true);
   }
@@ -4122,7 +4178,7 @@ function unloadField(){
   if(pts){const g=[pts.geometry,lines.geometry,dots.geometry];G.remove(pts,lines,dots);pts=lines=dots=null;slowDispose(g);}
   labelGroup.clear();slowDispose([...labelCache.values()]);labelCache.clear();lodClear();
   $ps.hidden=true;PS.seq++;
-  $q.value='';$('#file').value='';updateInfo();stat('Attach one or more files to build the field.');
+  $q.value='';$('#file').value='';updateInfo();playSync();stat('Attach one or more files to build the field.');
 }
 async function clearCurrent(){
   // UI first (instant), storage cleanup afterwards in a single background transaction
@@ -4771,7 +4827,7 @@ async function xrWkAdd(){
     }
     if(!docs.length){ wbStatus = 'Those pages had no readable text'; wbLoading = false; wbD = true; return; }
     wkQueue.clear();
-    const keep = curDocs.filter(d => !docs.some(n => n.name === d.name));
+    const keep = baseDocs().filter(d => !docs.some(n => n.name === d.name));
     wbStatus = 'Building conceptual field…';
     wbD = true;
     const ok = await ingest([...keep, ...docs]);
@@ -5047,7 +5103,7 @@ function colUpd(dt){
   applyState(true);
 }
 (()=>{const SKIP='button,input,textarea,select,a,label,summary,.wm,.chip,li,.dn,.lk,pre,.pc,#psb,.sr';
- ['info','hist','set','wk','hint','qf','ps','ur'].forEach(id=>{const el=document.getElementById(id);if(!el)return;let d=null;
+ ['info','hist','set','wk','hint','qf','ps','ur','pt'].forEach(id=>{const el=document.getElementById(id);if(!el)return;let d=null;
   el.addEventListener('pointerdown',e=>{if(e.button||e.target.closest(SKIP))return;const t=e.target;if(t.scrollHeight>t.clientHeight&&e.offsetX>=t.clientWidth)return;
    e.preventDefault();const r=el.getBoundingClientRect();d={x:e.clientX-r.left,y:e.clientY-r.top,w:r.width,h:r.height,on:false,sx:e.clientX,sy:e.clientY};});
   el.addEventListener('pointermove',e=>{if(!d)return;
@@ -5101,6 +5157,7 @@ async function showPassages(sp,off){
   let r;try{r=await ENG.call({t:'passages',ids:sp.ids,w:sp.w,must:sp.must,need:sp.need,all:sp.all,R:sp.R,cap:60,full:true,off:off|0,qg:sp.qg,cut:sp.cut});}
   catch(e){if(my===PS.seq)$('#psm').textContent='Passage search failed: '+(e&&e.message||e);return;}
   if(my!==PS.seq||ep!==EPOCH)return;
+  r.ps=r.ps.filter((p,i)=>!r.ps.some((q,j)=>j!==i&&q.doc===p.doc&&(q.text.length>p.text.length||(q.text.length===p.text.length&&j<i))&&q.text.includes(p.text)));
   PS.res=r;paintPass();
   $('#psb').scrollTop=0;
   if(renderer.xr.isPresenting){psXR=true;rdD=true;drawRdIfDirty();}
@@ -5251,10 +5308,29 @@ async function fetchDoc(u){
   throw new Error(err&&err.message==='Failed to fetch'?'blocked by the site (CORS)':(err&&err.message||'failed'));
 }
 const $ur=$('#ur');
+const $pt=$('#pt');
+const openPaste=()=>{$pt.hidden=false;$('#ptt').focus();};
+$('#ptx').onclick=()=>{$pt.hidden=true;};
+$('#ptgo').onclick=async()=>{
+  const t=$('#ptt').value.trim(),st=$('#pts');
+  if(t.length<40){st.textContent='Paste at least 40 characters.';return;}
+  if(ingesting){st.textContent='The field is still building. Try again in a moment.';return;}
+  const nm=$('#ptn').value.trim()||('Pasted text '+new Date().toLocaleTimeString());
+  st.textContent='Building field…';
+  const ok=await ingest([...baseDocs().filter(d=>d.name!==nm),{name:nm,text:t}]);
+  st.textContent=ok?'Added.':'Not enough repeated concepts in that text.';
+  if(ok){$('#ptt').value='';$('#ptn').value='';$pt.hidden=true;}
+};
+addEventListener('paste',e=>{
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test((e.target&&e.target.tagName)||''))return;
+  const tx=(e.clipboardData&&e.clipboardData.getData('text'))||'';
+  if(tx.trim().length<200)return;
+  e.preventDefault();openPaste();$('#ptt').value=tx;
+});
 const openUrl=()=>{$ur.hidden=false;$('#urt').focus();};
 const $am=$('#addm');
 $('#attl').onclick=e=>{e.stopPropagation();$am.hidden=!$am.hidden;};
-$am.addEventListener('click',e=>{const b=e.target.closest('button[data-a]');if(!b)return;$am.hidden=true;({file:()=>$('#file').click(),wiki:openWiki,url:openUrl,demo:()=>loadDemo()})[b.dataset.a]();});
+$am.addEventListener('click',e=>{const b=e.target.closest('button[data-a]');if(!b)return;$am.hidden=true;({file:()=>$('#file').click(),wiki:openWiki,paste:openPaste,url:openUrl,demo:()=>loadDemo()})[b.dataset.a]();});
 document.addEventListener('click',e=>{if(!$am.hidden&&!e.target.closest('#addm')&&!e.target.closest('#attl'))$am.hidden=true;});
 addEventListener('keydown',e=>{if(e.key==='Escape')$am.hidden=true;});
 $('#urx').onclick=()=>{$ur.hidden=true;};
@@ -5268,7 +5344,7 @@ $('#urgo').onclick=async()=>{
   }
   if(!docs.length){st.textContent='Nothing could be loaded: '+fails.join('; ');return;}
   st.textContent='Building field\u2026';
-  const ok=await ingest([...curDocs.filter(d=>!docs.some(n=>n.name===d.name)),...docs]);
+  const ok=await ingest([...baseDocs().filter(d=>!docs.some(n=>n.name===d.name)),...docs]);
   st.textContent=(ok?`Added ${docs.length} page${docs.length>1?'s':''}.`:'Not enough repeated concepts in those pages.')+(fails.length?' Could not load: '+fails.join('; '):'');
   if(ok)$('#urt').value='';
 };
@@ -5309,7 +5385,7 @@ function edgeBudget(){
   if(cnt!==lastLN){lastLN=cnt;lines.geometry.setDrawRange(0,cnt);}
 }
 ['pointerdown','pointermove','wheel','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>{lastAct=performance.now();},{passive:true}));
-const perfBusy=t=>t-lastAct<4000||U.uK.value>.01||thinking();
+const perfBusy=t=>(PLAY.on&&!PLAY.paused)||t-lastAct<4000||U.uK.value>.01||thinking();
 let pAcc=0,pN=0,pUp=0;
 function perfSample(r){
   if(r>.25)return;pAcc+=r;pN++;if(pAcc<1.5)return;const avg=pAcc/pN;pAcc=0;pN=0;
@@ -5332,7 +5408,7 @@ renderer.setAnimationLoop((t,frame)=>{
   const raw=clock.getDelta(),dt=Math.min(raw,.05);
   if(!xr){if(!idle)perfSample(raw);edgeBudget();}U.uT.value+=dt;
   {const tk=thinking()?1:0;if(tk&&!pulseOn)U.uP0.value=U.uT.value;pulseOn=tk;U.uK.value+=(tk-U.uK.value)*Math.min(1,dt*(tk?4:2.5));if(U.uK.value<.005&&!tk)U.uK.value=0;}
-  G.updateMatrixWorld(true);voiceStep(dt);voiceVis(dt);platform();lodLabels(dt);colUpdate(dt);
+  G.updateMatrixWorld(true);voiceStep(dt);voiceVis(dt);platform();lodLabels(dt);colUpdate(dt);playStep(dt);
   if(needCenter&&renderer.xr.isPresenting&&frame){const xc=renderer.xr.getCamera(),o=xc.getWorldPosition(new THREE.Vector3()),d=xc.getWorldDirection(new THREE.Vector3());d.y=0;if(d.lengthSq()>1e-4){d.normalize();G.scale.setScalar(centerS);const dist=arMode?.7:.75;G.position.set(o.x+d.x*dist,o.y-.1,o.z+d.z*dist);G.quaternion.identity();needCenter=false;}}
   if(renderer.xr.isPresenting){xrPerf(raw);xrWatch(dt);placeKB(dt);gestures(dt);sticks(dt);if(arMode&&frame){arPersist(frame,dt);arFrame(frame);}drawKBIfDirty();drawRdIfDirty();drawSbIfDirty();drawWbIfDirty();drawFbIfDirty();}
   else{
@@ -5343,11 +5419,15 @@ renderer.setAnimationLoop((t,frame)=>{
       if(keys.KeyW)m.add(v);if(keys.KeyS)m.sub(v);if(keys.KeyD)m.add(r);if(keys.KeyA)m.sub(r);if(keys.KeyE)m.y+=1;if(keys.KeyQ)m.y-=1;
       m.multiplyScalar(sp);camera.position.add(m);controls.target.add(m);
     }
-    controls.update();
+    playFly(dt);controls.update();
   }
   renderer.render(scene,camera);
 });
 
+$('#plbtn').onclick=playToggle;
+$('#plst').onclick=playStop;
+$('#plsp').onclick=()=>{PLAY.speed=SPDS[(SPDS.indexOf(PLAY.speed)+1)%SPDS.length];playUI();};
+$('#pltl').oninput=e=>{if(!PLAY.seq.length)return;if(!PLAY.on)playBegin();PLAY.paused=true;PLAY.idx=Math.max(0,Math.min(PLAY.seq.length-1,+e.target.value|0));PLAY.cur=PLAY.seq[PLAY.idx];applyState();};
 const fmUni=$('#fm-uni'),fmSep=$('#fm-sep');
 if(fmUni)fmUni.onclick=()=>setFieldMode('unified');
 if(fmSep)fmSep.onclick=()=>setFieldMode('separated');
