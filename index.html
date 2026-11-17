@@ -4,11 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Concept Field</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <style>
 :root{--cy:#5df0ff;--am:#ffb347;--bg:#01040a;--ink:#d6f6ff}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;overflow:hidden}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:'Inter','SF Pro Display','Segoe UI',system-ui,-apple-system,Roboto,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
 canvas{display:block}
 [hidden]{display:none!important}
 .vig{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,8,20,.75)),repeating-linear-gradient(0deg,rgba(93,240,255,.03) 0 1px,transparent 1px 3px)}
@@ -295,7 +297,7 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 </div>
 <div id="rd" class="panel" hidden><div id="rdh"><button id="rdp" title="Older reading">&#8249;</button><span id="rdn">0/0</span><button id="rdnx" title="Newer reading">&#8250;</button><span id="rdt"></span><button id="rdst" title="Stop generating" hidden>&#9632; Stop</button><button id="rdx" title="Close">&#10005;</button></div><div id="rdb"></div><div id="rdm"></div><form id="rdf"><input id="rdq" type="text" placeholder="Ask a follow-up within this context" autocomplete="off"><button type="submit" id="rds">Send</button></form></div>
 <button id="helpbtn" aria-label="Help" aria-expanded="false" title="Help">?</button>
-<div id="hint" class="panel" hidden>Desktop: drag to orbit, wheel to zoom, WASD/QE to fly, click concepts to select several (selected words pulse; click again to deselect). Search skips common filler words, while keeping recognized phrases and negation. In AR, a query bar, keyboard and a results box float in view (point and pinch or trigger the bar to type). The keyboard's mic key dictates into the bar with Whisper: press it, speak, press it again, then press W for Wikipedia or Ask. Or open your palm (the orb) or tap the mic and say &ldquo;Wikipedia: your topic&rdquo; to pull that page in; add &ldquo;as its own sphere&rdquo; or &ldquo;into the unified space&rdquo; to choose where it lands. Mixed reality (Quest 3): press Enter mixed reality to see your room through the passthrough cameras. Pinch and drag anywhere to carry the data sphere (the right stick spins it), pinch with both hands and spread to resize and twist it, quick pinch on a word to select it (or tap a selected word chip in the list box to deselect it); select several to see how they connect, and pinch a selected word again to deselect it. Two hands pushing out pushes the orbs away; motioning forward pulls them toward you. Pointing at words in the word list highlights them with a SELECT cue for easy clicking. The field remembers where you put it between mixed-reality sessions. A adds the selected concept to the query, B clears. Press Place on the panel to snap the field onto a wall, table or floor. In AR the top buttons are: + paste copied text, \u21C4 switch saved text, W fetch Wikipedia for the typed topic, \u00B6 source passages, and the gear toggles the LLM. Brighter nodes are more frequent words. Zoom out and neighbouring words collapse into the most dominant word of their area (bigger dot, labelled); zoom in and they expand again. The field learns as you use it: words you query or select together are drawn a little closer each time, and the arrangement is saved per text. Line colour is based on how often the words at each end occur in your text: rare words are violet and blue, then green and yellow, and the most frequent words are orange and red, so each line blends between its two ends. The results box scrolls: thumbstick while pointing at it, or (hand tracking) touch it with your index fingertip and slide up or down like a touchscreen, with a flick for momentum; tap a row to select that word. Source passages: select a concept (or click a link line, or press the ¶ button on a row) to see the sentences where the words occur, with the document name; how many are shown adapts to how strongly the words resonate. Voice: hold out an open palm (palm up or toward you) steadily for about three quarters of a second in mixed reality with hand tracking. An orb appears in your hand with lightning arcing to the network; speak, then close your hand or pull it away to send. Whisper runs in your browser (the first use downloads a small model). On desktop, or with controllers, use the mic button. Attach PDF, Word or HTML files, or fetch URLs. Wikipedia takes several voices at once: &ldquo;Wikipedia Nikola Tesla and Aleister Crowley and Edgar Cayce&rdquo; makes one orb each. In Separated Orbs, pinch and drag an orb in mixed reality or drag its label on desktop to move it independently. The gold threads between orbs are labelled with words that are not in your query but sit beside it in more than one file. In AR the panels stay where they are until you turn your head more than 60&deg; either way, then swing round to face you.</div>
+<div id="hint" class="panel" hidden>Desktop: drag to orbit, wheel to zoom, WASD/QE to fly, click concepts to select several (selected words pulse; click again to deselect). Search skips common filler words, while keeping recognized phrases and negation. In AR, a query bar, keyboard and a results box float in view (point and pinch or trigger the bar to type). The keyboard's mic key dictates into the bar with Whisper: press it, speak, press it again, then press W for Wikipedia or Ask. Or open your palm (the orb) or tap the mic and say &ldquo;Wikipedia: your topic&rdquo; to pull that page in; add &ldquo;as its own sphere&rdquo; or &ldquo;into the unified space&rdquo; to choose where it lands. Mixed reality (Quest 3): press Enter mixed reality to see your room through the passthrough cameras. Pinch and drag anywhere to carry the data sphere (the right stick spins it), pinch with both hands and spread to resize and twist it, quick pinch on a word to select it (or tap a selected word chip in the list box to deselect it); select several to see how they connect, and pinch a selected word again to deselect it. Two hands pushing out pushes the orbs away; motioning forward pulls them toward you. Pointing at words in the word list highlights them with a SELECT cue for easy clicking. The field remembers where you put it between mixed-reality sessions. A adds the selected concept to the query, B clears. Press Place on the panel to snap the field onto a wall, table or floor. In AR the top buttons are: + paste copied text, \u21C4 switch saved text, W fetch Wikipedia for the typed topic, \u00B6 source passages, and the gear toggles the LLM. Brighter nodes are more frequent words. Zoom out and neighbouring words collapse into the most dominant word of their area (bigger dot, labelled); zoom in and they expand again. The field learns as you use it: words you query or select together are drawn a little closer each time, and the arrangement is saved per text. Line colour is based on how often the words at each end occur in your text: rare words are violet and blue, then green and yellow, and the most frequent words are orange and red, so each line blends between its two ends. The results box scrolls: thumbstick while pointing at it, or (hand tracking) touch it with your index fingertip and slide up or down like a touchscreen, with a flick for momentum; tap a row to select that word. Source passages: select a concept (or click a link line, or press the ¶ button on a row) to see the sentences where the words occur, with the document name; how many are shown adapts to how strongly the words resonate. Voice: hold out an open palm (palm up or toward you) steadily for about three quarters of a second in mixed reality with hand tracking. An orb appears in your hand with lightning arcing to the network; speak, then close your hand or pull it away to send. Whisper runs in your browser (the first use downloads a small model). On desktop, or with controllers, use the mic button. Attach PDF, Word or HTML files, or fetch URLs. Wikipedia takes several voices at once: &ldquo;Wikipedia Nikola Tesla and Aleister Crowley and Edgar Cayce&rdquo; makes one orb each. In Separated Orbs each orb is fully independent: pinch and drag an orb in mixed reality, or on desktop drag any of its words or its label to move it anywhere; Shift+wheel over an orb resizes it, and zooming toward an orb expands its collapsed words on their own. The gold threads between orbs are labelled with words that are not in your query but sit beside it in more than one file. In AR the panels stay where they are until you turn your head more than 60&deg; either way, then swing round to face you.</div>
 <script type="text/plain" id="engine-src">
 
 'use strict';
@@ -1692,7 +1694,7 @@ async function setFieldMode(mode){
 let FS=1,VS=1;try{const v=parseFloat(localStorage.getItem('cf.fs'));if(isFinite(v))FS=Math.max(.8,Math.min(1.6,v));}catch(e){}
 let nodes=[],edges=[],word2i=new Map(),sel=-1,Q=null;const SS=new Set();let selV=0;
 let curDocs=[],curCorpus=null,replaying=false,hist=[],corpora=[];
-const col={lv:null,f:0,n:-1,hide:null,cnt:null,t:0};
+const col={lv:null,f:0,n:-1,hide:null,cnt:null,t:0,sk:null};
 const FV=4,SV='sw2';var fsT=0,PRE=null;
 let HLOG=[];
 function saveField(){
@@ -1768,7 +1770,7 @@ function getDocColor(d){ return DOC_PALETTE[(d||0)%DOC_PALETTE.length]; }
 
 let nL=null,nHW=null,wvPend=false,wvT=0;
 const _mc=document.createElement('canvas').getContext('2d');
-function wordHW(n){if(n.hw===undefined){_mc.font='600 133px system-ui,-apple-system,sans-serif';const tw=_mc.measureText(n.word).width;const effW=Math.min(tw,920);n.hw=(effW/1024)*.2*FS/2+.008;}return n.hw;}
+function wordHW(n){if(n.hw===undefined){_mc.font='600 133px Inter,system-ui,-apple-system,sans-serif';const tw=_mc.measureText(n.word).width;const effW=Math.min(tw,920);n.hw=(effW/1024)*.2*FS/2+.008;}return n.hw;}
 function refreshWV(){
   if(!pts||!nHW||nHW.length!==nodes.length)return;
   nHW.fill(0);nL.fill(0);
@@ -1785,7 +1787,7 @@ const crossLabelsGroup=new THREE.Group();crossGroup.add(crossLabelsGroup);
 const orbHaloGroup=new THREE.Group();G.add(orbHaloGroup);
 const divergenceGroup=new THREE.Group();G.add(divergenceGroup);
 
-let crossMode='overlap'; 
+let crossMode='overlap';let showThreads=true;try{showThreads=localStorage.getItem('cf.threads')!=='0';}catch(e){}
 
 const crossLineMat=new THREE.ShaderMaterial({
   uniforms:U,transparent:true,depthWrite:false,...ADD,
@@ -1915,7 +1917,7 @@ function updateCrossVisuals(){
   if(crossDotsMesh){crossGroup.remove(crossDotsMesh);crossDotsMesh.geometry.dispose();crossDotsMesh=null;}
   crossLabelsGroup.clear();
   updateDivergenceVisuals();
-  if(fieldMode!=='separated'||!Q||!Q.crossBridges||!Q.crossBridges.length){
+  if(!showThreads||fieldMode!=='separated'||!Q||!Q.crossBridges||!Q.crossBridges.length){
     crossGroup.visible=false;orbHaloGroup.visible=fieldMode==='separated'&&orbs.length>1;return;
   }
   crossGroup.visible=true;orbHaloGroup.visible=true;
@@ -1972,9 +1974,9 @@ function updateCrossVisuals(){
     ctx.textBaseline='middle';
     
     const labelText=isDirect?b.wordA:`${b.wordA} \u2194 ${b.wordB}`;
-    let cfs=isDirect?92:76;ctx.font='700 '+cfs+'px system-ui,-apple-system,sans-serif';
+    let cfs=isDirect?92:76;ctx.font='700 '+cfs+'px Inter,system-ui,-apple-system,sans-serif';
     let ctw=ctx.measureText(labelText).width;
-    if(ctw>920){cfs=Math.max(36,Math.floor(cfs*(920/ctw)));ctx.font='700 '+cfs+'px system-ui,-apple-system,sans-serif';}
+    if(ctw>920){cfs=Math.max(36,Math.floor(cfs*(920/ctw)));ctx.font='700 '+cfs+'px Inter,system-ui,-apple-system,sans-serif';}
     ctx.fillText(labelText,512,128);
     const tx=new THREE.CanvasTexture(c);tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
     const sm=new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false,blending:THREE.AdditiveBlending});
@@ -1994,14 +1996,14 @@ function updateOrbHalos(){
     const C=orb.center,R=orb.radius||1.25,grp=new THREE.Group();grp.position.set(C[0],C[1],C[2]);
     const orbColor=getDocColor(d);
     const c=document.createElement('canvas');c.width=1024;c.height=256;const ctx=c.getContext('2d');
-    ctx.font='600 70px system-ui,-apple-system,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font='600 70px Inter,system-ui,-apple-system,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.shadowColor=orbColor.hex;ctx.shadowBlur=24;ctx.fillStyle='#ffffff';
     let lt=(orb.name||('File '+(d+1))).replace(/^Demo:\s*/i,'');
-    let lfs=70;ctx.font='600 '+lfs+'px system-ui,-apple-system,sans-serif';
+    let lfs=70;ctx.font='600 '+lfs+'px Inter,system-ui,-apple-system,sans-serif';
     let ltw=ctx.measureText('\u2725 '+lt).width;
-    if(ltw>920){lfs=Math.max(36,Math.floor(lfs*(920/ltw)));ctx.font='600 '+lfs+'px system-ui,-apple-system,sans-serif';}
+    if(ltw>920){lfs=Math.max(36,Math.floor(lfs*(920/ltw)));ctx.font='600 '+lfs+'px Inter,system-ui,-apple-system,sans-serif';}
     ctx.fillText('\u2725 '+lt,512,100);
-    ctx.font='600 52px system-ui,-apple-system,sans-serif';ctx.fillStyle=orbColor.hex;
+    ctx.font='600 52px Inter,system-ui,-apple-system,sans-serif';ctx.fillStyle=orbColor.hex;
     ctx.fillText(`${orb.nodeCount} concepts \u00b7 drag to move`,512,180);
     const tx=new THREE.CanvasTexture(c);tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
     const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false,blending:THREE.AdditiveBlending}));
@@ -2041,7 +2043,7 @@ function restoreOrbPlacements(placements){
   });
 }
 function updateMovedOrbs(){
-  orbMoved=true;crossGroup.visible=false;updateGeom();
+  col.sk=null;orbMoved=true;crossGroup.visible=false;updateGeom();
 }
 function moveOrb(d,c){
   const orb=orbs[d];
@@ -2152,9 +2154,9 @@ function updateDivergenceVisuals(){
     ctx.fillStyle='#01050a';
     ctx.textAlign='center';
     ctx.textBaseline='middle';
-    let dfs=86;ctx.font='800 '+dfs+'px system-ui,-apple-system,sans-serif';
+    let dfs=86;ctx.font='800 '+dfs+'px Inter,system-ui,-apple-system,sans-serif';
     let dtw=ctx.measureText(spot.word).width;
-    if(dtw>840){dfs=Math.max(38,Math.floor(dfs*(840/dtw)));ctx.font='800 '+dfs+'px system-ui,-apple-system,sans-serif';}
+    if(dtw>840){dfs=Math.max(38,Math.floor(dfs*(840/dtw)));ctx.font='800 '+dfs+'px Inter,system-ui,-apple-system,sans-serif';}
     ctx.fillText(spot.word,512,128);
     const tx=new THREE.CanvasTexture(c);tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
     const sm=new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false});
@@ -2173,9 +2175,9 @@ function label(i,kind,projection){
   if(!s){
     const word=projection?projection.word:nodes[i].word;
     const c=document.createElement('canvas');c.width=1024;c.height=256;const x=c.getContext('2d');
-    let fs=133;x.font='600 '+fs+'px system-ui,-apple-system,sans-serif';
+    let fs=133;x.font='600 '+fs+'px Inter,system-ui,-apple-system,sans-serif';
     let tw=x.measureText(word).width;
-    if(tw>920){fs=Math.max(48,Math.floor(fs*(920/tw)));x.font='600 '+fs+'px system-ui,-apple-system,sans-serif';}
+    if(tw>920){fs=Math.max(48,Math.floor(fs*(920/tw)));x.font='600 '+fs+'px Inter,system-ui,-apple-system,sans-serif';}
     x.textAlign='center';x.textBaseline='middle';
     x.shadowColor=kind===1?'#ffb347':'#5df0ff';x.shadowBlur=30;x.fillStyle=kind===1?'#ffe2a8':'#d6fbff';x.fillText(word,512,128);
     const tx=new THREE.CanvasTexture(c);tx.anisotropy=renderer.capabilities.getMaxAnisotropy();tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
@@ -2279,7 +2281,7 @@ function applyState(quick){
       topNodes.slice(0,20).forEach(i=>labs.push([i,0]));
     }
   }
-  if(col.hide&&col.hide.length===N&&!hasCtx()&&!isSep){
+  if(col.hide&&col.hide.length===N&&!hasCtx()){
     for(let i=0;i<N;i++){
       if(col.hide[i]){nI[i]*=.1;ea[i]=.25;}
       else if(col.cnt[i]>1){nI[i]=Math.max(nI[i],.75+.08*Math.min(5,col.cnt[i]));ea[i]=1;labs.push([i,0]);}
@@ -2297,7 +2299,7 @@ function applyState(quick){
   const divShownSet=div?new Set(div.topDivergent.slice(0,16).map(d=>d.i)):null;
   const hid=new Uint8Array(N);let newest=-1;
   const pointIndex=pts.geometry.index;let pointCount=0;
-  visible=[];const colOn=!isSep&&!!(col.hide&&col.hide.length===N&&!hasCtx());
+  visible=[];const colOn=!!(col.hide&&col.hide.length===N&&!hasCtx());
   for(let i=0;i<N;i++){
     pointIndex.array[pointCount++]=i;
     nA[i]=nI[i];nP[i]=SS.has(i)?1:0;nF[i]=(SS.size&&(sm||nc[i]>=2))?(nc[i]>=2?1:0):(Q&&Q.A?(nc[i]===1?1:0):.3+.7*ni[i]);nS[i]=.013+.055*ni[i]+(nc[i]===2?.03:nc[i]===1?.012*nI[i]:0);
@@ -2533,8 +2535,9 @@ function renderDocs(){
         <button type="button" class="${fieldMode==='separated'?'active':''}" data-fm="separated">Separated Orbs</button>
       </div>
     </div>
+    ${fieldMode==='separated'?`<div class="fmode-row"><span>Overlap threads</span><div class="fmode-toggle"><button type="button" class="${showThreads?'active':''}" data-th="1">On</button><button type="button" class="${showThreads?'':'active'}" data-th="0">Off</button></div></div>`:''}
     <div class="hs" style="padding:4px 8px 6px;margin:0">
-      ${fieldMode==='separated'?'Each file has its own orb. Queries find and draw cross-field overlap connections.':'All attached texts form a single unified conceptual field (default).'}
+      ${fieldMode==='separated'?'Each orb is independent: drag any word or label to move it, Shift+wheel to resize it, zoom toward it to expand it.':'All attached texts form a single unified conceptual field (default).'}
     </div>
   `:'';
   docsEl.innerHTML=`<div class="dh"><span>${curDocs.length} attached text${curDocs.length===1?'':'s'}</span>${curDocs.length>1?'<button id="ctx" title="Remove all attached text and its saved copy">\u2715 Clear All</button>':''}<span>${curDocs.reduce((a,d)=>a+wc(d.text),0).toLocaleString()} words</span></div>`+
@@ -2545,6 +2548,8 @@ function renderDocs(){
 }
 $('#dcnt').onclick=()=>{docsOpen=!docsOpen;renderDocs();};
 docsEl.addEventListener('click',async e=>{
+  const thb=e.target.closest('button[data-th]');
+  if(thb){showThreads=thb.dataset.th==='1';try{localStorage.setItem('cf.threads',showThreads?'1':'0');}catch(_){}updateCrossVisuals();renderDocs();return;}
   const fmt=e.target.closest('button[data-fm]');
   if(fmt){setFieldMode(fmt.dataset.fm);renderDocs();return;}
   if(e.target.closest('#ctx')){ctxClear();return;}
@@ -3197,7 +3202,7 @@ const kc=document.createElement('canvas');kc.width=KW*PQ;kc.height=KH*PQ;
 const kctx=kc.getContext('2d'),ktex=new THREE.CanvasTexture(kc);ktex.colorSpace=THREE.SRGBColorSpace;ktex.anisotropy=8;
 const kb=new THREE.Mesh(new THREE.PlaneGeometry(KW/1000,KH/1000),new THREE.MeshBasicMaterial({map:ktex,transparent:true,depthTest:false}));
 kb.renderOrder=30;kb.visible=false;kb.frustumCulled=false;scene.add(kb);
-const IW=640,IH=600,HEAD=110,ROW=52,VIS=7,FNT='system-ui,-apple-system,sans-serif';
+const IW=640,IH=600,HEAD=110,ROW=52,VIS=7,FNT='Inter,system-ui,-apple-system,sans-serif';
 let HV=110,ibChips=[];const ic=document.createElement('canvas');ic.width=IW*PQ;ic.height=IH*PQ;
 const ictx=ic.getContext('2d'),itex=new THREE.CanvasTexture(ic);itex.colorSpace=THREE.SRGBColorSpace;itex.anisotropy=8;
 const ib=new THREE.Mesh(new THREE.PlaneGeometry(.4,.4*IH/IW),new THREE.MeshBasicMaterial({map:itex,transparent:true,depthTest:false}));
@@ -4015,6 +4020,32 @@ renderer.domElement.addEventListener('pointerup',e=>{
   if(!ray.ray.intersectPlane(pl,hp))return;const l=G.worldToLocal(hp).add(od.g);moveOrb(od.d,[l.x,l.y,l.z]);lastAct=performance.now();});
  const end=()=>{if(!od)return;od=null;controls.enabled=!renderer.xr.isPresenting;orbFinish();};
  addEventListener('pointerup',end);addEventListener('pointercancel',end);}
+{const pl=new THREE.Plane(),ndc=e=>new THREE.Vector2(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);let nd=null;
+ renderer.domElement.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='touch'||e.button||fieldMode!=='separated'||orbs.length<2||!pts)return;
+  ray.setFromCamera(ndc(e),camera);
+  const k=pick(ray.ray.origin,ray.ray.direction,.02);if(k<0)return;
+  const d=nodes[k].doc||0,orb=orbs[d];if(!orb)return;
+  const cw=G.localToWorld(new THREE.Vector3(orb.center[0],orb.center[1],orb.center[2])),nrm=camera.getWorldDirection(new THREE.Vector3());
+  pl.setFromNormalAndCoplanarPoint(nrm,cw);const hp=new THREE.Vector3();if(!ray.ray.intersectPlane(pl,hp))return;
+  nd={d,x:e.clientX,y:e.clientY,on:false,g:G.worldToLocal(cw.clone()).sub(G.worldToLocal(hp.clone()))};
+  down=[e.clientX,e.clientY];controls.enabled=false;e.stopImmediatePropagation();
+ },true);
+ addEventListener('pointermove',e=>{if(!nd)return;
+  if(!nd.on){if(Math.hypot(e.clientX-nd.x,e.clientY-nd.y)<5)return;nd.on=true;}
+  ray.setFromCamera(ndc(e),camera);const hp=new THREE.Vector3();if(!ray.ray.intersectPlane(pl,hp))return;
+  const l=G.worldToLocal(hp).add(nd.g);moveOrb(nd.d,[l.x,l.y,l.z]);lastAct=performance.now();});
+ const end=()=>{if(!nd)return;nd=null;controls.enabled=!renderer.xr.isPresenting;orbFinish();};
+ addEventListener('pointerup',end);addEventListener('pointercancel',end);
+ renderer.domElement.addEventListener('wheel',e=>{
+  if(!e.shiftKey||fieldMode!=='separated'||orbs.length<2)return;
+  ray.setFromCamera(ndc(e),camera);
+  const k=pick(ray.ray.origin,ray.ray.direction,.04);let d=k>=0?(nodes[k].doc||0):-1;
+  if(d<0){const h=orbLabels.length?ray.intersectObjects(orbLabels,false)[0]:null;if(h)d=h.object.userData.orbIdx;}
+  if(d<0)return;
+  e.preventDefault();e.stopImmediatePropagation();
+  if(resizeOrb(d,(orbs[d].scale||1)*Math.exp(-e.deltaY*.0015))){updateMovedOrbs();clearTimeout(orbFinish.t);orbFinish.t=setTimeout(orbFinish,160);}
+ },{capture:true,passive:false});}
 addEventListener('keydown',e=>{if(!/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))keys[e.code]=true;});
 addEventListener('keyup',e=>keys[e.code]=false);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
@@ -4497,9 +4528,9 @@ const lodGroup=new THREE.Group();G.add(lodGroup);
 const lodMap=new Map(),_cl=new THREE.Vector3(),_cw=new THREE.Vector3();
 function lodSprite(i){
   const c=document.createElement('canvas');c.width=1024;c.height=256;const x=c.getContext('2d');
-  let fs=133;x.font='600 '+fs+'px system-ui,-apple-system,sans-serif';
+  let fs=133;x.font='600 '+fs+'px Inter,system-ui,-apple-system,sans-serif';
   let tw=x.measureText(nodes[i].word).width;
-  if(tw>920){fs=Math.max(48,Math.floor(fs*(920/tw)));x.font='600 '+fs+'px system-ui,-apple-system,sans-serif';}
+  if(tw>920){fs=Math.max(48,Math.floor(fs*(920/tw)));x.font='600 '+fs+'px Inter,system-ui,-apple-system,sans-serif';}
   x.textAlign='center';x.textBaseline='middle';
   x.shadowColor='#5df0ff';x.shadowBlur=24;x.fillStyle='#d6fbff';x.fillText(nodes[i].word,512,128);
   const tx=new THREE.CanvasTexture(c);tx.anisotropy=renderer.capabilities.getMaxAnisotropy();tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
@@ -5448,12 +5479,31 @@ function colBuild(size){
 function colUpdate(dt){
   try{colUpd(dt);}catch(err){console.warn(err);col.hide=null;col.lv=-1;col.n=nodes.length;}
 }
+function colBuildSep(sizes){
+  const N=nodes.length,hide=new Uint8Array(N),cnt=new Uint16Array(N),reps=orbs.map(()=>[]);
+  const ord=[...Array(N).keys()].sort((a,b)=>nodes[b].score-nodes[a].score);
+  for(const i of ord){const n=nodes[i],d=n.doc||0,size=sizes[d]||0,R=reps[d];if(!R)continue;
+    if(!size){R.push(i);cnt[i]=1;continue;}
+    const r2=size*size;let h=-1;
+    for(const j of R){const m=nodes[j],dx=n.x-m.x,dy=n.y-m.y,dz=n.z-m.z;if(dx*dx+dy*dy+dz*dz<r2){h=j;break;}}
+    if(h<0){R.push(i);cnt[i]=1;}else{hide[i]=1;cnt[h]++;}}
+  col.hide=hide;col.cnt=cnt;
+}
 function colUpd(dt){
   if(!nodes.length)return;
   col.t+=dt;if(col.t<.1)return;col.t=0;
-  if(hasCtx()){if(col.lv!==null){col.lv=null;col.hide=null;}return;}
+  if(hasCtx()){if(col.lv!==null){col.lv=null;col.hide=null;col.sk=null;}return;}
   const cam=renderer.xr.isPresenting?renderer.xr.getCamera():camera;
   cam.getWorldPosition(_cw);_cl.copy(_cw);G.worldToLocal(_cl);
+  if(fieldMode==='separated'&&orbs.length>1){
+    const lvs=orbs.map(o=>{const dist=Math.hypot(_cl.x-o.center[0],_cl.y-o.center[1],_cl.z-o.center[2]),s=Math.max(0,dist-(o.radius||1.2)*.5)*.32,f=s<.12?-1:Math.log2(s/.12)*2;return f<0?-1:Math.round(f);});
+    const key=lvs.join(',')+'|'+orbs.map(o=>(o.scale||1).toFixed(2)).join(',')+'|'+nodes.length;
+    if(col.sk===key&&col.hide)return;
+    col.sk=key;col.lv=0;col.n=nodes.length;
+    if(lvs.every(l=>l<0))col.hide=null;else colBuildSep(lvs.map(l=>l<0?0:.12*Math.pow(2,l/2)));
+    applyState(true);return;
+  }
+  col.sk=null;
   const s=Math.max(0,_cl.length()-1)*.32,f=s<.12?-1:Math.log2(s/.12)*2;
   if(col.n===nodes.length&&col.lv!==null&&((f<0&&col.lv===-1)||(f>=0&&col.lv>=0&&Math.abs(f-col.lv)<.8)))return;
   col.lv=f<0?-1:Math.round(f);col.n=nodes.length;
@@ -5731,6 +5781,11 @@ Promise.resolve().then(()=>{
   if(nodes.length&&pts)applyState(true);
 }).catch(()=>{});
 
+try{document.fonts&&document.fonts.load('600 40px Inter').then(()=>document.fonts.load('700 40px Inter')).then(()=>{
+  labelCache.forEach(sp=>{sp.material.map.dispose();sp.material.dispose();});labelCache.clear();lodClear();
+  nodes.forEach(n=>{n.hw=undefined;});wvPend=true;kDirty=true;iDirty=true;rdD=true;
+  if(nodes.length&&pts){applyState(true);updateOrbHalos();updateCrossVisuals();}
+}).catch(()=>{});}catch(e){}
 const _ev=new THREE.Vector3();
 function edgeBudget(){
   if(!lines||(!lAmbN&&!lSpec))return;
