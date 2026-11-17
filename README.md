@@ -20,14 +20,14 @@ All heavy work runs in a Web Worker (the "engine") so the UI stays responsive.
 - **Filtering.** Stop words, structural words (numbers, time words, prepositions), contractions and junk are dropped from the drawn field, but they are not lost: every word you type in a query is still searched.
 - **Plural folding.** *waters* and *water* are merged into one concept.
 - **Phrase merging.** Word pairs that co-occur far more often than chance (pointwise mutual information) are fused into multi-word concepts, up to 5 words, over several passes.
-- **Idea boundaries.** A sliding-window similarity scan finds topic shifts in long texts, so association does not leak across unrelated sections.
+- **Idea boundaries.** Sentences are compared against the running profile of the topic so far (IDF-weighted word vectors). A sentence that is less cohesive with that profile than adjacent sentences typically are in this text starts a new topic. Scans never cross these boundaries, so association does not leak between topics, on short texts as well as long ones. Nothing about window size is fixed; the threshold comes from the text's own cohesion.
 
 ### 2. Association: which words belong together
 For each word, the engine scans forward and backward from every occurrence and accumulates weight for the words nearby.
 
 - Weight decays with distance. Crossing a sentence or paragraph break reduces it further; short paragraphs let association pass through more easily.
 - Scores are weighted by **IDF-like rarity** (inverse window frequency), damped for generic words, and compared against what chance would predict from each word's overall frequency. Words that co-occur *more than expected* score high.
-- **Rare-word floor.** A word appearing in at most 3 windows, but sitting close to the seed, is lifted to a minimum score (45% of the best) so distinctive terms are not buried by common ones. This is the `rareW` check in `leapScan`.
+- **Rare-word floor.** A word appearing in at most 3 windows, but occurring in the same topic segment as the seed (see Idea boundaries), is lifted to a minimum score (30% of the best) so distinctive terms are not buried by common ones. This is the `rareW` check in `leapScan`.
 - Direction is tracked, so each link knows whether A tends to precede B.
 
 ### 3. The field: layout
