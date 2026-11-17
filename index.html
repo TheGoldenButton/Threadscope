@@ -1658,15 +1658,10 @@ function updatePulse(textOnly){
 }
 let fieldMode=(()=>{try{const s=localStorage.getItem('cf.fieldMode');if(s==='separated'||s==='unified')return s;}catch(e){}return 'unified';})(),orbs=[],word2all=new Map();
 const setField=(r,preserveOrbPositions=false)=>{
-  const centers=preserveOrbPositions?new Map(orbs.map(orb=>[orb.name,orb.center])):null;
+  const placements=preserveOrbPositions?orbs.map(orbPlacement):null;
   nodes=r.nodes;edges=r.edges;orbs=r.orbs||[];
-  if(centers&&r.mode==='separated'){
-    for(const [index,orb] of orbs.entries()){
-      const center=centers.get(orb.name);
-      if(center)translateOrb(index,center);
-    }
-  }
   fieldMode=r.mode||fieldMode||'unified';
+  if(placements&&fieldMode==='separated')restoreOrbPlacements(placements);
   try{localStorage.setItem('cf.fieldMode',fieldMode);}catch(e){}
   word2i=new Map(nodes.map((n,i)=>[n.id,i]));
   word2all=new Map();
@@ -2020,13 +2015,40 @@ function translateOrb(d,c){
   for(const n of nodes)if(n.doc===d){n.x+=dx;n.y+=dy;n.z+=dz;n.orbCenter=c;}
   o.center=[c[0],c[1],c[2]];
 }
+function orbPlacement(orb){
+  return {name:orb.name,center:orb.center.slice(),scale:orb.scale||1};
+}
+function resizeOrb(index,scale){
+  const orb=orbs[index],previous=orb.scale||1;
+  scale=THREE.MathUtils.clamp(scale,.2,5);
+  if(Math.abs(previous-scale)<1e-6)return false;
+  const factor=scale/previous,[x,y,z]=orb.center;
+  for(const n of nodes)if(n.doc===orb.doc){
+    n.x=x+(n.x-x)*factor;n.y=y+(n.y-y)*factor;n.z=z+(n.z-z)*factor;
+  }
+  orb.scale=scale;orb.radius=(orb.radius||1.2)*factor;
+  const label=orbLabels[index];
+  if(label&&label.parent===orbHaloObjs[index])label.position.y=orb.radius+.45;
+  return true;
+}
+function restoreOrbPlacements(placements){
+  if(!Array.isArray(placements))return;
+  const byName=new Map(placements.filter(p=>p&&Array.isArray(p.center)&&p.center.length===3&&p.center.every(Number.isFinite)).map(p=>[p.name,p]));
+  orbs.forEach((orb,index)=>{
+    const saved=byName.get(orb.name);if(!saved)return;
+    translateOrb(index,saved.center);
+    if(Number.isFinite(saved.scale)&&saved.scale>0)resizeOrb(index,saved.scale);
+  });
+}
+function updateMovedOrbs(){
+  orbMoved=true;crossGroup.visible=false;updateGeom();
+}
 function moveOrb(d,c){
   const orb=orbs[d];
   if(!orb||Math.hypot(c[0]-orb.center[0],c[1]-orb.center[1],c[2]-orb.center[2])<1e-6)return;
   translateOrb(d,c);
   if(orbHaloObjs[d])orbHaloObjs[d].position.set(c[0],c[1],c[2]);
-  orbMoved=true;crossGroup.visible=false;
-  try{updateGeom();}catch(e){console.warn(e);}
+  updateMovedOrbs();
 }
 function orbFinish(){if(!orbMoved)return;orbMoved=false;updateCrossVisuals();}
 function orbAtWorld(p){
@@ -3417,7 +3439,7 @@ function keyAct(k,r){
   else if(k.act==='pass'){if(psXR){psXR=false;rdD=true;}else{const sp=curSpec()||(SS.size?specSel():null);if(!sp){xrNote='Select a word or ask a question first';hud();}else{psXR=true;PS.auto=true;rdD=true;showPassages(sp);}}}
   else if(k.act==='set')toggleSettingsXR();
   else if(k.act==='reset')resetReq=true;
-  else if(k.act==='help'){xrNote=fieldMode==='separated'?'Pinch and drag to move each orb independently. Tap a concept to select it.':'Pinch to select. Drag to move the field. Two hands resize and turn it.';hud();}
+  else if(k.act==='help'){xrNote=fieldMode==='separated'?'Pinch and drag an orb to move it. Pinch the same orb with both hands and spread or close them to resize.':'Pinch to select. Drag to move the field. Two hands resize and turn it.';hud();}
   else if(k.act==='hist'){psXR=false;rdD=true;if(reads().length||!$rd.hidden){$rd.hidden=!$rd.hidden;if(!$rd.hidden){rdLive=null;rdIdx=0;paintRd();}}else{xrNote='No readings yet';hud();}}
   else if(k.act==='brain')brain();
   else if(k.act==='place')beginPlacing();
@@ -3609,12 +3631,24 @@ function fingerTouch(r){
   if(!inside||!on)return null;
   return {px:(_ft.x/W+.5)*IW,py:(.5-_ft.y/Hh)*IH};
 }
-function uiStep(){
+function uiStep(points){
   ibHot=false;rbHot=false;rbHov0=rbHov;rbHov=null;
   let curIbHovRow=-1,curIbHovChip=null,curIbHovPt=null;
   const sbH0=sbHov,wbH0=wbHov,fbH0=fbHov;sbHov=null;wbHov=null;fbHov=null;
   if(!rig.some(r=>r.ft)&&Math.abs(iVel)>.05){setScroll(iScroll+iVel*GDT);iVel*=Math.pow(.04,GDT);}else if(!rig.some(r=>r.ft))iVel=0;
-  rig.forEach(r=>{
+  rig.forEach((r,i)=>{
+    const point=points?.[i];
+    if(!r.pin)r.orbHold=false;
+    if(point&&r.h?.userData.on&&!placing){
+      const touching=fieldMode==='separated'&&orbs.length>1?orbAtWorld(point)>=0:
+        nodes.length>0&&point.distanceTo(G.position)<=fieldR()*G.scale.x+.035;
+      if(r.pin&&!r.tp&&touching)r.orbHold=true;
+      if(touching||r.orbHold){
+        r.hk=null;r.uiHold=false;r.tp=r.pin;r.ft=null;
+        r.ibd=r.rdd=r.rds=r.bd=r.kd=null;
+        return;
+      }
+    }
     {const ft=r.pin?null:fingerTouch(r),nw=performance.now();
       if(ft){
         if(!r.ft){r.ft={px:ft.px,py:ft.py,off:iScroll,mv:false,t:nw,ly:ft.py,lt:nw};iVel=0;sfxTick(.6);}
@@ -3842,10 +3876,25 @@ try{arSaved=JSON.parse(localStorage.getItem(AR_KEY)||'null');}catch(e){}
 if(!arSaved||!Array.isArray(arSaved.p)||!Array.isArray(arSaved.q)||!isFinite(arSaved.s)||![...arSaved.p,...arSaved.q].every(isFinite))arSaved=null;
 const arPose=()=>[G.position.x,G.position.y,G.position.z,G.quaternion.x,G.quaternion.y,G.quaternion.z,G.quaternion.w,G.scale.x];
 const arDiff=(a,b)=>!a||!b||a.some((v,i)=>Math.abs(v-b[i])>(i===7?.002:.003));
+const arOrbPlacements=()=>fieldMode==='separated'?orbs.map(orbPlacement):[];
+const arHasChanges=()=>arDiff(arPose(),arLast)||(fieldMode==='separated'&&JSON.stringify(arOrbPlacements())!==JSON.stringify(arSaved?.orbs||[]));
+function arSnapshot(){
+  const sameBase=!arDiff(arPose(),arLast);
+  const snapshot={p:G.position.toArray(),q:G.quaternion.toArray(),s:G.scale.x};
+  if(sameBase&&arSaved?.uuid)snapshot.uuid=arSaved.uuid;
+  if(fieldMode==='separated')snapshot.orbs=arOrbPlacements();
+  else if(arSaved?.orbs)snapshot.orbs=arSaved.orbs;
+  return snapshot;
+}
 const arWrite=()=>{try{localStorage.setItem(AR_KEY,JSON.stringify(arSaved));}catch(e){}};
 function arBegin(){
   arTried=true;arAnchor=null;arLast=null;arDirty=false;arSettle=0;arBusy=false;
-  if(arSaved&&nodes.length){arRest=1;arRestT=0;G.visible=false;G.scale.setScalar(THREE.MathUtils.clamp(arSaved.s,.08,8));needCenter=false;return true;}
+  if(arSaved&&nodes.length){
+    if(fieldMode==='separated'&&arSaved.orbs){
+      restoreOrbPlacements(arSaved.orbs);updateGeom();updateOrbHalos();updateCrossVisuals();
+    }
+    arRest=1;arRestT=0;G.visible=false;G.scale.setScalar(THREE.MathUtils.clamp(arSaved.s,.08,8));needCenter=false;return true;
+  }
   arRest=0;return false;
 }
 function arFinish(){arRest=0;G.visible=true;arLast=arPose();}
@@ -3867,9 +3916,9 @@ function arAnchorPose(frame,ref){
 }
 function arApply(t){G.position.set(t.position.x,t.position.y,t.position.z);G.quaternion.set(t.orientation.x,t.orientation.y,t.orientation.z,t.orientation.w);arLast=arPose();}
 function arCommit(frame){
-  arLast=arPose();
   const oldA=arAnchor,oldU=arSaved&&arSaved.uuid,s=renderer.xr.getSession(),ref=renderer.xr.getReferenceSpace();
-  const mine=arSaved={p:G.position.toArray(),q:G.quaternion.toArray(),s:G.scale.x};arWrite();
+  const mine=arSaved=arSnapshot();arLast=arPose();arWrite();
+  if(mine.uuid)return;
   if(!s||!ref||!frame.createAnchor)return;
   let pr;
   try{pr=frame.createAnchor(new XRRigidTransform({x:G.position.x,y:G.position.y,z:G.position.z},{x:G.quaternion.x,y:G.quaternion.y,z:G.quaternion.z,w:G.quaternion.w}),ref);}catch(e){return;}
@@ -3883,7 +3932,7 @@ function arCommit(frame){
   }).catch(()=>{}).finally(()=>{arBusy=false;});
 }
 function arFlush(){
-  if(arLast&&arRest===0&&nodes.length&&arDiff(arPose(),arLast)){arSaved={p:G.position.toArray(),q:G.quaternion.toArray(),s:G.scale.x};arWrite();}
+  if(arRest===0&&nodes.length&&arHasChanges()){arSaved=arSnapshot();arLast=arPose();arWrite();}
 }
 function arPersist(frame,dt){
   if(!nodes.length)return;
@@ -3899,7 +3948,7 @@ function arPersist(frame,dt){
   if(mode!=='none'||placing){arDirty=true;arSettle=0;return;}
   if(arDirty){
     arSettle+=dt;
-    if(arSettle>.7){if(arBusy)arSettle=.7;else{arDirty=false;arSettle=0;if(arDiff(arPose(),arLast))arCommit(frame);}}
+    if(arSettle>.7){if(arBusy)arSettle=.7;else{arDirty=false;arSettle=0;if(arHasChanges())arCommit(frame);}}
     return;
   }
 }
@@ -4055,7 +4104,7 @@ function recoverField(force){
 }
 function resetGestures(){
   mode='none';gi=-1;g0={};g1={};grabbing=false;twoHandInit=false;pushPullVel=0;
-  rig.forEach(r=>{r.pin=false;r.tp=false;r.uiHold=false;r.c.userData.sq=false;r.c.userData.tr=false;});
+  rig.forEach(r=>{r.pin=false;r.tp=false;r.uiHold=false;r.orbHold=false;r.c.userData.sq=false;r.c.userData.tr=false;});
 }
 let lostT=0;
 function xrWatch(dt){
@@ -4165,7 +4214,7 @@ function nearestWorld(p,rad){
 function gestures(dt){
   GDT=dt;
   const P=rig.map(r=>{const v=handPoint(r);return v&&isFinite(v.x+v.y+v.z)?v:null;});
-  uiStep();
+  uiStep(P);
 
   const act=[0,1].filter(i=>P[i]&&rig[i].pin&&!rig[i].uiHold&&!placing);
   if(act.length)seatWanted=false;
@@ -4175,13 +4224,30 @@ function gestures(dt){
     if(fieldMode==='separated'&&orbs.length>1){
       if(mode!=='two'){
         orbFinish();grabbing=false;mode='two';
+        const targets=P.map((point,i)=>aimOrb(rig[i],point));
+        const same=targets[0]>=0&&targets[0]===targets[1]?targets[0]:orbAtWorld(M);
+        if(same>=0&&!(targets[0]>=0&&targets[1]>=0&&targets[0]!==targets[1])){
+          const orb=orbs[same];
+          g0={resize:same,d:Math.max(d,.025),scale:orb.scale||1,
+            midpoint:G.worldToLocal(M.clone()),center:new THREE.Vector3().fromArray(orb.center)};
+          return;
+        }
         const taken=new Set();
         g0={grabs:P.map((point,i)=>{
-          const index=aimOrb(rig[i],point);
+          const index=targets[i];
           if(index<0||taken.has(index))return null;
           taken.add(index);
           return {index,point:G.worldToLocal(point.clone()),center:new THREE.Vector3().fromArray(orbs[index].center)};
         })};
+      }
+      if(g0.resize!==undefined){
+        const index=g0.resize,orb=orbs[index];
+        if(!orb)return;
+        const resized=resizeOrb(index,g0.scale*Math.max(d,.01)/g0.d);
+        const center=G.worldToLocal(M.clone()).sub(g0.midpoint).add(g0.center);
+        if(center.distanceToSquared(new THREE.Vector3().fromArray(orb.center))>1e-12)moveOrb(index,center.toArray());
+        else if(resized)updateMovedOrbs();
+        return;
       }
       g0.grabs?.forEach((grab,i)=>{
         if(!grab)return;
