@@ -27,7 +27,7 @@ For each word, the engine scans forward and backward from every occurrence and a
 
 - Weight decays with distance. Crossing a sentence or paragraph break reduces it further; short paragraphs let association pass through more easily.
 - Scores are weighted by **IDF-like rarity** (inverse window frequency), damped for generic words, and compared against what chance would predict from each word's overall frequency. Words that co-occur *more than expected* score high.
-- **Rare-word floor.** A word appearing in at most 3 windows, but occurring in the same topic segment as the seed (see Idea boundaries), is lifted to the score of the weakest word that already clears the Query pruning cut-off in that scan (so it always displays, and ties only with the bottom of the visible list) so distinctive terms are not buried by common ones. This is the `rareW` check in `leapScan`.
+- **Rare-word floor.** A word appearing in at most 3 windows, but occurring in the same topic segment as the seed (see Idea boundaries), gets a rarity lift: its score becomes `cut + (1 - cut) * score`, where `cut` is the Query pruning cut-off, so every rare in-topic word clears the display cut-off but keeps its own proximity ordering (no flat ties). Words in other topic segments are never reached, so they get no lift. This is the `rareW` check in `leapScan`.
 - Direction is tracked, so each link knows whether A tends to precede B.
 
 ### 3. The field: layout
