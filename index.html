@@ -567,7 +567,7 @@ function leapScan(terms,excl){
     const c=ent.get(k),p=new Map(),hits=c.hits,rare=[],NEARV=DEC[Math.min(HZ,Math.round(HZ*.6))]||0;let a=0;
     for(let i=0;i<c.ids.length;i++){
       const r=c.ids[i];if(excl[r])continue;
-      const rareW=WDF&&NWIN>=3&&WDF[r]>0&&WDF[r]<=3;if(hits>=20&&CN>3e3&&c.raw[i]*c.stride<2&&!rareW)continue;
+      const rareW=WDF&&WDF[r]>0&&WDF[r]<=3;if(hits>=20&&CN>3e3&&c.raw[i]*c.stride<2&&!rareW)continue;
       const o=cIdf[r];if(!(o>.08))continue;
       const v=c.acc[i],ex=Math.ceil(hits/c.stride)*DW*cfreq[r]/Math.max(1,LT);
       const sc=Math.log(1+v)*o*(GEN.get(vocab[r])||1)*Math.log(1+v/(ex+1));
