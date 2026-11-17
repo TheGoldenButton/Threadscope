@@ -1998,31 +1998,34 @@ function orbAtWorld(p){
   orbs.forEach((o,d)=>{const dist=Math.hypot(l.x-o.center[0],l.y-o.center[1],l.z-o.center[2]);if(dist<(o.radius||1.2)*1.1&&dist<bd){bd=dist;b=d;}});
   return b;
 }
+const _aoO=new THREE.Vector3(),_aoD=new THREE.Vector3(),_aoV=new THREE.Vector3(),_aoC=new THREE.Vector3(),_aoQ=new THREE.Quaternion();
 function aimOrb(r,p){
   if(!r||!nodes.length)return -1;
-  const o=new THREE.Vector3(),q=new THREE.Quaternion(),d=new THREE.Vector3(0,0,-1);
-  if(r.c){r.c.getWorldPosition(o);r.c.getWorldQuaternion(q);d.applyQuaternion(q).normalize();}
-  else if(p){const cam=renderer.xr.getCamera();cam.getWorldPosition(o);d.copy(p).sub(o).normalize();}
+  if(r.c){r.c.getWorldPosition(_aoO);_aoD.set(0,0,-1).applyQuaternion(r.c.getWorldQuaternion(_aoQ)).normalize();}
+  else if(p){renderer.xr.getCamera().getWorldPosition(_aoO);_aoD.copy(p).sub(_aoO).normalize();}
   else return -1;
-  const ry=new THREE.Ray(o,d),sph=new THREE.Sphere(),hp=new THREE.Vector3();
+  const scale=G.matrixWorld.getMaxScaleOnAxis();
   if(fieldMode==='separated'&&orbs.length>=2){
-    let best=-1,minD=1e9;
-    orbs.forEach((orb,idx)=>{
-      const cw=G.localToWorld(new THREE.Vector3(orb.center[0],orb.center[1],orb.center[2]));
-      const rad=(orb.radius||1.2)*G.matrixWorld.getMaxScaleOnAxis()*1.15;
-      sph.set(cw,rad);
-      if(p&&p.distanceTo(cw)<=rad*1.05){const dist=p.distanceTo(cw);if(dist<minD){minD=dist;best=idx;}}
-      else if(ry.intersectSphere(sph,hp)){const dist=o.distanceTo(hp);if(dist<minD){minD=dist;best=idx;}}
-      else if(orbLabels[idx]){const hits=new THREE.Raycaster(o,d,0,20).intersectObject(orbLabels[idx],false);if(hits.length&&hits[0].distance<minD){minD=hits[0].distance;best=idx;}}
-    });
+    let best=-1,minT=1e9;
+    for(let idx=0;idx<orbs.length;idx++){
+      const orb=orbs[idx];
+      _aoC.set(orb.center[0],orb.center[1],orb.center[2]).applyMatrix4(G.matrixWorld);
+      const rad=(orb.radius||1.2)*scale*1.15;
+      if(p&&p.distanceTo(_aoC)<=rad*1.05)return idx;
+      _aoV.subVectors(_aoC,_aoO);
+      const t=_aoV.dot(_aoD);
+      if(t>0&&t<minT){
+        const d2=_aoV.lengthSq()-t*t;
+        if(d2<=rad*rad){minT=t;best=idx;}
+      }
+    }
     return best;
   }else if(nodes.length){
-    const cw=G.position;
-    let rMax=0.3;for(let ni=0;ni<nodes.length;ni+=Math.max(1,Math.floor(nodes.length/40))){const dn=Math.hypot(nodes[ni].x,nodes[ni].y,nodes[ni].z);if(dn>rMax)rMax=dn;}
-    const rad=Math.max(0.6,rMax)*G.matrixWorld.getMaxScaleOnAxis()*1.25;
-    sph.set(cw,rad);
-    if(p&&p.distanceTo(cw)<=rad*1.1)return 0;
-    if(ry.intersectSphere(sph,hp))return 0;
+    const rad=1.8*scale*1.25;
+    if(p&&p.distanceTo(G.position)<=rad*1.05)return 0;
+    _aoV.subVectors(G.position,_aoO);
+    const t=_aoV.dot(_aoD);
+    if(t>0&&_aoV.lengthSq()-t*t<=rad*rad)return 0;
   }
   return -1;
 }
@@ -3972,47 +3975,40 @@ function getHandPos(r,out){
   if(r.c&&r.c.userData.on)return r.c.getWorldPosition(out);
   return null;
 }
+const _hpA=new THREE.Vector3(),_hpB=new THREE.Vector3(),_hpV=new THREE.Vector3();
 function handPoint(r){
-  const j=r.h&&r.h.joints,ti=j&&j['thumb-tip'],ix=j&&j['index-finger-tip'],wr=j&&j['wrist'];
+  const j=r.h&&r.h.joints,ti=j&&j['thumb-tip'],ix=j&&j['index-finger-tip'];
   if(r.h&&r.h.userData.on&&ti&&ix&&ti.jointRadius!==undefined){
-    if(r.h.visible===false||ti.visible===false||ix.visible===false||(wr&&wr.visible===false)){
+    if(r.h.visible===false||ti.visible===false||ix.visible===false){
       if(r.pin)r.cancel=true;
       r.rawPin=false;r.pinT=0;r.pin=false;r.sm=null;r.hk=null;r.ls=0;r.lk=null;return null;
     }
-    const a=ti.getWorldPosition(new THREE.Vector3()),b=ix.getWorldPosition(new THREE.Vector3()),d=a.distanceTo(b);
+    ti.getWorldPosition(_hpA);
+    ix.getWorldPosition(_hpB);
+    const d=_hpA.distanceTo(_hpB);
     if(!isFinite(d)){
       if(r.pin)r.cancel=true;
       r.rawPin=false;r.pinT=0;r.pin=false;r.sm=null;r.hk=null;r.ls=0;r.lk=null;return null;
     }
-    const cam=renderer.xr.getCamera(),cp=cam.getWorldPosition(new THREE.Vector3()),cf=cam.getWorldDirection(new THREE.Vector3());
-    if(a.clone().sub(cp).dot(cf)<0.05){
+    const key=_hpA.x+','+_hpA.y+','+_hpA.z+','+_hpB.x+','+_hpB.y+','+_hpB.z;
+    if(key===r.lk)r.ls=(r.ls||0)+GDT;else{r.ls=0;r.lk=key;}
+    if(r.ls>.3){
       if(r.pin)r.cancel=true;
-      r.rawPin=false;r.pinT=0;r.pin=false;r.sm=null;r.hk=null;r.ls=0;r.lk=null;return null;
+      r.rawPin=false;r.pinT=0;r.pin=false;r.sm=null;r.hk=null;return null;
     }
-    const key=a.x.toFixed(4)+','+a.y.toFixed(4)+','+a.z.toFixed(4)+','+b.x.toFixed(4)+','+b.y.toFixed(4)+','+b.z.toFixed(4);
-    if(key===r.lk){
-      r.ls=(r.ls||0)+GDT;
-      if(r.ls>.08){
-        if(r.pin)r.cancel=true;
-        r.rawPin=false;r.pinT=0;r.pin=false;r.sm=null;r.hk=null;return null;
-      }
-    }else{
-      r.ls=0;r.lk=key;
-    }
-    r.rawPin=d<(r.rawPin?.036:.02);
-    if(r.rawPin)r.pinT=.1;else r.pinT=Math.max(0,(r.pinT||0)-GDT);
+    r.rawPin=d<(r.rawPin?.04:.022);
+    if(r.rawPin)r.pinT=.15;else r.pinT=Math.max(0,(r.pinT||0)-GDT);
     r.pin=r.pinT>0;
-    const v=a.add(b).multiplyScalar(.5);
-    if(!r.sm||!r.pin||v.distanceTo(r.sm)>.25)r.sm=v.clone();else r.sm.lerp(v,.45);
+    _hpV.addVectors(_hpA,_hpB).multiplyScalar(.5);
+    if(!r.sm||!r.pin||_hpV.distanceTo(r.sm)>.25)r.sm=_hpV.clone();else r.sm.lerp(_hpV,.45);
     return r.sm.clone();
   }
-  if(r.c&&r.c.userData.on&&!r.c.userData.isHand&&r.c.visible){
+  if(r.c&&r.c.visible)r.c.userData.vis=true;
+  if(r.c&&r.c.userData.on&&!r.c.userData.isHand&&(r.c.visible||!r.c.userData.vis)){
     r.pin=!!r.c.userData.sq;
     return r.c.getWorldPosition(new THREE.Vector3());
   }
-  if(r.pin)r.cancel=true;
-  r.pin=false;r.rawPin=false;r.pinT=0;r.sm=null;
-  return null;
+  r.pin=false;return null;
 }
 function nearestWorld(p,rad){
   let best=-1,bd=rad;
@@ -4023,11 +4019,6 @@ function gestures(dt){
   GDT=dt;
   const P=rig.map(r=>{const v=handPoint(r);return v&&isFinite(v.x+v.y+v.z)?v:null;});
   uiStep();
-
-  if(rig.some(r=>r.cancel)){
-    if(mode==='one'){mode='none';gi=-1;g1={};grabbing=false;orbFinish();}
-    if(mode==='two'){mode='none';g0={};orbFinish();}
-  }
 
   const act=[0,1].filter(i=>P[i]&&rig[i].pin&&!rig[i].uiHold&&!placing);
   if(act.length)seatWanted=false;
