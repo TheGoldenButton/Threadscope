@@ -311,16 +311,16 @@ let CUR=null;
 const PROG=t=>{if(CUR!==null)self.postMessage({rid:CUR,prog:t});};
 const NCAP=3000,K=6,FORCE=new Set();
 let nodes=[],edges=[],word2i=new Map(),FAMH=new Map(),fieldMode='unified',ORBS=[];
-const FV=4;
+const FV=4,SV='sw2';
 
-const STOP=new Set(`the and for with are there was were been has had have did does doing having done you your yours her hers him his she they them their theirs its our ours mine that this per of to in is it be by as at an on am he me my we us if or so do but off out himself herself itself myself yourself ourselves themselves yes no thereby get gets got getting goes going went let lets one ones than then too very just also can could would should might may must shall these those such some any each both either neither other others another about from into onto here while upon up down even yet nor quite whenever wherever whatever whoever whichever what when where which who whom whose why how because since during before after above below between through under again further once`.split(' '));
+const STOP=new Set(`the and for with are there was were been has had have did does doing having done you your yours her hers him his she they them their theirs its our ours mine that this per of to in is it be by as at an on am he me my we us if or so do but off out himself herself itself myself yourself ourselves themselves yes no thereby get gets got getting goes going went let lets one ones than then too very just also can could would should might may must shall these those such some any each both either neither other others another about from into onto here while upon up down even yet nor quite whenever wherever whatever whoever whichever what when where which who whom whose why how because since during before after between through under again further once`.split(' '));
 
 {const pr='i you he she it we they that there here what who how when where which whom why this these those one someone everyone nobody let would could should might must may will shall'.split(' ');
  pr.forEach(e=>["'s","'d","'ll","'ve","'re","'m"].forEach(t=>STOP.add(e+t)));
- `ll ve re em th tis twas twere twill twould twixt yeah yep yup nope okay ok oh ah aha ahh hmm hm um uh er erm huh hey hello hi ooh oops wow whoa yay ugh aw gee lol lmao omg btw etc eh ha haha hehe ya gonna gotta wanna gimme lemme dunno kinda sorta outta cuz coz thee thou thy thine ye hast hath doth dost wilt shalt wert wast didst hadst canst couldst wouldst shouldst ere nay yea prithee methinks wherefore whence hither thither whilst ma'am y'all o'clock e'en ne'er o'er ain't`.split(' ').forEach(w=>STOP.add(w));}
+ `ll ve re em th tis twas twere twill twould twixt yeah yep yup nope okay ok oh ah aha ahh hmm hm um uh er erm huh hey hello hi ooh oops wow whoa yay ugh aw gee lol lmao omg btw etc eh ha haha hehe ya gonna gotta wanna gimme lemme dunno kinda sorta outta cuz coz thee thou thy thine ye hast hath doth dost wilt shalt wert wast didst hadst canst couldst wouldst shouldst ere nay yea prithee methinks wherefore whence hither thither whilst ma'am y'all o'clock e'en ne'er o'er ain't thats whats heres theres whos hows wheres itll thatll`.split(' ').forEach(w=>STOP.add(w));}
 const STRUCT=new Set(`today tonight yesterday tomorrow later earlier twice ago soon already often always sometimes usually rarely seldom recently formerly lately meanwhile afterward afterwards ever year years month months week weeks day days decade decades century centuries hour hours minute minutes time times period second third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth fifteenth sixteenth seventeenth eighteenth nineteenth twentieth hundredth four five seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty thirty forty fifty sixty seventy eighty ninety hundred hundreds thousand thousands million millions billion billions dozen dozens slightly rather fairly nearly mostly largely mainly partly entirely completely totally extremely highly greatly especially particularly generally typically merely roughly approximately many much several numerous various enough plenty every somehow anyway toward towards across around beyond against beside besides amid back forward throughout within inside outside among amongst along alongside despite regarding concerning versus via beneath behind ahead apart aside away nearby therein thereof thereafter herein wherein whereby whereas whereupon hence accordingly consequently furthermore moreover nevertheless nonetheless otherwise instead indeed perhaps maybe namely respectively additionally together altogether forth onward however become becomes became becoming remain remains remained remaining seem seems appear appears appeared called named referred considered regarded contain contains contained consist consists consisting begin begins began begun started continue continues continued tend tends tended allow allows allowed require requires required involve involves involved live lives lived thing things way ways kind kinds sort sorts part parts number numbers amount lot lots bit case cases example examples fact facts large larger largest small smaller smallest big bigger biggest little huge tiny major minor main chief principal whole entire high higher highest low lower lowest long longer longest short early late latest recent current old young middle top previous former latter common general usual normal typical available necessary important significant simple basic real full said says say saying told tell tells telling asked ask asks replied reply answered cried exclaimed whispered shouted`.split(' '));
 const GEN=new Map();`able actually almost although art automatically basically bring brought came certain chapter come comes coming currently eventually far finally find first following found gave give given gives go gone good great immediately include included includes including keep kept knew know known knows last least leave less like look looked looks made make makes making man mean means meant men more most near need needs never new next now obtain obtained own potentially previously probably provide provides put really refer refers same saw see seemed seen show showed shown shows simply six specifically start still suddenly take taken takes therefore think thought three thus took tried try two use used uses using want wanted well whether will value values type types line version file result list set form view valid return returns returned single multiple different possible similar specific particular exactly indicate indicates indicating contents users user due argument arguments default defaults instance instances object objects`.split(' ').forEach(w=>GEN.set(w,.25));
-'over until unless though although whilst whereas across within without upon onto toward towards via per than then thus nor yet so if or and but as at by for in of on to with from into about above below off out up down under through between during before after while when where which who whom whose whether either neither both each also just only even still such very'.split(' ').forEach(w=>STRUCT.add(w));
+'over until unless though although whilst whereas across within without upon onto toward towards via per than then thus nor yet so if or and but as at by for in of on to with from into about off out up down under through between during before after while when where which who whom whose whether either neither both each also just only even still such very'.split(' ').forEach(w=>STRUCT.add(w));
 const BREAKW=new Set('but however although though yet whereas while nevertheless nonetheless instead'.split(' '));
 const WHW=new Set('what when where who whom whose which why how'.split(' '));
 const okw=e=>e.length<=(e.indexOf(' ')>0?36:24)&&!/(.)\1\1/.test(e)&&!WHW.has(e);
@@ -1217,7 +1217,7 @@ function buildFieldSeparated(){
   try{edgeSeq();}catch(err){edges.forEach(e=>{e.g=1;e.bk=0;e.fwd=1;});nodes.forEach(n=>{if(n.pos===undefined)n.pos=0;});}
 }
 function restoreField(f){
-  if(!f||f.v!==FV||!f.n||!f.e)return false;
+  if(!f||f.v!==FV||f.sv!==SV||!f.n||!f.e)return false;
   const ids=[];
   for(const n of f.n){const id=rawId.get(n[0]);if(!(id>1)||!cfreq[id])return false;ids.push(id);}
   const nn=[],w2=new Map();
@@ -1343,6 +1343,7 @@ function communities(subNodes,subEdges,N){
   for(let i=0;i<N;i++)if(out[i]<0)out[i]=0;
   return {l:out,nc:Math.max(1,keep.length)};
 }
+let SEED=null;
 function layout(subNodes,subEdges,SP){
   if(!subNodes)subNodes=nodes;if(!subEdges)subEdges=edges;if(SP===undefined)SP=2.1;
   const N=subNodes.length;if(!N)return;
@@ -1355,6 +1356,8 @@ function layout(subNodes,subEdges,SP){
   if(nc>1){
     for(let i=0;i<N;i++){const j=cm[i],y=1-2*(j+.5)/nc,r=Math.sqrt(Math.max(0,1-y*y)),a=j*2.399963;
       P[i*3]=.75*r*Math.cos(a)+.45*P[i*3];P[i*3+1]=.75*y+.45*P[i*3+1];P[i*3+2]=.75*r*Math.sin(a)+.45*P[i*3+2];}}
+  let PIN=null;
+  if(SEED){PIN=new Uint8Array(N);subNodes.forEach((n,i)=>{const q=SEED.get(n.word);if(q){PIN[i]=1;P[i*3]=q[0]/SP;P[i*3+1]=q[1]/SP;P[i*3+2]=q[2]/SP;}});}
   for(let n=0;n<it;n++){
     D.fill(0);
     if(N<BH_MIN){
@@ -1382,6 +1385,7 @@ function layout(subNodes,subEdges,SP){
     }
     const t=.35*(1-n/it)+.01;
     for(let i=0;i<N;i++){
+      if(PIN&&PIN[i])continue;
       for(let c=0;c<3;c++)D[i*3+c]-=P[i*3+c]*.6;
       const m=Math.hypot(D[i*3],D[i*3+1],D[i*3+2])+1e-6,s=Math.min(m,t)/m;
       for(let c=0;c<3;c++)P[i*3+c]+=D[i*3+c]*s;
@@ -1409,7 +1413,7 @@ function layout(subNodes,subEdges,SP){
     }
     if(!moved)break;
   }
-  subNodes.forEach((n,i)=>{n.x=P[i*3];n.y=P[i*3+1];n.z=P[i*3+2];});
+  subNodes.forEach((n,i)=>{if(PIN&&PIN[i]){const q=SEED.get(n.word);n.x=q[0];n.y=q[1];n.z=q[2];}else{n.x=P[i*3];n.y=P[i*3+1];n.z=P[i*3+2];}});
 }
 
 function splitPass(text){
@@ -1556,7 +1560,7 @@ self.onmessage=e=>{
       foldPlurals();PROG('Finding phrases\u2026');mergePhrases();PROG('Counting\u2026');recount();
       let built=false;
       if(fieldMode==='separated'&&DOCS.length>1){buildFieldSeparated();built=true;}
-      else if(!(m.pre&&restoreField(m.pre))){buildField();built=true;}
+      else if(!(m.pre&&restoreField(m.pre))){SEED=null;if(m.pre&&m.pre.n){SEED=new Map();m.pre.n.forEach(n=>SEED.set(n[0],[n[3],n[4],n[5]]));}try{buildField();}finally{SEED=null;}built=true;}
       self.postMessage({rid:m.rid,nodes,edges,orbs:ORBS,mode:fieldMode,force:forceWords(),built});return;}
     if(m.t==='passages'){self.postMessage(Object.assign({rid:m.rid},getPassages(m)));return;}
     if(m.t==='query'){
@@ -1586,7 +1590,7 @@ import {VRButton} from 'three/addons/webxr/VRButton.js';
 import {XRHandModelFactory} from 'three/addons/webxr/XRHandModelFactory.js';
 import {XRControllerModelFactory} from 'three/addons/webxr/XRControllerModelFactory.js';
 const TOKRE=/[\p{L}\p{M}]+(?:['-][\p{L}\p{M}]+)*|\d+(?:[.,]\d+)*|[.!?;:()\u2014\u2013]+|,|\n[ \t\r]*\n/gu;
-const FUNCW=new Set('over until unless though although whilst whereas across within without upon onto toward towards via per than then thus nor yet so if or and but as at by for in of on to with from into about above below off out up down under through between during before after while when where which who whom whose whether either neither both each also just only even still such very the a an is are was were be been am it its this that these those there here not no yes can could would should may might must will shall do does did has have had i you he she we they me him her us them my your his our their'.split(' '));
+const FUNCW=new Set('over until unless though although whilst whereas across within without upon onto toward towards via per than then thus nor yet so if or and but as at by for in of on to with from into about off out up down under through between during before after while when where which who whom whose whether either neither both each also just only even still such very the a an is are was were be been am it its this that these those there here not no yes can could would should may might must will shall do does did has have had i you he she we they me him her us them my your his our their'.split(' '));
 
 const ENG=(()=>{
   const w=new Worker(URL.createObjectURL(new Blob([document.getElementById('engine-src').textContent],{type:'text/javascript'})));
@@ -1661,11 +1665,11 @@ let FS=1,VS=1;try{const v=parseFloat(localStorage.getItem('cf.fs'));if(isFinite(
 let nodes=[],edges=[],word2i=new Map(),sel=-1,Q=null;const SS=new Set();let selV=0;
 let curDocs=[],curCorpus=null,replaying=false,hist=[],corpora=[];
 const col={lv:null,f:0,n:-1,hide:null,cnt:null,t:0};
-const FV=4;var fsT=0,PRE=null;
+const FV=4,SV='sw2';var fsT=0,PRE=null;
 let HLOG=[];
 function saveField(){
   clearTimeout(fsT);const id=curCorpus;if(!id||!nodes.length)return;
-  fsT=setTimeout(async()=>{try{await dbP;await dbPut('fields',{id,v:FV,ts:Date.now(),
+  fsT=setTimeout(async()=>{try{await dbP;await dbPut('fields',{id,v:FV,sv:SV,ts:Date.now(),
     n:nodes.map(n=>[n.word,n.freq,n.score,n.x,n.y,n.z,n.pos]),
     e:edges.map(e=>[e.s,e.t,e.w,e.wn,e.fwd,e.gap,e.g,e.bk]),f:forceWords.slice(),h:HLOG.slice(-200)});}catch(e){}},50);
 }
@@ -3682,14 +3686,14 @@ function arFrame(frame){
 }
 hud();
 const AR_KEY='cf.ar';
-let arSaved=null,arAnchor=null,arRest=0,arRestT=0,arDirty=false,arSettle=0,arBusy=false,arLast=null;
+let arTried=false,arSaved=null,arAnchor=null,arRest=0,arRestT=0,arDirty=false,arSettle=0,arBusy=false,arLast=null;
 try{arSaved=JSON.parse(localStorage.getItem(AR_KEY)||'null');}catch(e){}
 if(!arSaved||!Array.isArray(arSaved.p)||!Array.isArray(arSaved.q)||!isFinite(arSaved.s)||![...arSaved.p,...arSaved.q].every(isFinite))arSaved=null;
 const arPose=()=>[G.position.x,G.position.y,G.position.z,G.quaternion.x,G.quaternion.y,G.quaternion.z,G.quaternion.w,G.scale.x];
 const arDiff=(a,b)=>!a||!b||a.some((v,i)=>Math.abs(v-b[i])>(i===7?.002:.003));
 const arWrite=()=>{try{localStorage.setItem(AR_KEY,JSON.stringify(arSaved));}catch(e){}};
 function arBegin(){
-  arAnchor=null;arLast=null;arDirty=false;arSettle=0;arBusy=false;
+  arTried=true;arAnchor=null;arLast=null;arDirty=false;arSettle=0;arBusy=false;
   if(arSaved&&nodes.length){arRest=1;arRestT=0;G.visible=false;G.scale.setScalar(THREE.MathUtils.clamp(arSaved.s,.08,8));needCenter=false;return true;}
   arRest=0;return false;
 }
@@ -3733,6 +3737,7 @@ function arFlush(){
 function arPersist(frame,dt){
   if(!nodes.length)return;
   const s=renderer.xr.getSession(),ref=renderer.xr.getReferenceSpace();
+  if(!arRest&&!arTried&&arSaved&&!needCenter&&!placing&&mode==='none'&&arBegin()){xrNote='Field restored to where you left it. Pinch and drag to move it';hud();}
   if(arRest){
     arRestT+=dt;
     if(arRest===1){arRest=2;arRestore(s);}
@@ -3747,6 +3752,8 @@ function arPersist(frame,dt){
     return;
   }
 }
+addEventListener('pagehide',()=>{try{if(arMode)arFlush();}catch(e){}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){try{if(arMode)arFlush();}catch(e){}}});
 const ray=new THREE.Raycaster(),tmp=new THREE.Vector3(),keys={};
 const _pq=new THREE.Quaternion(),_pr=new THREE.Vector3(),_pu=new THREE.Vector3();
 function pick(o,d,maxAng){
@@ -3935,7 +3942,7 @@ renderer.xr.addEventListener('sessionstart',()=>{
   const envAR=!!s.environmentBlendMode&&s.environmentBlendMode!=='opaque';
   sessAR=reqLook!==null||envAR;
   const pass=reqLook!==null?reqLook==='mr':envAR;reqLook=null;
-  controls.enabled=false;kb.visible=true;kInit=false;kOffL.set(0,0,0);kbOpen=false;HUIDE=false;U.uX.value=1;needCenter=false;lostT=0;arRest=0;arAnchor=null;arLast=null;arDirty=false;arBusy=false;
+  controls.enabled=false;kb.visible=true;kInit=false;kOffL.set(0,0,0);kbOpen=false;HUIDE=false;U.uX.value=1;needCenter=false;lostT=0;arRest=0;arTried=false;arAnchor=null;arLast=null;arDirty=false;arBusy=false;
   try{renderer.xr.setFoveation(0);}catch(e){}
   {const bl=s.renderState&&s.renderState.baseLayer;U.uH.value=bl&&bl.framebufferHeight?bl.framebufferHeight:2000;}
   dolly.position.set(0,0,0);dolly.rotation.set(0,0,0);
