@@ -566,7 +566,7 @@ function leapScan(terms,excl){
       const v=c.acc[i],ex=Math.ceil(hits/c.stride)*DW*cfreq[r]/Math.max(1,LT);
       const sc=Math.log(1+v)*o*(GEN.get(vocab[r])||1)*Math.log(1+v/(ex+1));
       p.set(r,sc);if(sc>a)a=sc;if(rareW)rare.push(r);}
-    if(rare.length&&a>0){const fl=.3*a;for(const q of rare)if(p.get(q)<fl)p.set(q,fl);}
+    if(rare.length&&a>0){const rs=new Set(rare),cf=QCUT*a;let lo=Infinity;p.forEach((v,r)=>{if(!rs.has(r)&&v>=cf&&v<lo)lo=v;});const fl=isFinite(lo)?lo:cf;for(const q of rare)if(p.get(q)<fl)p.set(q,fl);}
     p.forEach((v,r)=>p.set(r,v/(a||1)));
     
     return {p,hits,
@@ -582,7 +582,7 @@ function leapOverlap(e,t,n,s,sf){
   a.forEach((e,id)=>{const c=e.cw/r;if(e.n<n||c<s)return;o.push({id,cov:c,n:e.n,idx:e.idx,per:e.per,s:Math.pow(c,1.5)*(e.sw/e.cw)});});
   return o.sort((x,y)=>y.s-x.s);
 }
-const FAMS=new Map(),FAMC={cos:.6};let WDF=null,NWIN=0;
+const FAMS=new Map(),FAMC={cos:.6};let WDF=null,NWIN=0,QCUT=0;
 function wForms(e,t){
   const n=[],s=e.length,r=x=>{x.length>2&&x!==e&&!n.includes(x)&&n.push(x);},a=x=>!(x.length<=4&&/[^aeiou][aeiou][^aeiouwxy]$/.test(x));
   if(e.endsWith("'s")){r(e.slice(0,-2));return n;}
@@ -1570,7 +1570,7 @@ function getPassages(m){
 }
 const forceWords=()=>[...FORCE].map(i=>vocab[i]);
 self.onmessage=e=>{
-  const m=e.data;CUR=m.rid;
+  const m=e.data;CUR=m.rid;if(m.cut!=null)QCUT=m.cut;
   try{
         if(m.t==='reset'){resetCorpus();nodes=[];edges=[];word2i=new Map();ORBS=[];return;}
     if(m.t==='setMode'){
@@ -1626,8 +1626,8 @@ const ENG=(()=>{
     if(m.prog){if(p.prog)p.prog(m.prog);return;}
     pend.delete(m.rid);m.err?p.rej(new Error(m.err)):p.res(m);};
   w.onerror=e=>{pend.forEach(p=>p.rej(new Error(e.message||'worker error')));pend.clear();};
-  return {call(msg,prog){return new Promise((res,rej)=>{const id=++rid;pend.set(id,{res,rej,prog});w.postMessage({...msg,rid:id});});},
-    post(msg){w.postMessage({...msg,rid:++rid});}};
+  return {call(msg,prog){return new Promise((res,rej)=>{const id=++rid;pend.set(id,{res,rej,prog});w.postMessage({cut:cthrOf(),...msg,rid:id});});},
+    post(msg){w.postMessage({cut:cthrOf(),...msg,rid:++rid});}};
 })();
 const PLAY={on:false,paused:true,idx:0,rank:null,seq:[],cur:-1,speed:1,t:0,key:''};
 let EPOCH=0,ingesting=false,qSeq=0,forceWords=[],qBusy=0;var wikiBusy=0;
