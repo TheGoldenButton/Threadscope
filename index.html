@@ -4496,23 +4496,40 @@ function ogUpdate(g,i,p,dt){
   G.worldToLocal(_ogC);
   ogMove(g.orb,[_ogC.x,_ogC.y,_ogC.z]);
 }
-function ogFrame(pa,pb,qa,qb,out){
-  _ogX.subVectors(pb,pa).normalize();
-  _ogY.set(0,1,0).applyQuaternion(qa);_ogZ.set(0,1,0).applyQuaternion(qb);_ogY.add(_ogZ);
-  _ogY.addScaledVector(_ogX,-_ogY.dot(_ogX));
-  if(_ogY.lengthSq()<.09){_ogY.set(0,1,0).addScaledVector(_ogX,-_ogX.y);if(_ogY.lengthSq()<.09)_ogY.set(0,0,1).addScaledVector(_ogX,-_ogX.z);}
-  _ogY.normalize();_ogZ.crossVectors(_ogX,_ogY).normalize();_ogY.crossVectors(_ogZ,_ogX);
-  _ogM.makeBasis(_ogX,_ogY,_ogZ);return out.setFromRotationMatrix(_ogM);
+function wristOrientation(i,out){
+  const r=rig[i],wrist=r.h?.joints?.wrist;
+  const source=r.c.userData.isHand && wrist?.visible ? wrist : r.c;
+  return source.getWorldQuaternion(out);
+}
+function beginTurn(pa,pb){
+  const wrists=[0,1].map(i=>wristOrientation(i,new THREE.Quaternion()));
+  return {axis:pb.clone().sub(pa).normalize(),wrists,total:new THREE.Quaternion()};
+}
+function updateTurn(state,pa,pb){
+  const axis=_ogX.subVectors(pb,pa).normalize();
+  const swing=_ogQ.setFromUnitVectors(state.axis,axis);
+  let twist=0;
+  for(let i=0;i<2;i++){
+    const previous=state.wrists[i],current=wristOrientation(i,_ogQ2);
+    // Remove the swing already measured by the pinch points, then extract wrist roll.
+    const residual=_ogQ3.copy(previous).invert().premultiply(current)
+      .multiply(new THREE.Quaternion().copy(swing).invert());
+    previous.copy(current);
+    if(residual.w<0)residual.set(-residual.x,-residual.y,-residual.z,-residual.w);
+    const axial=residual.x*axis.x+residual.y*axis.y+residual.z*axis.z;
+    twist+=Math.atan2(axial,residual.w);
+  }
+  state.axis.copy(axis);
+  return state.total.premultiply(_ogQ2.setFromAxisAngle(axis,twist).multiply(swing)).normalize();
 }
 function ogBeginTwo(orb,pa,pb){
-  ogQuat(0,0);ogQuat(1,0);
-  const F0=ogFrame(pa,pb,OG.q[0],OG.q[1],new THREE.Quaternion()),M0=pa.clone().add(pb).multiplyScalar(.5),cw=ogOrbWorld(orb,new THREE.Vector3());
-  OG.two={orb,F0inv:F0.clone().invert(),d0:pa.distanceTo(pb),off0:cw.sub(M0),sc0:orbs[orb].scale||1,R:new THREE.Quaternion()};
+  const M0=pa.clone().add(pb).multiplyScalar(.5),cw=ogOrbWorld(orb,new THREE.Vector3());
+  OG.two={orb,turn:beginTurn(pa,pb),d0:pa.distanceTo(pb),off0:cw.sub(M0),sc0:orbs[orb].scale||1,R:new THREE.Quaternion()};
 }
 function ogUpdateTwo(pa,pb,dt){
   const t=OG.two,orb=orbs[t.orb];if(!orb){OG.two=null;return;}
-  ogQuat(0,dt);ogQuat(1,dt);
-  const Rt=ogFrame(pa,pb,OG.q[0],OG.q[1],_ogQ3).clone().multiply(t.F0inv);
+  if(pa.distanceTo(pb)<.025)return;
+  const Rt=updateTurn(t.turn,pa,pb);
   const Rd=Rt.clone().multiply(t.R.clone().invert());
   if(Math.abs(Rd.w)<1-1e-9){
     _ogQ2.copy(G.quaternion).invert().multiply(Rd).multiply(G.quaternion);
@@ -4575,16 +4592,16 @@ function gestures(dt){
     }
   }else if(OG.g[0]||OG.g[1]||OG.two)orbGrabReset();
   if(act.length===2){
-    const a=P[0],b=P[1],d=a.distanceTo(b),M=a.clone().add(b).multiplyScalar(.5),v=b.clone().sub(a);
+    const a=P[0],b=P[1],d=a.distanceTo(b),M=a.clone().add(b).multiplyScalar(.5);
     // Nearly coincident pinch points do not define a reliable rotation axis.
     if(d<.025)return;
     if(mode!=='two'){
       orbFinish();g1.moved=true;mode='two';
-      g0={d,axis:v.normalize(),midpoint:M,offset:G.position.clone().sub(M),scale:G.scale.x,rotation:G.quaternion.clone()};
+      g0={d,turn:beginTurn(a,b),midpoint:M,offset:G.position.clone().sub(M),scale:G.scale.x,rotation:G.quaternion.clone()};
       return;
     }
     const scale=THREE.MathUtils.clamp(g0.scale*d/g0.d,.08,8);
-    const turn=new THREE.Quaternion().setFromUnitVectors(g0.axis,v.normalize());
+    const turn=updateTurn(g0.turn,a,b);
     G.scale.setScalar(scale);
     G.quaternion.copy(turn).multiply(g0.rotation);
     G.position.copy(g0.offset).applyQuaternion(turn).multiplyScalar(scale/g0.scale)
