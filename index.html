@@ -1903,7 +1903,7 @@ function getDocColor(d){ return DOC_PALETTE[(d||0)%DOC_PALETTE.length]; }
 
 let nL=null,nHW=null,wvPend=false,wvT=0;
 const _mc=document.createElement('canvas').getContext('2d');
-function wordHW(n){if(n.hw===undefined){_mc.font='500 133px Inter,system-ui,-apple-system,sans-serif';const tw=_mc.measureText(n.word).width;const effW=Math.min(tw,920);n.hw=(effW/1024)*.3*FS*WSZ/2+.008;}return n.hw;}
+function wordHW(n){if(n.hw===undefined){_mc.font='600 133px Inter,system-ui,-apple-system,sans-serif';const tw=_mc.measureText(n.word).width;const effW=Math.min(tw,920);n.hw=(effW/1024)*.3*FS*WSZ/2+.008;}return n.hw;}
 function refreshWV(){
   if(!pts||!nHW||nHW.length!==nodes.length)return;
   nHW.fill(0);nL.fill(0);
@@ -2088,7 +2088,7 @@ function updateCrossVisuals(){
     const c=document.createElement('canvas');c.width=1024;c.height=256;const ctx=c.getContext('2d');
     const isDirect=b.kind==='direct';
     const hexA=getDocHex(b.docA),hexB=getDocHex(b.docB);
-    ctx.fillStyle='rgba(6,12,22,.88)';
+    ctx.fillStyle='rgba(255,255,255,.94)';
     const grad=ctx.createLinearGradient(40,0,984,0);
     grad.addColorStop(0,hexA);grad.addColorStop(1,hexB);
     ctx.strokeStyle=grad;
@@ -2097,9 +2097,8 @@ function updateCrossVisuals(){
     ctx.roundRect(40,28,944,200,100);
     ctx.fill();
     ctx.stroke();
-    ctx.shadowColor=hexA;
-    ctx.shadowBlur=26;
-    ctx.fillStyle=isDirect?'#ffffff':'#e6fbff';
+    ctx.shadowBlur=0;
+    ctx.fillStyle='#000000';
     ctx.textAlign='center';
     ctx.textBaseline='middle';
     
@@ -2109,7 +2108,7 @@ function updateCrossVisuals(){
     if(ctw>920){cfs=Math.max(36,Math.floor(cfs*(920/ctw)));ctx.font='700 '+cfs+'px Inter,system-ui,-apple-system,sans-serif';}
     ctx.fillText(labelText,512,128);
     const tx=new THREE.CanvasTexture(c);tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
-    const sm=new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false,blending:THREE.AdditiveBlending});
+    const sm=new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false});
     const sp=new THREE.Sprite(sm);sp.position.set(mx,my,mz);sp.scale.set(.5*FS,.125*FS,1);sp.renderOrder=35;
     sp.userData={isBridge:true,bridge:b};
     crossLabelsGroup.add(sp);
@@ -2308,22 +2307,23 @@ function computeDivergence(){
 
 
 const labelCache=new Map();
-// Light label style: medium weight, no filled box, a thin dark halo only for legibility, and ink tinted by the word's
-// frequency (same ramp as the lines) so text and links read as one system.
+// Crisp black words with clean high-contrast protective halo for clear readability against all backgrounds
 function labelInk(i,kind){
-  if(kind===1)return '#ffe9b8';
-  if(i==null||!nodes[i])return '#eaf8ff';
-  const c=mix(rainbow(cnorm(i)),[1,1,1],.5).map(v=>Math.round(255*Math.max(0,Math.min(1,v))));
-  return 'rgb('+c[0]+','+c[1]+','+c[2]+')';
+  return '#000000';
 }
 function drawLabel(x,word,i,kind){
-  let fs=133;x.font='500 '+fs+'px Inter,system-ui,-apple-system,sans-serif';
+  let fs=133;x.font='600 '+fs+'px Inter,system-ui,-apple-system,sans-serif';
   const tw=x.measureText(word).width;
-  if(tw>920){fs=Math.max(48,Math.floor(fs*(920/tw)));x.font='500 '+fs+'px Inter,system-ui,-apple-system,sans-serif';}
+  if(tw>920){fs=Math.max(48,Math.floor(fs*(920/tw)));x.font='600 '+fs+'px Inter,system-ui,-apple-system,sans-serif';}
   x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';
-  x.lineWidth=Math.max(6,fs*.075);x.strokeStyle='rgba(1,5,12,.55)';x.strokeText(word,512,128);
-  x.shadowColor=kind===1?'rgba(255,179,71,.55)':'rgba(0,0,0,.5)';x.shadowBlur=kind===1?14:8;
-  x.fillStyle=labelInk(i,kind);x.fillText(word,512,128);
+  x.lineWidth=Math.max(8,fs*.095);
+  x.strokeStyle=kind===1?'rgba(255,230,160,0.95)':'rgba(255,255,255,0.92)';
+  x.shadowColor=kind===1?'rgba(255,180,50,0.8)':'rgba(255,255,255,0.65)';
+  x.shadowBlur=kind===1?12:8;
+  x.strokeText(word,512,128);
+  x.shadowBlur=0;
+  x.fillStyle='#000000';
+  x.fillText(word,512,128);
 }
 function label(i,kind,projection){
   const key=i+':'+kind;let s=projection?null:labelCache.get(key);
@@ -4905,8 +4905,6 @@ function platform(){
 const lodGroup=new THREE.Group();G.add(lodGroup);
 const lodMap=new Map(),_cl=new THREE.Vector3(),_cw=new THREE.Vector3();
 const _vdirW=new THREE.Vector3(),_vdirL=new THREE.Vector3(),_invG=new THREE.Matrix4();
-let _connScores=new Float32Array(4000);
-const _connVisited=[];
 function lodSprite(i){
   const c=document.createElement('canvas');c.width=1024;c.height=256;const x=c.getContext('2d');
   drawLabel(x,nodes[i].word,i,0);
@@ -4921,8 +4919,6 @@ function _dstep(){_dt=0;const t0=performance.now();
   if(_dq.length)_dt=setTimeout(_dstep,16);}
 function lodClear(){
   const l=[];lodMap.forEach(sp=>{lodGroup.remove(sp);l.push(sp);});lodMap.clear();slowDispose(l);
-  for(let k=0;k<_connVisited.length;k++)_connScores[_connVisited[k]]=0;
-  _connVisited.length=0;
 }
 let lodT=0;
 function lodLabels(dt){
@@ -4933,7 +4929,7 @@ function lodLabels(dt){
   const cam=renderer.xr.isPresenting?renderer.xr.getCamera():camera;
   cam.getWorldPosition(_cw);_cl.copy(_cw);G.worldToLocal(_cl);
 
-  // View direction in local G coordinate space to filter and retain clear direction
+  // View direction in local G coordinate space
   cam.getWorldDirection(_vdirW);
   _invG.copy(G.matrixWorld).invert();
   _vdirL.copy(_vdirW).transformDirection(_invG).normalize();
@@ -4943,8 +4939,8 @@ function lodLabels(dt){
   const distCenter=_cl.length();
   const isInside=fieldEnvelops()||(distCenter<fr*1.35)||(fieldMode==='separated'&&orbs.some(o=>Math.hypot(_cl.x-o.center[0],_cl.y-o.center[1],_cl.z-o.center[2])<(o.radius||1.8)*1.35));
 
-  // When inside the room-filling orb, proximity covers the whole room/orb volume
-  const maxProximity=isInside?Math.max(fr*1.8,8.0):2.5;
+  // Generous proximity range so words in view are captured when zooming in
+  const maxProximity=isInside?Math.max(fr*3.2,16.0):Math.max(fr*2.6,10.0);
   const inView=[];
   for(const i of visible){
     if(col.hide&&col.hide[i])continue;
@@ -4954,8 +4950,8 @@ function lodLabels(dt){
     if(d<0.04||d>maxProximity)continue;
     const dirX=dx/d,dirY=dy/d,dirZ=dz/d;
     const dot=dirX*_vdirL.x+dirY*_vdirL.y+dirZ*_vdirL.z;
-    // When outside, discard nodes outside forward view cone. When inside the room-scale orb, encompass all 360°
-    if(!isInside&&dot<0.35)continue;
+    // When outside, retain words within the viewing frustum / cone. When inside, 360 degree coverage
+    if(!isInside&&dot<0.28)continue;
     inView.push({i,n,d,dx,dy,dz,dirX,dirY,dirZ,dot});
   }
 
@@ -4963,140 +4959,57 @@ function lodLabels(dt){
     if(lodMap.size){
       for(const [i,sp] of lodMap){
         if(sp.parent===lodGroup){lodGroup.remove(sp);wvPend=true;}
-        if(lodMap.size>300){sp.material.map.dispose();sp.material.dispose();lodMap.delete(i);}
+        if(lodMap.size>350){sp.material.map.dispose();sp.material.dispose();lodMap.delete(i);}
       }
     }
     return;
   }
 
-  // Find focal anchor roots in the view
-  if(_connScores.length<nodes.length)_connScores=new Float32Array(nodes.length+500);
-  for(let k=0;k<_connVisited.length;k++)_connScores[_connVisited[k]]=0;
-  _connVisited.length=0;
-
-  const focalRoots=[];
-  if(SS.size){
-    for(const cand of inView){
-      if(SS.has(cand.i)&&!focalRoots.includes(cand.i))focalRoots.push(cand.i);
-    }
-  }
-  if(Q&&Q.seed&&Q.seed.size){
-    for(const cand of inView){
-      if(Q.seed.has(cand.i)&&!focalRoots.includes(cand.i))focalRoots.push(cand.i);
-    }
-  }
-  if(isInside){
-    // When inside the field, seed multi-hub connectivity across the room
-    for(const cand of inView){
-      if(cand.dot>0.5&&focalRoots.length<4){
-        focalRoots.push(cand.i);
-      }
-    }
-    const hubCandidates=inView.slice().sort((a,b)=>{
-      const degA=(a.n.adj?a.n.adj.length:0);
-      const degB=(b.n.adj?b.n.adj.length:0);
-      return (degB*2+(b.n.score||0))-(degA*2+(a.n.score||0));
-    });
-    for(const hc of hubCandidates){
-      let tooClose=false;
-      for(const frId of focalRoots){
-        const fn=nodes[frId];
-        const rx=hc.n.x-fn.x,ry=hc.n.y-fn.y,rz=hc.n.z-fn.z;
-        if(rx*rx+ry*ry+rz*rz<0.36){tooClose=true;break;}
-      }
-      if(!tooClose){
-        focalRoots.push(hc.i);
-        if(focalRoots.length>=12)break;
-      }
-    }
-  }else if(!focalRoots.length){
-    const bestRoots=[];
-    for(let k=0;k<inView.length;k++){
-      const cand=inView[k];
-      if(cand.dot>0.45){
-        const fScore=Math.pow(cand.dot,2.5)*(0.35+0.65*(cand.n.score||cand.n.nf||0.5))/(0.2+cand.d);
-        bestRoots.push({i:cand.i,n:cand.n,score:fScore});
-      }
-    }
-    if(!bestRoots.length){
-      let topC=inView[0];
-      for(let k=1;k<inView.length;k++)if(inView[k].dot>topC.dot)topC=inView[k];
-      bestRoots.push({i:topC.i,n:topC.n,score:1});
-    }else{
-      bestRoots.sort((a,b)=>b.score-a.score);
-    }
-    for(const r of bestRoots){
-      let tooClose=false;
-      for(const frId of focalRoots){
-        const fn=nodes[frId];
-        const rx=r.n.x-fn.x,ry=r.n.y-fn.y,rz=r.n.z-fn.z;
-        if(rx*rx+ry*ry+rz*rz<0.16){tooClose=true;break;}
-      }
-      if(!tooClose){
-        focalRoots.push(r.i);
-        if(focalRoots.length>=3)break;
-      }
-    }
-  }
-
-  // Propagate connectivity along graph edges from focal roots so words appear by connectivity
-  const queue=[];
-  for(const r of focalRoots){
-    _connScores[r]=1;
-    _connVisited.push(r);
-    queue.push(r);
-  }
-  let qHead=0;
-  const maxQueue=isInside?800:350;
-  while(qHead<queue.length&&queue.length<maxQueue){
-    const u=queue[qHead++];
-    const uConn=_connScores[u];
-    if(uConn<0.10)continue;
-    const adj=nodes[u].adj;
-    if(!adj)continue;
-    for(let a=0;a<adj.length;a++){
-      const {j,e}=adj[a];
-      const edge=edges[e];
-      const edgeW=edge?(edge.wn||0.4):0.4;
-      const candConn=uConn*(0.35+0.65*edgeW);
-      if(candConn>0.06&&candConn>_connScores[j]){
-        if(_connScores[j]===0)_connVisited.push(j);
-        _connScores[j]=candConn;
-        queue.push(j);
-      }
-    }
-  }
-
-  // Score candidates by connectivity, view alignment, and distance
-  const qualified=[];
+  // Score all words in view by connectivity and prominence without filtering out disconnected words:
+  // Most connected words are evaluated first, compressing the view cleanly without visual bloat.
+  const scored=[];
   for(let k=0;k<inView.length;k++){
     const cand=inView[k];
     if(forcedSet.has(cand.i))continue;
-    const conn=_connScores[cand.i];
-    if(conn<=0.06)continue; // Exclude random disconnected words
+
+    // Connectivity: degree (number of connected edges) + edge weight sum
+    const degree=cand.n.adj?cand.n.adj.length:0;
+    let edgeWeightSum=0;
+    if(cand.n.adj){
+      for(let a=0;a<cand.n.adj.length;a++){
+        const ed=edges[cand.n.adj[a].e];
+        if(ed)edgeWeightSum+=(ed.wn||0.35);
+      }
+    }
+    const connScore=degree*2.0+edgeWeightSum*1.5+(cand.n.score||0)*2.5+(cand.n.nf||0.5);
+
     let alignWeight;
     if(isInside){
-      alignWeight=cand.dot>0?(0.7+0.5*Math.pow(cand.dot,1.2)):0.65;
+      alignWeight=cand.dot>0?(0.75+0.25*Math.pow(cand.dot,1.2)):0.65;
     }else{
-      alignWeight=Math.pow(cand.dot,1.4);
+      alignWeight=Math.pow(Math.max(0.01,cand.dot),1.2);
     }
-    const prominence=0.4+0.6*(cand.n.score||cand.n.nf||0.5);
-    cand.conn=conn;
-    cand.finalScore=conn*alignWeight*prominence/(0.3+(isInside?Math.min(cand.d,3.2):cand.d));
-    qualified.push(cand);
-  }
-  qualified.sort((a,b)=>b.finalScore-a.finalScore);
 
-  // Spacing filter: space words out in 3D and in screen view so they do not crowd or overlap
-  const minSpacing3D=(isInside?0.24:0.28)*(FS/1.25)*(WSZ/1.05);
+    let bonus=0;
+    if(SS.has(cand.i))bonus+=30;
+    if(Q&&Q.A&&Q.A[cand.i])bonus+=Q.A[cand.i]*15;
+
+    // Final priority: most connected words at focal view center first, with smooth distance weighting
+    cand.finalScore=(connScore+bonus)*alignWeight/(0.35+Math.min(cand.d,3.0));
+    scored.push(cand);
+  }
+  scored.sort((a,b)=>b.finalScore-a.finalScore);
+
+  // Spacing filter: compresses words into the most connected concepts so nearby words do not overlap or bloat
+  const minSpacing3D=(isInside?0.16:0.20)*(FS/1.25)*(WSZ/1.05);
   const minSpacing3Dsq=minSpacing3D*minSpacing3D;
-  const maxWords=isInside?Math.min(110,Math.max(50,Math.floor(nodes.length*0.4))):24;
+  const maxWords=isInside?Math.min(220,Math.max(90,Math.floor(nodes.length*0.75))):Math.min(140,Math.max(50,Math.floor(nodes.length*0.55)));
   const chosen=[];
 
-  for(let k=0;k<qualified.length;k++){
-    const cand=qualified[k];
+  for(let k=0;k<scored.length;k++){
+    const cand=scored[k];
     let tooClose=false;
-    // Check against forced static labels in view
+    // Check against forced static anchor labels in view
     for(const fId of forcedSet){
       const fn=nodes[fId];
       if(!fn)continue;
@@ -5111,7 +5024,7 @@ function lodLabels(dt){
       const ox=cand.n.x-other.n.x,oy=cand.n.y-other.n.y,oz=cand.n.z-other.n.z;
       if(ox*ox+oy*oy+oz*oz<minSpacing3Dsq){tooClose=true;break;}
       const cosAng=cand.dirX*other.dirX+cand.dirY*other.dirY+cand.dirZ*other.dirZ;
-      if(cosAng>0.994){tooClose=true;break;}
+      if(cosAng>0.995&&Math.abs(cand.d-other.d)<0.6){tooClose=true;break;}
     }
     if(tooClose)continue;
 
@@ -5119,7 +5032,7 @@ function lodLabels(dt){
     if(chosen.length>=maxWords)break;
   }
 
-  // Display active spaced-out connected words with smooth fade
+  // Display active spaced words with clean solid opacity
   const on=new Set();
   for(let k=0;k<chosen.length;k++){
     const cand=chosen[k];
@@ -5129,13 +5042,13 @@ function lodLabels(dt){
     if(sp.parent!==lodGroup){lodGroup.add(sp);wvPend=true;}
     let op;
     if(isInside){
-      const gazeBright=cand.dot>0?(0.75+0.25*Math.pow(cand.dot,1.2)):0.65;
-      const distFade=Math.min(1,Math.max(0.35,(maxProximity-cand.d)/(maxProximity*0.4)));
-      op=Math.min(1,Math.max(0.35,gazeBright*distFade*(0.5+0.5*cand.conn)));
+      const gazeBright=cand.dot>0?(0.8+0.2*Math.pow(cand.dot,1.2)):0.7;
+      const distFade=Math.min(1,Math.max(0.4,(maxProximity-cand.d)/(maxProximity*0.3)));
+      op=Math.min(1,Math.max(0.5,gazeBright*distFade));
     }else{
-      const viewFade=Math.min(1,Math.max(0,(cand.dot-0.35)/0.22));
-      const distFade=Math.min(1,Math.max(0,(maxProximity-cand.d)/0.6));
-      op=Math.min(1,Math.max(0.2,viewFade*distFade*(0.45+0.55*cand.conn)));
+      const viewFade=Math.min(1,Math.max(0.35,(cand.dot-0.28)/0.22));
+      const distFade=Math.min(1,Math.max(0.35,(maxProximity-cand.d)/1.2));
+      op=Math.min(1,Math.max(0.5,viewFade*distFade));
     }
     sp.material.opacity=op;
   }
@@ -5143,7 +5056,7 @@ function lodLabels(dt){
   for(const [i,sp] of lodMap){
     if(!on.has(i)){
       if(sp.parent===lodGroup){lodGroup.remove(sp);wvPend=true;}
-      if(lodMap.size>300){sp.material.map.dispose();sp.material.dispose();lodMap.delete(i);}
+      if(lodMap.size>350){sp.material.map.dispose();sp.material.dispose();lodMap.delete(i);}
     }
   }
 }
