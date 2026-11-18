@@ -2112,19 +2112,38 @@ function updateOrbHalos(){
   orbs.forEach((orb,d)=>{
     const C=orb.center,R=orb.radius||1.25,grp=new THREE.Group();grp.position.set(C[0],C[1],C[2]);
     const orbColor=getDocColor(d);
-    const c=document.createElement('canvas');c.width=1024;c.height=256;const ctx=c.getContext('2d');
-    ctx.font='600 70px Inter,system-ui,-apple-system,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.shadowColor=orbColor.hex;ctx.shadowBlur=24;ctx.fillStyle='#ffffff';
-    let lt=(orb.name||('File '+(d+1))).replace(/^Demo:\s*/i,'');
-    let lfs=96;ctx.font='700 '+lfs+'px Inter,system-ui,-apple-system,sans-serif';
-    let ltw=ctx.measureText('\u2725 '+lt).width;
-    if(ltw>960){lfs=Math.max(40,Math.floor(lfs*(960/ltw)));ctx.font='700 '+lfs+'px Inter,system-ui,-apple-system,sans-serif';}
-    ctx.fillText('\u2725 '+lt,512,96);
-    ctx.font='600 54px Inter,system-ui,-apple-system,sans-serif';ctx.fillStyle=orbColor.hex;
-    ctx.fillText(`${orb.nodeCount} concepts \u00b7 drag to move`,512,196);
+    const c=document.createElement('canvas');
+    c.width=1024;
+    const ctx=c.getContext('2d');
+    const name=orb.name||('File '+(d+1));
+    const nameFont='700 96px Inter,system-ui,-apple-system,sans-serif';
+    ctx.font=nameFont;
+    const lines=[];
+    let line='';
+    const characters=new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(name);
+    for(const {segment} of characters){
+      if(line&&ctx.measureText(line+segment).width>928){
+        lines.push(line);
+        line='';
+      }
+      line+=segment;
+    }
+    lines.push(line);
+    const extraHeight=(lines.length-1)*110;
+    c.height=256+extraHeight;
+    ctx.font=nameFont;
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.shadowColor=orbColor.hex;
+    ctx.shadowBlur=24;
+    ctx.fillStyle='#fff';
+    lines.forEach((text,i)=>ctx.fillText(text,512,96+i*110,928));
+    ctx.font='600 54px Inter,system-ui,-apple-system,sans-serif';
+    ctx.fillStyle=orbColor.hex;
+    ctx.fillText(orb.nodeCount+' concepts · drag to move',512,196+extraHeight);
     const tx=new THREE.CanvasTexture(c);tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
     const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false,blending:THREE.AdditiveBlending}));
-    sp.position.set(0,R+.6,0);sp.scale.set(1.2*FS,.3*FS,1);sp.renderOrder=15;sp.userData.orbIdx=d;
+    sp.position.set(0,R+.6,0);sp.scale.set(1.2*FS,.3*FS*c.height/256,1);sp.center.y=128/c.height;sp.renderOrder=15;sp.userData.orbIdx=d;
     grp.add(sp);orbHaloGroup.add(grp);orbHaloObjs[d]=grp;orbLabels.push(sp);
   });
 }
@@ -2672,7 +2691,7 @@ function renderDocs(){
   `:'';
   docsEl.innerHTML=`<div class="dh"><span>${curDocs.length} attached text${curDocs.length===1?'':'s'}</span>${curDocs.length>1?'<button id="ctx" title="Remove all attached text and its saved copy">\u2715 Clear All</button>':''}<span>${curDocs.reduce((a,d)=>a+wc(d.text),0).toLocaleString()} words</span></div>`+
     modeRow+
-    curDocs.map((d,i)=>`<div class="dr"><button class="dn" data-v="${i}" title="Show or hide a preview">${docOpen.has(d.name)?'\u25be':'\u25b8'} ${esc(d.name)}</button><span class="dm">${wc(d.text).toLocaleString()} w</span><button class="dx" data-d="${i}" title="Remove ${esc(d.name)}" aria-label="Remove ${esc(d.name)}">\u00d7</button></div>`+
+    curDocs.map((d,i)=>`<div class="dr"><button class="dn" data-v="${i}" title="Show or hide a preview" aria-expanded="${docOpen.has(d.name)}">${esc(d.name)}</button><span class="dm">${wc(d.text).toLocaleString()} w</span><button class="dx" data-d="${i}" title="Remove ${esc(d.name)}" aria-label="Remove ${esc(d.name)}">\u00d7</button></div>`+
     (docOpen.has(d.name)?`<pre class="dp">${esc(d.text.slice(0,1500))}${d.text.length>1500?'\n\u2026':''}</pre>`:'')).join('')+
     `<div class="da"><button id="docadd" title="Add more text files to the field">+ Add more files</button></div>`;
 }
