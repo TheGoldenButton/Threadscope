@@ -4389,15 +4389,16 @@ function gestures(dt){
   if(act.length)seatWanted=false;
   if(act.length===2){
     const a=P[0],b=P[1],d=a.distanceTo(b),M=a.clone().add(b).multiplyScalar(.5),v=b.clone().sub(a);
-    const fresh=()=>({d:Math.max(d,.05),v:v.clone(),M,P:G.position.clone(),s:G.scale.x,q:G.quaternion.clone()});
+    // Nearly coincident pinch points do not define a reliable rotation axis.
+    if(d<.025)return;
     if(fieldMode==='separated'&&orbs.length>1){
       if(mode!=='two'){
+        const targets=P.map((point,i)=>mode==='one'&&gi===i&&g1.ob>=0?g1.ob:aimOrb(rig[i],point));
         orbFinish();grabbing=false;mode='two';
-        const targets=P.map((point,i)=>aimOrb(rig[i],point));
-        const same=targets[0]>=0&&targets[0]===targets[1]?targets[0]:orbAtWorld(M);
+        const same=targets[0]>=0&&targets[0]===targets[1]?targets[0]:(targets.find(index=>index>=0)??orbAtWorld(M));
         if(same>=0&&!(targets[0]>=0&&targets[1]>=0&&targets[0]!==targets[1])){
           const orb=orbs[same];
-          g0={resize:same,pv:v.clone(),d:Math.max(d,.025),scale:orb.scale||1,
+          g0={resize:same,axis:v.clone().normalize(),rotation:new THREE.Quaternion(),d,scale:orb.scale||1,
             midpoint:G.worldToLocal(M.clone()),center:new THREE.Vector3().fromArray(orb.center)};
           return;
         }
@@ -4412,14 +4413,14 @@ function gestures(dt){
       if(g0.resize!==undefined){
         const index=g0.resize,orb=orbs[index];
         if(!orb)return;
-        let twisted=false;
-        if(g0.pv&&g0.pv.lengthSq()>1e-6&&v.lengthSq()>1e-6){
-          const Rw=new THREE.Quaternion().setFromUnitVectors(g0.pv.clone().normalize(),v.clone().normalize());
-          if(Math.abs(Rw.w)<.99999){_gq.copy(G.quaternion);rotateOrb(index,_gq.clone().invert().multiply(Rw).multiply(_gq));twisted=true;}
-          g0.pv=v.clone();
-        }
-        const resized=resizeOrb(index,g0.scale*Math.max(d,.01)/g0.d);
-        const center=G.worldToLocal(M.clone()).sub(g0.midpoint).add(g0.center);
+        const worldTurn=new THREE.Quaternion().setFromUnitVectors(g0.axis,v.normalize());
+        const turn=G.quaternion.clone().invert().multiply(worldTurn).multiply(G.quaternion);
+        const delta=turn.clone().multiply(g0.rotation.clone().invert());
+        const twisted=Math.abs(delta.w)<1-1e-12;
+        if(twisted){rotateOrb(index,delta);g0.rotation.copy(turn);}
+        const resized=resizeOrb(index,g0.scale*d/g0.d);
+        const center=g0.center.clone().sub(g0.midpoint).applyQuaternion(g0.rotation)
+          .multiplyScalar((orb.scale||1)/g0.scale).add(G.worldToLocal(M.clone()));
         if(center.distanceToSquared(new THREE.Vector3().fromArray(orb.center))>1e-12)moveOrb(index,center.toArray());
         else if(resized||twisted)updateMovedOrbs();
         return;
@@ -4431,14 +4432,17 @@ function gestures(dt){
       });
       return;
     }
-    if(mode!=='two'){orbFinish();if(g1)g1.moved=true;g0=Object.assign(fresh(),{on:false});mode='two';}
-    else if(!g0.on){
-      if(Math.abs(d/g0.d-1)>.1||v.clone().normalize().angleTo(g0.v.clone().normalize())>.15||(MOVE&&M.distanceTo(g0.M)>.05))g0=Object.assign(fresh(),{on:true});
-    }else{
-      const s=THREE.MathUtils.clamp(g0.s*Math.max(d,.02)/g0.d,.08,8),R=new THREE.Quaternion().setFromUnitVectors(g0.v.clone().normalize(),v.clone().normalize());
-      G.scale.setScalar(s);G.quaternion.copy(R).multiply(g0.q);
-      if(MOVE)G.position.copy(g0.P).add(M.clone().sub(g0.M));
+    if(mode!=='two'){
+      orbFinish();g1.moved=true;mode='two';
+      g0={d,axis:v.normalize(),midpoint:M,offset:G.position.clone().sub(M),scale:G.scale.x,rotation:G.quaternion.clone()};
+      return;
     }
+    const scale=THREE.MathUtils.clamp(g0.scale*d/g0.d,.08,8);
+    const turn=new THREE.Quaternion().setFromUnitVectors(g0.axis,v.normalize());
+    G.scale.setScalar(scale);
+    G.quaternion.copy(turn).multiply(g0.rotation);
+    G.position.copy(g0.offset).applyQuaternion(turn).multiplyScalar(scale/g0.scale)
+      .add(MOVE?M:g0.midpoint);
   }else if(act.length===1){
     const i=act[0],p=P[i];
     if(mode!=='one'||gi!==i){
