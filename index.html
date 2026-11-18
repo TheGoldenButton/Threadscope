@@ -249,7 +249,7 @@ input[type=text],input[type=password],select,textarea{background:rgba(255,255,25
  <label class="f" for="scut">Query pruning: emerged words and passages must connect the query terms at least this strongly (0 to 1, relative to the best)</label><input id="scut" type="text" inputmode="decimal" autocomplete="off">
 </div>
 <button id="helpbtn" aria-label="Help" aria-expanded="false" title="Help">?</button>
-<div id="hint" class="panel" hidden>Desktop: drag to orbit, wheel to zoom, WASD/QE to fly, click concepts to select several (selected words pulse; click again to deselect). Search skips common filler words, while keeping recognized phrases and negation. In AR, a query bar, keyboard and a results box float in view (point and pinch or trigger the bar to type). The keyboard's mic key dictates into the bar with Whisper: press it, speak, press it again, then press W for Wikipedia or Ask. Or open your palm (the orb) or tap the mic and say &ldquo;Wikipedia: your topic&rdquo; to pull that page in; add &ldquo;as its own sphere&rdquo; or &ldquo;into the unified space&rdquo; to choose where it lands. Mixed reality (Quest 3): press Enter mixed reality to see your room through the passthrough cameras. Pinch and drag anywhere to carry the data sphere (the right stick spins it), pinch with both hands and spread to resize and twist it, quick pinch on a word to select it (or tap a selected word chip in the list box to deselect it); select several to see how they connect, and pinch a selected word again to deselect it. Two hands pushing out pushes the orbs away; motioning forward pulls them toward you. Pointing at words in the word list highlights them with a SELECT cue for easy clicking. The field remembers where you put it between mixed-reality sessions. A adds the selected concept to the query, B clears. Press Place on the panel to snap the field onto a wall, table or floor. In AR the top buttons are: + paste copied text, \u21C4 switch saved text, W fetch Wikipedia for the typed topic, \u00B6 source passages, and the gear opens Settings. Brighter nodes are more frequent words. Zoom out and neighbouring words collapse into the most dominant word of their area (bigger dot, labelled); zoom in and they expand again. The field learns as you use it: words you query or select together are drawn a little closer each time, and the arrangement is saved per text. Line colour is based on how often the words at each end occur in your text: rare words are violet and blue, then green and yellow, and the most frequent words are orange and red, so each line blends between its two ends. The results box scrolls: thumbstick while pointing at it, or (hand tracking) touch it with your index fingertip and slide up or down like a touchscreen, with a flick for momentum; tap a row to select that word. Source passages: select a concept (or click a link line, or press the ¶ button on a row) to see the sentences where the words occur, with the document name; how many are shown adapts to how strongly the words resonate. Voice: hold out an open palm (palm up or toward you) steadily for about three quarters of a second in mixed reality with hand tracking. An orb appears in your hand with lightning arcing to the network; speak, then close your hand or pull it away to send. Whisper runs in your browser (the first use downloads a small model). On desktop, or with controllers, use the mic button. Attach PDF, Word or HTML files, or fetch URLs. Wikipedia takes several voices at once: &ldquo;Wikipedia Nikola Tesla and Aleister Crowley and Edgar Cayce&rdquo; makes one orb each. In Separated Orbs each orb is fully independent: pinch and drag an orb in mixed reality, or on desktop drag any of its words or its label to move it anywhere; Shift+wheel over an orb resizes it, and right-drag or Alt+drag on an orb rotates just that orb, zooming toward an orb expands its collapsed words on their own. The gold threads between orbs are labelled with words that are not in your query but sit beside it in more than one file. In AR the panels stay where they are until you turn your head more than 60&deg; either way, then swing round to face you.</div>
+<div id="hint" class="panel" hidden>Desktop: drag to orbit, wheel to zoom, WASD/QE to fly, click concepts to select several (selected words pulse; click again to deselect). Search skips common filler words, while keeping recognized phrases and negation. In AR, a query bar, keyboard and a results box float in view (point and pinch or trigger the bar to type). The keyboard's mic key dictates into the bar with Whisper: press it, speak, press it again, then press W for Wikipedia or Ask. Or open your palm (the orb) or tap the mic and say &ldquo;Wikipedia: your topic&rdquo; to pull that page in; add &ldquo;as its own sphere&rdquo; or &ldquo;into the unified space&rdquo; to choose where it lands. Mixed reality (Quest 3): press Enter mixed reality to see your room through the passthrough cameras. Pinch and drag anywhere to carry the data sphere (the right stick spins it), pinch with both hands and spread to resize and twist it, quick pinch on a word to select it (or tap a selected word chip in the list box to deselect it); select several to see how they connect, and pinch a selected word again to deselect it. Two hands pushing out pushes the orbs away; motioning forward pulls them toward you. Pointing at words in the word list highlights them with a SELECT cue for easy clicking. The field remembers where you put it between mixed-reality sessions. A adds the selected concept to the query, B clears. Press Place on the panel to snap the field onto a wall, table or floor. In AR the top buttons are: + paste copied text, \u21C4 switch saved text, W fetch Wikipedia for the typed topic, 🌳 history, and the gear opens Settings. Brighter nodes are more frequent words. Zoom out and neighbouring words collapse into the most dominant word of their area (bigger dot, labelled); zoom in and they expand again. The field learns as you use it: words you query or select together are drawn a little closer each time, and the arrangement is saved per text. Line colour is based on how often the words at each end occur in your text: rare words are violet and blue, then green and yellow, and the most frequent words are orange and red, so each line blends between its two ends. The results box scrolls: thumbstick while pointing at it, or (hand tracking) touch it with your index fingertip and slide up or down like a touchscreen, with a flick for momentum; tap a row to select that word. Source passages: select a concept (or click a link line, or press the ¶ button on a row) to see the sentences where the words occur, with the document name; how many are shown adapts to how strongly the words resonate. Voice: hold out an open palm (palm up or toward you) steadily for about three quarters of a second in mixed reality with hand tracking. An orb appears in your hand with lightning arcing to the network; speak, then close your hand or pull it away to send. Whisper runs in your browser (the first use downloads a small model). On desktop, or with controllers, use the mic button. Attach PDF, Word or HTML files, or fetch URLs. Wikipedia takes several voices at once: &ldquo;Wikipedia Nikola Tesla and Aleister Crowley and Edgar Cayce&rdquo; makes one orb each. In Separated Orbs each orb is fully independent: pinch and drag an orb in mixed reality, or on desktop drag any of its words or its label to move it anywhere; Shift+wheel over an orb resizes it, and right-drag or Alt+drag on an orb rotates just that orb, zooming toward an orb expands its collapsed words on their own. The gold threads between orbs are labelled with words that are not in your query but sit beside it in more than one file. In AR the panels stay where they are until you turn your head more than 60&deg; either way, then swing round to face you.</div>
 </div>
 <script type="text/plain" id="engine-src">
 
@@ -3374,8 +3374,8 @@ function hud(){
     {id:'mic',x:sbX-280,y:106,w:56,h:56,act:'mic'},
     {id:'dcnt',x:sbX-396,y:106,w:96,h:56,act:'dcnt',dk:true},
     {id:'reset',label:'Reset',x:B-320,y:98,w:76,h:72,tool:true,act:'reset'},
-    {id:'pass',label:'Passages',x:B-236,y:98,w:76,h:72,tool:true,act:'pass'},
-    {id:'set',label:'Settings',x:B-68,y:98,w:76,h:72,tool:true,act:'set'},
+    {id:'hist',label:'History',x:B-236,y:98,w:76,h:72,tool:true,act:'hist'},
+    {id:'set',label:'Settings',x:B-152,y:98,w:76,h:72,tool:true,act:'set'},
     {id:'toggle',x:sbX+8,y:106,w:56,h:56,act:'toggle'},
     {id:'field',x:sbX+72,y:106,w:440,h:56,act:'open'},
     {id:'ask',label:'',x:sbX+524,y:106,w:56,h:56,act:'ask'},
@@ -3411,7 +3411,7 @@ function drawKB(){
       rr(x,k.x,k.y,k.w,k.h,10);
       x.fillStyle=fl?'#916b34':on?'#52667c':'#324357';x.fill();
       x.textAlign='center';x.fillStyle='#d6f6ff';x.font='30px '+F;
-      x.fillText(({reset:'↺',pass:'¶',hist:document.getElementById('hbtn').textContent,set:'⚙'})[k.id],cx,k.y+23);
+      x.fillText(({reset:'↺',hist:document.getElementById('hbtn').textContent,set:'⚙'})[k.id],cx,k.y+23);
       x.font='600 16px '+F;x.fillText(k.label,cx,k.y+54,k.w-4);x.textAlign='left';
       continue;
     }
@@ -3507,7 +3507,7 @@ function keyAct(k,r){
   else if(k.act==='snd'){setSound(!AU.on);xrNote=AU.on?'Sound on':'Sound off';hud();}
   else if(k.act==='corp')xrCycleCorpus();
   else if(k.act==='wiki')toggleWikiXR();
-  else if(k.act==='pass'){if(psXR){psXR=false;rdD=true;}else{const sp=curSpec()||(SS.size?specSel():null);if(!sp){xrNote='Select a word or ask a question first';hud();}else{psXR=true;PS.auto=true;rdD=true;showPassages(sp);}}}
+  else if(k.act==='hist')toggleFilesXR(true);
   else if(k.act==='set')toggleSettingsXR();
   else if(k.act==='reset')resetReq=true;
   else if(k.act==='help'){xrNote=fieldMode==='separated'?'Pinch and drag an orb to move it. Pinch the same orb with both hands and spread or close them to resize.':'Pinch to select. Drag to move the field. Two hands resize and turn it.';hud();}
@@ -5185,20 +5185,20 @@ const fcv=document.createElement('canvas'); fcv.width=FBW*PQ; fcv.height=FBH*PQ;
 const fx=fcv.getContext('2d'), ftex=new THREE.CanvasTexture(fcv); ftex.colorSpace=THREE.SRGBColorSpace; ftex.anisotropy=8;
 const fb=new THREE.Mesh(new THREE.PlaneGeometry(.5, .5*FBH/FBW), new THREE.MeshBasicMaterial({map:ftex, transparent:true, depthTest:false, side:THREE.DoubleSide}));
 fb.renderOrder=33; fb.visible=false; fb.frustumCulled=false; scene.add(fb);
-let fbOpen=false, fbPlaced=false, fbHov=null, fbD=true, fbPage=0, fbPend=null, fbStatus='', fbSig='', fbCnt=-1;
+let fbHistory=false, fbOpen=false, fbPlaced=false, fbHov=null, fbD=true, fbPage=0, fbPend=null, fbStatus='', fbSig='', fbCnt=-1;
 const fwc=t=>t.split(/\s+/).filter(Boolean).length;
 let _fbc=null,_fbk='';
 function fbBtns(){
-  const n0=curDocs.length,pk=n0+'|'+fbPage;if(_fbc&&_fbk===pk)return _fbc;
+  const n0=fbHistory?hist.length:curDocs.length,pk=fbHistory+'|'+n0+'|'+fbPage;if(_fbc&&_fbk===pk)return _fbc;
   const n=n0,out=[{id:'x',x:FBW-68,y:16,w:52,h:46}];
-  if(n>1)out.push({id:'clear',x:FBW-258,y:16,w:178,h:46},{id:'lay',x:32,y:76,w:FBW-64,h:46});
+  if(!fbHistory&&n>1)out.push({id:'clear',x:FBW-258,y:16,w:178,h:46},{id:'lay',x:32,y:76,w:FBW-64,h:46});
   const pages=Math.max(1,Math.ceil(n/FB_ROWS));fbPage=Math.min(fbPage,pages-1);
-  for(let i=0;i<FB_ROWS;i++){if(fbPage*FB_ROWS+i>=n)break;out.push({id:'del_'+i,idx:fbPage*FB_ROWS+i,x:FBW-32-110,y:132+i*74,w:110,h:64});}
+  for(let i=0;i<FB_ROWS;i++){if(fbPage*FB_ROWS+i>=n)break;if(fbHistory){out.push({id:'restore_'+i,idx:fbPage*FB_ROWS+i,x:32,y:132+i*74,w:FBW-64,h:64});continue;}out.push({id:'del_'+i,idx:fbPage*FB_ROWS+i,x:FBW-32-110,y:132+i*74,w:110,h:64});}
   if(pages>1)out.push({id:'prev',x:32,y:FBH-72,w:110,h:52},{id:'next',x:FBW-142,y:FBH-72,w:110,h:52});
-  _fbc=out;_fbk=n0+'|'+fbPage;return out;
+  _fbc=out;_fbk=fbHistory+'|'+n0+'|'+fbPage;return out;
 }
-function toggleFilesXR(){
-  fbOpen=!fbOpen; fb.visible=fbOpen;
+function toggleFilesXR(history=false){
+  fbOpen=!fbOpen||history!==fbHistory; fbHistory=history; fb.visible=fbOpen;
   if(fbOpen){fbPlaced=false;fbD=true;fbPend=null;fbStatus='';fbPage=0;sbOpen=false;sb.visible=false;wbOpen=false;wb.visible=false;}
   kDirty=true;
 }
@@ -5220,7 +5220,8 @@ async function filesRemove(i){
 function filesAct(k){
   if(!k) return;
   sfxTick(1);
-  if(k.id==='x'){ toggleFilesXR(); return; }
+  if(k.id==='x'){ toggleFilesXR(fbHistory); return; }
+  if(k.id.startsWith('restore_')){const entry=hist[k.idx];if(entry&&!replaying){toggleFilesXR(true);openEntry(entry).catch(e=>xrDone(e.message));}return;}
   if(k.id==='prev'){ fbPage=Math.max(0,fbPage-1); fbPend=null; }
   else if(k.id==='next'){ fbPage++; fbPend=null; }
   else if(k.id==='lay'){ setFieldMode(fieldMode==='separated'?'unified':'separated'); }
@@ -5234,19 +5235,20 @@ function filesAct(k){
   fbD=true;
 }
 function drawFbIfDirty(){
-  const sig=curDocs.map(d=>d.name).join('|');
+  const sig=fbHistory?String(hist[0]?.id)+'|'+hist.length:curDocs.map(d=>d.name).join('|');
   if(sig!==fbSig){fbSig=sig;fbD=true;fbPend=null;}
-  if(curDocs.length!==fbCnt){fbCnt=curDocs.length;kDirty=true;if(!curDocs.length&&fbOpen){fbOpen=false;fb.visible=false;}}
+  if(curDocs.length!==fbCnt){fbCnt=curDocs.length;kDirty=true;if(!fbHistory&&!curDocs.length&&fbOpen){fbOpen=false;fb.visible=false;}}
   if(!fb.visible){ fbPlaced=false; return; }
   if(!fbPlaced){ placeBoard(fb); fbPlaced=true; fbD=true; }
   if(!fbD) return;
   fbD=false;
-  const x=fx,F=FNT,n=curDocs.length,pages=Math.max(1,Math.ceil(n/FB_ROWS));
+  const x=fx,F=FNT,n=fbHistory?hist.length:curDocs.length,pages=Math.max(1,Math.ceil(n/FB_ROWS));
   x.setTransform(PQ,0,0,PQ,0,0); x.clearRect(0,0,FBW,FBH);
   rr(x,0,0,FBW,FBH,20); x.fillStyle='rgba(6,16,30,.94)'; x.fill();
   rr(x,1.5,1.5,FBW-3,FBH-3,20); x.strokeStyle='rgba(255,179,71,.85)'; x.lineWidth=3; x.stroke();
   x.textBaseline='middle'; x.textAlign='left'; x.font='700 30px '+F; x.fillStyle='#ffe2a8';
-  x.fillText(n+' attached text'+(n===1?'':'s')+' \u00b7 '+curDocs.reduce((a,d)=>a+fwc(d.text),0).toLocaleString()+' words',32,38,FBW-330);
+  if(fbHistory)x.fillText(n?'History':'History — no saved results yet',32,38,FBW-130);
+  else x.fillText(n+' attached text'+(n===1?'':'s')+' \u00b7 '+curDocs.reduce((a,d)=>a+fwc(d.text),0).toLocaleString()+' words',32,38,FBW-330);
   const btn=(k,label,hov,col,font)=>{
     rr(x,k.x,k.y,k.w,k.h,10); x.fillStyle=hov?(col==='r'?'rgba(255,100,100,.45)':'rgba(93,240,255,.32)'):(col==='r'?'rgba(255,138,138,.12)':'rgba(255,255,255,.09)'); x.fill();
     x.strokeStyle=hov?'#ffe2a8':(col==='r'?'rgba(255,138,138,.7)':'rgba(255,255,255,.35)'); x.lineWidth=hov?2.5:1.5; x.stroke();
@@ -5254,6 +5256,7 @@ function drawFbIfDirty(){
   fbBtns().forEach(k=>{
     const hov=fbHov===k||(fbHov&&fbHov.id===k.id);
     if(k.id==='x') btn(k,'\u2715',hov,'r','600 28px '+F);
+    else if(k.id.startsWith('restore_')) btn(k,hist[k.idx].text,hov);
     else if(k.id==='clear') btn(k,fbPend==='all'?'Tap to confirm':'\u2715 Clear all',hov,'r','600 20px '+F);
     else if(k.id==='lay') btn(k,'Field layout: '+(fieldMode==='separated'?'Separated orbs (tap for Unified)':'Unified (tap for Separated orbs)'),hov);
     else if(k.id==='prev') btn(k,'\u2039 Prev',hov);
@@ -5268,7 +5271,7 @@ function drawFbIfDirty(){
   });
   if(n>FB_ROWS){ x.textAlign='center'; x.font='20px '+F; x.fillStyle='rgba(214,246,255,.7)'; x.fillText('Page '+(fbPage+1)+' of '+pages,FBW/2,FBH-46); }
   x.textAlign='center'; x.font='18px '+F; x.fillStyle='rgba(214,246,255,.6)';
-  x.fillText(fbStatus||'Tap Remove twice to confirm. Drag the title bar to move.',FBW/2,FBH-14,FBW-40);
+  x.fillText(fbHistory?'Select a saved result to restore it.':fbStatus||'Tap Remove twice to confirm. Drag the title bar to move.',FBW/2,FBH-14,FBW-40);
   ftex.needsUpdate=true;
 }
 function colBuild(size){
