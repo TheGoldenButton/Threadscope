@@ -2728,10 +2728,11 @@ function updateInfo(){
 const baseDocs=()=>isDemoCorpus(curCorpus)?[]:curDocs;
 async function load(files){
   const nw=await readFiles(files);
-  if(!nw.length)return;
+  if(!nw.length)return 0;
   const keep=baseDocs().filter(d=>!nw.some(n=>n.name===d.name));
   await ingest([...keep,...nw]);
   $('#file').value='';
+  return nw.length;
 }
 const docsEl=$('#docs'),docOpen=new Set();let docsOpen=false;
 function renderDocs(){
@@ -3535,7 +3536,7 @@ function hud(){
     {id:'plus',x:sbX-140,y:106,w:56,h:56,act:'plus'},
     {id:'snd',x:sbX-210,y:106,w:56,h:56,act:'snd'},
     {id:'mic',x:sbX-280,y:106,w:56,h:56,act:'mic'},
-    {id:'dcnt',x:sbX-396,y:106,w:96,h:56,act:'dcnt',dk:true},
+    {id:'dcnt',x:sbX-396,y:106,w:96,h:56,act:'dcnt'},
     {id:'reset',label:'Reset',x:B-320,y:98,w:76,h:72,tool:true,act:'reset'},
     {id:'hist',label:'History',x:B-236,y:98,w:76,h:72,tool:true,act:'hist'},
     {id:'set',label:'Settings',x:B-152,y:98,w:76,h:72,tool:true,act:'set'},
@@ -3603,7 +3604,7 @@ function drawKB(){
     rr(x,k.x,k.y,k.w,k.h,10);
     x.fillStyle=(fl||(k.id==='move'&&MOVE)||(k.act==='kmic'&&VOICE.dict&&(VOICE.st==='rec'||VOICE.st==='starting')))?'rgba(255,179,71,.6)':on?'rgba(255,255,255,.3)':'rgba(255,255,255,.12)';x.fill();
     x.strokeStyle=on?'rgba(255,255,255,.8)':'rgba(255,255,255,.42)';x.lineWidth=2;x.stroke();
-    const lab=k.id==='dcnt'?curDocs.length+(fbOpen?' \u25b4':' \u25be'):(k.kbk&&k.act==='ask'&&wbOpen)?'Search':k.id==='place'?'Place':k.id==='move'?(MOVE?'Move':'Spin'):k.id==='toggle'?(kbOpen?'hide':'keys'):k.id==='hideui'?(HUIDE?'Show UI':'Hide UI'):k.act==='kmic'?(VOICE.dict&&(VOICE.st==='rec'||VOICE.st==='starting')?'\u25CF':'\uD83C\uDFA4'):k.label;
+    const lab=k.id==='dcnt'?'Files '+curDocs.length+(fbOpen?' \u25b4':' \u25be'):(k.kbk&&k.act==='ask'&&wbOpen)?'Search':k.id==='place'?'Place':k.id==='move'?(MOVE?'Move':'Spin'):k.id==='toggle'?(kbOpen?'hide':'keys'):k.id==='hideui'?(HUIDE?'Show UI':'Hide UI'):k.act==='kmic'?(VOICE.dict&&(VOICE.st==='rec'||VOICE.st==='starting')?'\u25CF':'\uD83C\uDFA4'):k.label;
     x.font=(k.kbk?'600 30px ':'600 24px ')+F;x.fillStyle=k.act==='ask'?'#ffb347':'#d6fbff';x.textAlign='center';
     x.fillText(lab,k.x+k.w/2,k.y+k.h/2+1,k.w-10);
     x.globalAlpha=1;
@@ -4394,6 +4395,9 @@ for(let i=0;i<2;i++){
   c.addEventListener('disconnected',()=>Object.assign(c.userData,{on:false,isHand:false,src:null,sq:false,tr:false}));
   c.addEventListener('squeezestart',()=>c.userData.sq=true);c.addEventListener('squeezeend',()=>c.userData.sq=false);
   c.addEventListener('selectend',()=>{c.userData.tr=false;});
+  c.addEventListener('select',()=>{
+    if(fb.visible&&!fbHistory&&filesHit(c)?.k?.id==='add')pickImmersiveFiles();
+  });
   c.addEventListener('selectstart',e=>{if(e.data.hand)return;c.userData.tr=true;if(!nodes.length||placing||panelHit(c)||infoHit(c)||rdHit(c)||settingsHit(c)||wikiHit(c)||filesHit(c))return;
     const o=c.getWorldPosition(new THREE.Vector3()),d=new THREE.Vector3(0,0,-1).applyQuaternion(c.getWorldQuaternion(new THREE.Quaternion()));
     ray.set(o,d);
@@ -5485,7 +5489,8 @@ let _fbc=null,_fbk='';
 function fbBtns(){
   const n0=fbHistory?hist.length:curDocs.length,pk=fbHistory+'|'+n0+'|'+fbPage;if(_fbc&&_fbk===pk)return _fbc;
   const n=n0,out=[{id:'x',x:FBW-68,y:16,w:52,h:46}];
-  if(!fbHistory&&n>1)out.push({id:'clear',x:FBW-258,y:16,w:178,h:46},{id:'lay',x:32,y:76,w:FBW-64,h:46});
+  if(!fbHistory)out.push({id:'add',x:32,y:76,w:240,h:46},{id:'browser',x:282,y:76,w:260,h:46});
+  if(!fbHistory&&n>1)out.push({id:'clear',x:FBW-258,y:16,w:178,h:46},{id:'lay',x:552,y:76,w:FBW-584,h:46});
   const pages=Math.max(1,Math.ceil(n/FB_ROWS));fbPage=Math.min(fbPage,pages-1);
   for(let i=0;i<FB_ROWS;i++){if(fbPage*FB_ROWS+i>=n)break;if(fbHistory){out.push({id:'restore_'+i,idx:fbPage*FB_ROWS+i,x:32,y:132+i*74,w:FBW-64,h:64});continue;}out.push({id:'del_'+i,idx:fbPage*FB_ROWS+i,x:FBW-32-110,y:132+i*74,w:110,h:64});}
   if(pages>1)out.push({id:'prev',x:32,y:FBH-72,w:110,h:52},{id:'next',x:FBW-142,y:FBH-72,w:110,h:52});
@@ -5511,9 +5516,50 @@ async function filesRemove(i){
   catch(e){ fbStatus='Could not remove: '+(e&&e.message||e); }
   fbD=true; kDirty=true;
 }
+let xrPicking=false;
+async function pickImmersiveFiles(){
+  if(xrPicking||ingesting)return;
+  xrPicking=true;
+  try{
+    if(!window.showOpenFilePicker){
+      fbStatus='Select Use browser picker to open files on this device.';
+      return;
+    }
+    const handles=await window.showOpenFilePicker({multiple:true,types:[{description:'Text files',accept:{'text/plain':['.txt','.text','.md','.csv']}}]});
+    fbStatus='Reading files…';fbD=true;
+    const files=await Promise.all(handles.map(handle=>handle.getFile()));
+    const added=await load(files);
+    fbStatus=added?'Loaded '+added+' file(s).':'No readable text found.';
+  }catch(e){
+    fbStatus=e.name==='AbortError'?'Selection canceled.':'Select Use browser picker to choose files outside this session.';
+  }finally{xrPicking=false;fbD=true;}
+}
+async function openBrowserImport(){
+  if(xrPicking||ingesting)return;
+  const session=renderer.xr.getSession(),mode=activeXRMode;
+  if(!session)return;
+  await session.end();
+  const dialog=document.createElement('dialog');
+  dialog.innerHTML='<p>Choose text files to add to the field.</p><input type="file" multiple><p role="status"></p><button type="button">Return to '+(mode==='immersive-ar'?'AR':'VR')+'</button>';
+  const input=dialog.querySelector('input'),back=dialog.querySelector('button'),status=dialog.querySelector('[role=status]');
+  input.accept=document.querySelector('#file').accept;
+  input.onchange=async()=>{
+    input.disabled=back.disabled=true;
+    status.textContent='Reading files…';
+    try{const added=await load(input.files);status.textContent=added?'Loaded '+added+' file(s).':'No readable text found.';}
+    catch(e){status.textContent=e.message;}
+    finally{input.value='';input.disabled=back.disabled=false;}
+  };
+  back.onclick=()=>{dialog.close();startXR(mode);};
+  dialog.onclose=()=>dialog.remove();
+  document.body.append(dialog);
+  dialog.showModal();
+}
 function filesAct(k){
   if(!k) return;
   sfxTick(1);
+  if(k.id==='add'){fbStatus='Point at Add text files and release the trigger or pinch.';fbD=true;return;}
+  if(k.id==='browser'){openBrowserImport().catch(e=>{fbStatus=e.message;fbD=true;});return;}
   if(k.id==='x'){ toggleFilesXR(fbHistory); return; }
   if(k.id.startsWith('restore_')){const entry=hist[k.idx];if(entry&&!replaying){toggleFilesXR(true);openEntry(entry).catch(e=>xrDone(e.message));}return;}
   if(k.id==='prev'){ fbPage=Math.max(0,fbPage-1); fbPend=null; }
@@ -5531,7 +5577,7 @@ function filesAct(k){
 function drawFbIfDirty(){
   const sig=fbHistory?String(hist[0]?.id)+'|'+hist.length:curDocs.map(d=>d.name).join('|');
   if(sig!==fbSig){fbSig=sig;fbD=true;fbPend=null;}
-  if(curDocs.length!==fbCnt){fbCnt=curDocs.length;kDirty=true;if(!fbHistory&&!curDocs.length&&fbOpen){fbOpen=false;fb.visible=false;}}
+  if(curDocs.length!==fbCnt){fbCnt=curDocs.length;kDirty=true;}
   if(!fb.visible){ fbPlaced=false; return; }
   if(!fbPlaced){ placeBoard(fb); fbPlaced=true; fbD=true; }
   if(!fbD) return;
@@ -5551,8 +5597,10 @@ function drawFbIfDirty(){
     const hov=fbHov===k||(fbHov&&fbHov.id===k.id);
     if(k.id==='x') btn(k,'\u2715',hov,'r','600 28px '+F);
     else if(k.id.startsWith('restore_')) btn(k,hist[k.idx].text,hov);
+    else if(k.id==='add') btn(k,'Add text files',hov);
+    else if(k.id==='browser') btn(k,'Use browser picker',hov);
     else if(k.id==='clear') btn(k,fbPend==='all'?'Tap to confirm':'\u2715 Clear all',hov,'r','600 20px '+F);
-    else if(k.id==='lay') btn(k,'Field layout: '+(fieldMode==='separated'?'Separated orbs (tap for Unified)':'Unified (tap for Separated orbs)'),hov);
+    else if(k.id==='lay') btn(k,fieldMode==='separated'?'Layout: separated':'Layout: unified',hov);
     else if(k.id==='prev') btn(k,'\u2039 Prev',hov);
     else if(k.id==='next') btn(k,'Next \u203a',hov);
     else if(k.id.startsWith('del_')){
