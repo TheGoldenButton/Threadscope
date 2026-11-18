@@ -2081,7 +2081,7 @@ function updateCrossVisuals(){
   crossDotsMesh=new THREE.Points(dg,crossDotMat);crossDotsMesh.frustumCulled=false;crossGroup.add(crossDotsMesh);
 
   
-  const topB=bridges.filter(b=>b.kind==='direct').slice(0,16);
+  const topB=bridges.filter(b=>b.kind==='direct'&&(!resultWords||resultWords.has(b.wordA))).slice(0,16);
   topB.forEach(b=>{
     const u=nodes[b.u],v=nodes[b.v];
     const mx=(u.x+v.x)*.5,my=(u.y+v.y)*.5+.045,mz=(u.z+v.z)*.5;
@@ -2371,6 +2371,7 @@ function addMorphemeProjections(){
   }
 }
 function buildVisuals(){
+  emptyQuery=false;
   lodClear();col.lv=null;col.hide=null;
   if(pts){G.remove(pts,lines,dots);slowDispose([pts.geometry,lines.geometry,dots.geometry]);}
   slowDispose([...labelCache.values()]);labelCache.clear();
@@ -2405,10 +2406,12 @@ const hsv=(h,s,v)=>{const f=n=>{const k=(n+h*6)%6;return v-v*s*Math.max(0,Math.m
 const rainbow=t=>hsv((1-Math.max(0,Math.min(1,t)))*.78,.85,1);
 const cnorm=i=>nodes[i].cr!==undefined?nodes[i].cr:nodes[i].nf;
 const lcol=(i,a)=>rainbow(cnorm(i)).map(v=>v*(.7+.3*a));
-let visible=[],forcedSet=new Set();
+let visible=[],forcedSet=new Set(),resultWords=null,emptyQuery=false;
 function applyState(quick){
   const N=nodes.length,E=edges.length;if(!N)return;
   if(Q&&Q.fromSel&&!SS.size)Q=null;
+  resultWords=Q?.top ? new Set((infoData()?.rows||[]).map(row=>row.l)) : emptyQuery ? new Set() : null;
+  if(resultWords)for(const i of SS)resultWords.add(nodes[i].word);
   const isSep=fieldMode==='separated'&&orbs.length>1;
   const nI=new Float32Array(N),ni=new Float32Array(N),ei=new Float32Array(E),ec=new Uint8Array(E),nc=new Uint8Array(N),er=new Float32Array(E),ea=new Float32Array(N).fill(1);
   const labs=[];
@@ -2521,10 +2524,13 @@ function applyState(quick){
   aT.needsUpdate=true;for(const a of ['aI','aDir','aCol'])dots.geometry.attributes[a].needsUpdate=true;
   for(const a of ['aI','aSize','aCol','aF','aP'])pts.geometry.attributes[a].needsUpdate=true;
   lines.geometry.attributes.aI.needsUpdate=true;lines.geometry.attributes.aCol.needsUpdate=true;
-  const vs=new Set(visible),seenL=new Set();for(let j=labs.length-1;j>=0;j--){const id=labs[j][0];if(!vs.has(id)||seenL.has(id))labs.splice(j,1);else seenL.add(id);}
+  const vs=new Set(visible),seenL=new Set();for(let j=labs.length-1;j>=0;j--){const id=labs[j][0];if((resultWords&&!resultWords.has(nodes[id].word))||!vs.has(id)||seenL.has(id))labs.splice(j,1);else seenL.add(id);}
   slowDispose(labelGroup.children.filter(s=>s.userData.projection));
   labelGroup.clear();labs.forEach(([i,k])=>{const sp=label(i,k);sp.material.opacity=(Q&&Q.A&&k===0)?.5+.5*Math.min(1,Q.A[i]):1;labelGroup.add(sp);});forcedSet=new Set(labs.map(l=>l[0]));
-  addMorphemeProjections();
+  if(!resultWords)addMorphemeProjections();
+  for(const [i,sp] of lodMap){
+    if(forcedSet.has(i)||(resultWords&&!resultWords.has(nodes[i].word)))lodGroup.remove(sp);
+  }
   refreshWV();
   updateCrossVisuals();
   if(quick){kDirty=true;}else updateInfo();
@@ -2546,7 +2552,8 @@ async function runQuery(text,again,opts){
   if(so&&[...SS].join(',')!==sk)return;
   if(rr.rebuilt){setField(rr.rebuilt,true,true);replayHebb();saveField();buildVisuals();}
   const res=rr.res;
-  if(!res){if(so)return;if(queryAudio)sfxQuery('empty');Q=null;applyState();stat('No matching words or recognizable word parts in this field.');return;}
+  if(!res){if(so)return;if(queryAudio)sfxQuery('empty');emptyQuery=true;Q=null;applyState();stat('No matching words or recognizable word parts in this field.');return;}
+  emptyQuery=false;
   const N=nodes.length,E=edges.length,A=new Float32Array(N),show=new Uint8Array(N),pq=new Array(N);let miss=0,n1=0,n2=0;const seedK=new Set();
   const getKs=id=>word2all&&word2all.has(id)?word2all.get(id):([word2i.get(id)].filter(x=>x!==undefined));
   res.seeds.forEach(sd=>sd.ids.forEach(id=>{
@@ -2651,6 +2658,7 @@ function replayHebb(){
 function selQ(){return !!(Q&&Q.fromSel&&SS.size&&Q.sk===[...SS].join(','));}
 function selQuery(){const ws=[...SS].map(i=>nodes[i].word);if(ws.length)runQuery(ws.join(' '),true,{sel:true,words:ws});}
 function toggleSel(i){
+  emptyQuery=false;
   const w=nodes[i]&&nodes[i].word;
   const ks=((w&&word2all&&word2all.get(nodes[i].id))||[i]);
   const hasAny=ks.some(k=>SS.has(k));
@@ -2681,6 +2689,7 @@ function selectEdge(k){
 }
 function select(i){if(i<0)return;const on=toggleSel(i);if(on)sfxChime(i);if(on&&SS.size===1&&!replaying)pushHist(selectEntry(i));}
 function clearAll(){
+  emptyQuery=false;
   SS.clear();
   selV++;
   sel=-1;
@@ -4917,7 +4926,7 @@ function lodLabels(dt){
   cam.getWorldPosition(_cw);
   G.worldToLocal(_cl.copy(_cw));
   for(let i=0;i<nodes.length;i++){
-    if(forcedSet.has(i)||(col.hide?.[i]&&!hasCtx()))continue;
+    if((resultWords&&!resultWords.has(nodes[i].word))||forcedSet.has(i)||(col.hide?.[i]&&!hasCtx()))continue;
     const n=nodes[i];
     point.set(n.x,n.y,n.z);
     if(!views.some(view=>{
