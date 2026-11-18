@@ -16,6 +16,12 @@ canvas{display:block}
 .vig{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,8,20,.75)),repeating-linear-gradient(0deg,rgba(93,240,255,.03) 0 1px,transparent 1px 3px)}
 .panel{position:fixed;background:rgba(3,16,28,.55);border:1px solid rgba(93,240,255,.28);backdrop-filter:blur(10px);padding:12px 14px;border-radius:2px;box-shadow:0 0 24px rgba(93,240,255,.08) inset}
 #top{top:4px;left:4px;width:min(380px,calc(100vw - 28px))}
+#busy{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%) translateY(-6px);z-index:9;display:flex;gap:9px;align-items:center;padding:9px 16px;border-radius:999px;background:rgba(3,16,28,.72);border:1px solid rgba(93,240,255,.4);box-shadow:0 0 18px rgba(93,240,255,.25);opacity:0;pointer-events:none;transition:opacity .18s ease,transform .18s ease}
+#busy.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#busy i{display:block;width:9px;height:9px;border-radius:50%;background:var(--cy);box-shadow:0 0 10px var(--cy);animation:busydot 1.1s infinite ease-in-out both}
+#busy i:nth-child(2){animation-delay:.16s}#busy i:nth-child(3){animation-delay:.32s}
+@keyframes busydot{0%,80%,100%{transform:translateY(0) scale(.6);opacity:.35}40%{transform:translateY(-5px) scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){#busy i{animation:none;opacity:.8}}
 #top h1{margin:0 0 8px;font-size:calc(18px*var(--fs,1));font-weight:600;letter-spacing:.06em;color:var(--cy);text-shadow:0 0 12px var(--cy)}
 .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 button,.btn{font:inherit;color:var(--cy);background:rgba(93,240,255,.07);border:1px solid rgba(93,240,255,.5);padding:7px 11px;cursor:pointer;font-size:calc(13px*var(--fs,1));border-radius:2px;transition:background .15s}
@@ -212,6 +218,7 @@ input[type=text],input[type=password],select,textarea{background:rgba(255,255,25
 </head>
 <body>
 <div class="vig"></div>
+<div id="busy" role="status" aria-label="Processing"><i></i><i></i><i></i></div>
 <div id="xr-ui">
 <div id="top">
   <div class="row" style="margin-top:0;align-items:center">
@@ -2683,6 +2690,8 @@ docsEl.addEventListener('click',async e=>{
   if(x){
     const rest=curDocs.filter((_,i)=>i!==+x.dataset.d);
     if(!rest.length){unloadField();return;}
+    // Drop the file from the list right away; the field rebuilds in the background (the top "..." shows progress).
+    curDocs=rest;docOpen.delete((x.closest('.dr')?.querySelector('.dn')?.textContent||'').replace(/^[\u25be\u25b8]\s*/,''));renderDocs();
     await ingest(rest);
   }
 });
@@ -5824,7 +5833,7 @@ renderer.setAnimationLoop((t,frame)=>{
   lastR=t;
   const raw=clock.getDelta(),dt=Math.min(raw,.05);
   if(!xr){if(!idle)perfSample(raw);edgeBudget();}U.uT.value+=dt;
-  {const tk=thinking()?1:0;if(tk&&!pulseOn)U.uP0.value=U.uT.value;pulseOn=tk;U.uK.value+=(tk-U.uK.value)*Math.min(1,dt*(tk?4:2.5));if(U.uK.value<.005&&!tk)U.uK.value=0;}
+  {const tk=thinking()?1:0;{const qb=qBusy>0?1:0;if(qb!==(window._busyOn|0)){window._busyOn=qb;const be=document.getElementById('busy');if(be)be.classList.toggle('on',!!qb);}}if(tk&&!pulseOn)U.uP0.value=U.uT.value;pulseOn=tk;U.uK.value+=(tk-U.uK.value)*Math.min(1,dt*(tk?4:2.5));if(U.uK.value<.005&&!tk)U.uK.value=0;}
   G.updateMatrixWorld(true);voiceStep(dt);voiceVis(dt);platform();lodLabels(dt);colUpdate(dt);
   if(needCenter&&renderer.xr.isPresenting&&frame){const xc=renderer.xr.getCamera(),o=xc.getWorldPosition(new THREE.Vector3()),d=xc.getWorldDirection(new THREE.Vector3());d.y=0;if(d.lengthSq()>1e-4){d.normalize();G.scale.setScalar(centerS);const dist=.7;G.position.set(o.x+d.x*dist,o.y-.1,o.z+d.z*dist);G.quaternion.identity();needCenter=false;}}
   if(renderer.xr.isPresenting){xrPerf(raw);xrWatch(dt);placeKB(dt);if(resetReq)xrResetField(frame);gestures(dt);sticks(dt);if(arMode&&frame){arPersist(frame,dt);arFrame(frame);}drawKBIfDirty();drawRdIfDirty();drawSbIfDirty();drawWbIfDirty();drawFbIfDirty();}
