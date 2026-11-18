@@ -2316,10 +2316,10 @@ function drawLabel(x,word,i,kind){
   const tw=x.measureText(word).width;
   if(tw>920){fs=Math.max(48,Math.floor(fs*(920/tw)));x.font='600 '+fs+'px Inter,system-ui,-apple-system,sans-serif';}
   x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';
-  x.lineWidth=Math.max(8,fs*.095);
+  x.lineWidth=Math.max(3,fs*.048);
   x.strokeStyle=kind===1?'rgba(255,230,160,0.95)':'rgba(255,255,255,0.92)';
   x.shadowColor=kind===1?'rgba(255,180,50,0.8)':'rgba(255,255,255,0.65)';
-  x.shadowBlur=kind===1?12:8;
+  x.shadowBlur=0;
   x.strokeText(word,512,128);
   x.shadowBlur=0;
   x.fillStyle='#000000';
@@ -2526,7 +2526,7 @@ function applyState(quick){
   lines.geometry.attributes.aI.needsUpdate=true;lines.geometry.attributes.aCol.needsUpdate=true;
   const vs=new Set(visible),seenL=new Set();for(let j=labs.length-1;j>=0;j--){const id=labs[j][0];if((resultWords&&!resultWords.has(nodes[id].word))||!vs.has(id)||seenL.has(id))labs.splice(j,1);else seenL.add(id);}
   slowDispose(labelGroup.children.filter(s=>s.userData.projection));
-  labelGroup.clear();labs.forEach(([i,k])=>{const sp=label(i,k);sp.material.opacity=(Q&&Q.A&&k===0)?.5+.5*Math.min(1,Q.A[i]):1;labelGroup.add(sp);});forcedSet=new Set(labs.map(l=>l[0]));
+  labelGroup.clear();const pinned=labs.filter(([i])=>SS.has(i));pinned.forEach(([i,k])=>{const sp=label(i,k);sp.material.opacity=(Q&&Q.A&&k===0)?.5+.5*Math.min(1,Q.A[i]):1;labelGroup.add(sp);});forcedSet=new Set(pinned.map(l=>l[0]));
   if(!resultWords)addMorphemeProjections();
   for(const [i,sp] of lodMap){
     if(forcedSet.has(i)||(resultWords&&!resultWords.has(nodes[i].word)))lodGroup.remove(sp);
@@ -4902,8 +4902,8 @@ const lodGroup=new THREE.Group();G.add(lodGroup);
 const lodMap=new Map(),_cl=new THREE.Vector3(),_cw=new THREE.Vector3();
 const _vdirW=new THREE.Vector3(),_vdirL=new THREE.Vector3(),_invG=new THREE.Matrix4();
 function lodSprite(i){
-  const c=document.createElement('canvas');c.width=256;c.height=64;const x=c.getContext('2d');
-  x.scale(.25,.25);
+  const c=document.createElement('canvas');c.width=512;c.height=128;const x=c.getContext('2d');
+  x.scale(.5,.5);
   drawLabel(x,nodes[i].word,i,0);
   const tx=new THREE.CanvasTexture(c);tx.anisotropy=renderer.capabilities.getMaxAnisotropy();tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false}));
@@ -4929,28 +4929,49 @@ function lodLabels(dt){
   const point=new THREE.Vector3(),clip=new THREE.Vector3(),on=new Set();
   cam.getWorldPosition(_cw);
   G.worldToLocal(_cl.copy(_cw));
+  const candidates=[],occupied=eyes.map(()=>[]);
+  const budget=xr?16:Math.max(8,Math.min(24,Math.floor(innerWidth/55)));
   for(let i=0;i<nodes.length;i++){
-    if((resultWords&&!resultWords.has(nodes[i].word))||forcedSet.has(i)||(col.hide?.[i]&&!hasCtx()))continue;
-    const n=nodes[i];
+    const n=nodes[i],pinned=forcedSet.has(i);
+    if((resultWords&&!resultWords.has(n.word))||(!pinned&&col.hide?.[i]&&!hasCtx()))continue;
     point.set(n.x,n.y,n.z);
-    if(!views.some(view=>{
+    const distance=point.distanceTo(_cl);
+    const size=pinned ? .3*FS*WSZ:Math.min(.30,distance*.105)*FS*WSZ;
+    const boxes=views.map((view,k)=>{
       clip.copy(point).applyMatrix4(view);
-      return Math.abs(clip.x)<=1.02&&Math.abs(clip.y)<=1.02&&Math.abs(clip.z)<=1;
-    }))continue;
+      if(Math.abs(clip.x)>1.02||Math.abs(clip.y)>1.02||Math.abs(clip.z)>1)return null;
+      const e=view.elements,depth=e[3]*n.x+e[7]*n.y+e[11]*n.z+e[15];
+      const factor=size*G.matrixWorld.getMaxScaleOnAxis()/Math.max(.001,depth);
+      const projection=eyes[k].projectionMatrix.elements;
+      return {x:clip.x,y:clip.y,w:.03+factor*projection[0]*.5,h:.035+factor*projection[5]*.125};
+    });
+    const box=boxes.find(Boolean);
+    if(!box)continue;
+    const score=(Q?.cv?.[i]||n.nf||0)*.25-Math.log1p(distance)-.55*Math.hypot(box.x,box.y)+(lodMap.get(i)?.parent===lodGroup ? .12 : 0);
+    candidates.push({i,boxes,pinned,distance,size,score});
+  }
+  candidates.sort((a,b)=>Number(b.pinned)-Number(a.pinned)||b.score-a.score||a.i-b.i);
+  let count=0;
+  for(const {i,boxes,pinned,distance,size} of candidates){
+    if(!pinned&&count>=budget)break;
+    if(!pinned&&boxes.some((box,k)=>box&&occupied[k].some(other=>
+      Math.abs(box.x-other.x)<box.w+other.w&&Math.abs(box.y-other.y)<box.h+other.h)))continue;
+    boxes.forEach((box,k)=>{if(box)occupied[k].push(box);});
+    count++;
+    if(pinned)continue;
+    const n=nodes[i];
     on.add(i);
     let sp=lodMap.get(i);
     if(!sp){sp=lodSprite(i);lodMap.set(i,sp);}
     if(sp.parent!==lodGroup){lodGroup.add(sp);wvPend=true;}
-    sp.position.copy(point);
-    const distance=point.distanceTo(_cl);
-    const size=Math.min(.30,Math.max(.003,distance*.105))*FS*WSZ;
+    sp.position.set(n.x,n.y,n.z);
     sp.scale.set(size,size*.25,1);
     sp.material.opacity=Math.max(.45,1/(1+.09*distance));
   }
   for(const [i,sp] of lodMap){
     if(!on.has(i)){
       if(sp.parent===lodGroup){lodGroup.remove(sp);wvPend=true;}
-      if(lodMap.size>350){sp.material.map.dispose();sp.material.dispose();lodMap.delete(i);}
+      if(lodMap.size>64){sp.material.map.dispose();sp.material.dispose();lodMap.delete(i);}
     }
   }
 }
