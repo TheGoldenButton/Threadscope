@@ -2437,7 +2437,7 @@ function applyState(quick){
   }else{
     for(let i=0;i<N;i++)nI[i]=.18+1.9*Math.pow(ni[i],1.2);
     for(let e=0;e<E;e++){ei[e]=Math.max(.3,(.15+.34*edges[e].wn)*(.65+.7*(nodes[edges[e].s].nf+nodes[edges[e].t].nf)/2));er[e]=edges[e].wn;}
-    if(isSep){
+    if(orbs.length){
       orbs.forEach(orb=>{
         const docNodes=[];
         for(let i=0;i<N;i++)if(nodes[i].doc===orb.doc)docNodes.push(i);
@@ -2458,23 +2458,6 @@ function applyState(quick){
           }
         }
       });
-    }else if(!col.hide){
-      const topNodes=[...Array(N).keys()].sort((a,b)=>(nodes[b].score||0)-(nodes[a].score||0));
-      const spacedAnchors=[];
-      for(const i of topNodes){
-        const ni=nodes[i];
-        let tooClose=false;
-        for(const prev of spacedAnchors){
-          const np=nodes[prev];
-          const d2=(ni.x-np.x)*(ni.x-np.x)+(ni.y-np.y)*(ni.y-np.y)+(ni.z-np.z)*(ni.z-np.z);
-          if(d2 < 0.20){tooClose=true;break;}
-        }
-        if(!tooClose){
-          spacedAnchors.push(i);
-          labs.push([i,0]);
-          if(spacedAnchors.length >= 12) break;
-        }
-      }
     }
   }
   if(col.hide&&col.hide.length===N&&!hasCtx()){
@@ -2505,7 +2488,7 @@ function applyState(quick){
       nA[i]=Math.max(nA[i], 1.35);
       nP[i]=1;
       nS[i]*=1.35;
-    }else if(isSep){
+    }else if(orbs.length){
       const docC=getDocRgb(nodes[i].doc||0);
       cc=nc[i]===2?GO:nc[i]===1?mix(docC,AM,Math.min(1,nI[i])):nc[i]===3?WH:(ni[i]<.7?mix(docC,CY,ni[i]/.7):mix(docC,WH,(ni[i]-.7)/.3));
     }else{
@@ -4906,7 +4889,8 @@ const lodGroup=new THREE.Group();G.add(lodGroup);
 const lodMap=new Map(),_cl=new THREE.Vector3(),_cw=new THREE.Vector3();
 const _vdirW=new THREE.Vector3(),_vdirL=new THREE.Vector3(),_invG=new THREE.Matrix4();
 function lodSprite(i){
-  const c=document.createElement('canvas');c.width=1024;c.height=256;const x=c.getContext('2d');
+  const c=document.createElement('canvas');c.width=256;c.height=64;const x=c.getContext('2d');
+  x.scale(.25,.25);
   drawLabel(x,nodes[i].word,i,0);
   const tx=new THREE.CanvasTexture(c);tx.anisotropy=renderer.capabilities.getMaxAnisotropy();tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false}));
@@ -4925,134 +4909,31 @@ function lodLabels(dt){
   if(!nodes.length)return;
   wvT+=dt;if(wvPend&&wvT>.25){wvT=0;refreshWV();}
   lodT+=dt;if(lodT<.06)return;lodT=0;
-  if(col.hide&&col.hide.length===nodes.length&&!hasCtx()){if(lodMap.size){lodClear();wvPend=true;}return;}
-  const cam=renderer.xr.isPresenting?renderer.xr.getCamera():camera;
-  cam.getWorldPosition(_cw);_cl.copy(_cw);G.worldToLocal(_cl);
-
-  // View direction in local G coordinate space
-  cam.getWorldDirection(_vdirW);
-  _invG.copy(G.matrixWorld).invert();
-  _vdirL.copy(_vdirW).transformDirection(_invG).normalize();
-
-  // Detect if the camera/viewer is inside the field / room-scale orb
-  const fr=fieldR();
-  const distCenter=_cl.length();
-  const isInside=fieldEnvelops()||(distCenter<fr*1.35)||(fieldMode==='separated'&&orbs.some(o=>Math.hypot(_cl.x-o.center[0],_cl.y-o.center[1],_cl.z-o.center[2])<(o.radius||1.8)*1.35));
-
-  // Generous proximity range so words in view are captured when zooming in
-  const maxProximity=isInside?Math.max(fr*3.2,16.0):Math.max(fr*2.6,10.0);
-  const inView=[];
-  for(const i of visible){
-    if(col.hide&&col.hide[i])continue;
+  const xr=renderer.xr.isPresenting;
+  const cam=xr?renderer.xr.getCamera():camera;
+  const eyes=xr&&cam.cameras.length?cam.cameras:[cam];
+  const views=eyes.map(eye=>new THREE.Matrix4().multiplyMatrices(eye.projectionMatrix,eye.matrixWorldInverse).multiply(G.matrixWorld));
+  const point=new THREE.Vector3(),clip=new THREE.Vector3(),on=new Set();
+  cam.getWorldPosition(_cw);
+  G.worldToLocal(_cl.copy(_cw));
+  for(let i=0;i<nodes.length;i++){
+    if(forcedSet.has(i)||(col.hide?.[i]&&!hasCtx()))continue;
     const n=nodes[i];
-    const dx=n.x-_cl.x,dy=n.y-_cl.y,dz=n.z-_cl.z;
-    const d=Math.hypot(dx,dy,dz);
-    if(d<0.04||d>maxProximity)continue;
-    const dirX=dx/d,dirY=dy/d,dirZ=dz/d;
-    const dot=dirX*_vdirL.x+dirY*_vdirL.y+dirZ*_vdirL.z;
-    // When outside, retain words within the viewing frustum / cone. When inside, 360 degree coverage
-    if(!isInside&&dot<0.28)continue;
-    inView.push({i,n,d,dx,dy,dz,dirX,dirY,dirZ,dot});
-  }
-
-  if(!inView.length){
-    if(lodMap.size){
-      for(const [i,sp] of lodMap){
-        if(sp.parent===lodGroup){lodGroup.remove(sp);wvPend=true;}
-        if(lodMap.size>350){sp.material.map.dispose();sp.material.dispose();lodMap.delete(i);}
-      }
-    }
-    return;
-  }
-
-  // Score all words in view by connectivity and prominence without filtering out disconnected words:
-  // Most connected words are evaluated first, compressing the view cleanly without visual bloat.
-  const scored=[];
-  for(let k=0;k<inView.length;k++){
-    const cand=inView[k];
-    if(forcedSet.has(cand.i))continue;
-
-    // Connectivity: degree (number of connected edges) + edge weight sum
-    const degree=cand.n.adj?cand.n.adj.length:0;
-    let edgeWeightSum=0;
-    if(cand.n.adj){
-      for(let a=0;a<cand.n.adj.length;a++){
-        const ed=edges[cand.n.adj[a].e];
-        if(ed)edgeWeightSum+=(ed.wn||0.35);
-      }
-    }
-    const connScore=degree*2.0+edgeWeightSum*1.5+(cand.n.score||0)*2.5+(cand.n.nf||0.5);
-
-    let alignWeight;
-    if(isInside){
-      alignWeight=cand.dot>0?(0.75+0.25*Math.pow(cand.dot,1.2)):0.65;
-    }else{
-      alignWeight=Math.pow(Math.max(0.01,cand.dot),1.2);
-    }
-
-    let bonus=0;
-    if(SS.has(cand.i))bonus+=30;
-    if(Q&&Q.A&&Q.A[cand.i])bonus+=Q.A[cand.i]*15;
-
-    // Final priority: most connected words at focal view center first, with smooth distance weighting
-    cand.finalScore=(connScore+bonus)*alignWeight/(0.35+Math.min(cand.d,3.0));
-    scored.push(cand);
-  }
-  scored.sort((a,b)=>b.finalScore-a.finalScore);
-
-  // Spacing filter: compresses words into the most connected concepts so nearby words do not overlap or bloat
-  const minSpacing3D=(isInside?0.16:0.20)*(FS/1.25)*(WSZ/1.05);
-  const minSpacing3Dsq=minSpacing3D*minSpacing3D;
-  const maxWords=isInside?Math.min(220,Math.max(90,Math.floor(nodes.length*0.75))):Math.min(140,Math.max(50,Math.floor(nodes.length*0.55)));
-  const chosen=[];
-
-  for(let k=0;k<scored.length;k++){
-    const cand=scored[k];
-    let tooClose=false;
-    // Check against forced static anchor labels in view
-    for(const fId of forcedSet){
-      const fn=nodes[fId];
-      if(!fn)continue;
-      const fdx=cand.n.x-fn.x,fdy=cand.n.y-fn.y,fdz=cand.n.z-fn.z;
-      if(fdx*fdx+fdy*fdy+fdz*fdz<minSpacing3Dsq){tooClose=true;break;}
-    }
-    if(tooClose)continue;
-
-    // Check distance and angular overlap against already chosen words
-    for(let cIdx=0;cIdx<chosen.length;cIdx++){
-      const other=chosen[cIdx];
-      const ox=cand.n.x-other.n.x,oy=cand.n.y-other.n.y,oz=cand.n.z-other.n.z;
-      if(ox*ox+oy*oy+oz*oz<minSpacing3Dsq){tooClose=true;break;}
-      const cosAng=cand.dirX*other.dirX+cand.dirY*other.dirY+cand.dirZ*other.dirZ;
-      if(cosAng>0.995&&Math.abs(cand.d-other.d)<0.6){tooClose=true;break;}
-    }
-    if(tooClose)continue;
-
-    chosen.push(cand);
-    if(chosen.length>=maxWords)break;
-  }
-
-  // Display active spaced words with clean solid opacity
-  const on=new Set();
-  for(let k=0;k<chosen.length;k++){
-    const cand=chosen[k];
-    on.add(cand.i);
-    let sp=lodMap.get(cand.i);
-    if(!sp){sp=lodSprite(cand.i);lodMap.set(cand.i,sp);}
+    point.set(n.x,n.y,n.z);
+    if(!views.some(view=>{
+      clip.copy(point).applyMatrix4(view);
+      return Math.abs(clip.x)<=1.02&&Math.abs(clip.y)<=1.02&&Math.abs(clip.z)<=1;
+    }))continue;
+    on.add(i);
+    let sp=lodMap.get(i);
+    if(!sp){sp=lodSprite(i);lodMap.set(i,sp);}
     if(sp.parent!==lodGroup){lodGroup.add(sp);wvPend=true;}
-    let op;
-    if(isInside){
-      const gazeBright=cand.dot>0?(0.8+0.2*Math.pow(cand.dot,1.2)):0.7;
-      const distFade=Math.min(1,Math.max(0.4,(maxProximity-cand.d)/(maxProximity*0.3)));
-      op=Math.min(1,Math.max(0.5,gazeBright*distFade));
-    }else{
-      const viewFade=Math.min(1,Math.max(0.35,(cand.dot-0.28)/0.22));
-      const distFade=Math.min(1,Math.max(0.35,(maxProximity-cand.d)/1.2));
-      op=Math.min(1,Math.max(0.5,viewFade*distFade));
-    }
-    sp.material.opacity=op;
+    sp.position.copy(point);
+    const distance=point.distanceTo(_cl);
+    const size=Math.min(.30,Math.max(.003,distance*.105))*FS*WSZ;
+    sp.scale.set(size,size*.25,1);
+    sp.material.opacity=Math.max(.45,1/(1+.09*distance));
   }
-
   for(const [i,sp] of lodMap){
     if(!on.has(i)){
       if(sp.parent===lodGroup){lodGroup.remove(sp);wvPend=true;}
@@ -5705,10 +5586,10 @@ function colUpd(dt){
   if(hasCtx()){if(col.lv!==null){col.lv=null;col.hide=null;col.sk=null;}return;}
   const cam=renderer.xr.isPresenting?renderer.xr.getCamera():camera;
   cam.getWorldPosition(_cw);_cl.copy(_cw);G.worldToLocal(_cl);
-  if(fieldMode==='separated'&&orbs.length>1){
+  if(orbs.length){
     const lvs=orbs.map(o=>{const dist=Math.hypot(_cl.x-o.center[0],_cl.y-o.center[1],_cl.z-o.center[2]),s=Math.max(0,dist-(o.radius||1.2)*.95)*.32,f=s<.12?-1:Math.log2(s/.12)*2;return f<0?-1:Math.round(f);});
     const key=lvs.join(',')+'|'+orbs.map(o=>(o.scale||1).toFixed(2)).join(',')+'|'+nodes.length;
-    if(col.sk===key&&col.hide)return;
+    if(col.sk===key)return;
     col.sk=key;col.lv=0;col.n=nodes.length;
     if(lvs.every(l=>l<0))col.hide=null;else colBuildSep(lvs.map(l=>l<0?0:.12*Math.pow(2,l/2)));
     applyState(true);return;
@@ -6038,10 +5919,37 @@ function xrPerf(raw){
   pfA+=raw;pfN++;pfT+=raw;if(pfT<2){return;}
   const fps=pfN/pfA;xrNote='fps '+fps.toFixed(0)+'  frame '+(1000*pfA/pfN).toFixed(1)+' ms';hud();pfA=0;pfN=0;pfT=0;
 }
+const xrBusy=new THREE.Group();
+scene.add(xrBusy);
+const busyDisc=new THREE.CircleGeometry(.009,24);
+for(let i=0;i<3;i++){
+  const dot=new THREE.Mesh(busyDisc,new THREE.MeshBasicMaterial({color:0x66efff,transparent:true,depthWrite:false,depthTest:false}));
+  dot.position.x=(i-1)*.033;
+  dot.renderOrder=10000;
+  xrBusy.add(dot);
+}
+const reducedDots=matchMedia('(prefers-reduced-motion: reduce)');
+function updateXRBusy(active,t){
+  xrBusy.visible=active;
+  if(!active)return;
+  const head=renderer.xr.getCamera(),eye=head.cameras[0]||head;
+  head.getWorldQuaternion(xrBusy.quaternion);
+  const p=eye.projectionMatrix.elements;
+  xrBusy.position.set(0,.74*(1+p[9])/p[5],-1).applyQuaternion(xrBusy.quaternion);
+  head.getWorldPosition(_cw);xrBusy.position.add(_cw);
+  xrBusy.children.forEach((dot,i)=>{
+    const phase=((t/1000-i*.16)%1.1+1.1)%1.1/1.1;
+    const pulse=reducedDots.matches?1:Math.max(0,1-Math.abs(phase-.4)/.4);
+    dot.scale.setScalar(.6+.4*pulse);
+    dot.position.y=reducedDots.matches?0:.01*pulse;
+    dot.material.opacity=.35+.65*pulse;
+  });
+}
 renderer.setAnimationLoop((t,frame)=>{
   const xr=renderer.xr.isPresenting,idle=!xr&&!perfBusy(t);
   if(idle&&t-lastR<33)return;
   lastR=t;
+  updateXRBusy(xr&&qBusy>0,t);
   const raw=clock.getDelta(),dt=Math.min(raw,.05);
   if(!xr){if(!idle)perfSample(raw);edgeBudget();}U.uT.value+=dt;
   {const tk=thinking()?1:0;{const qb=qBusy>0?1:0;if(qb!==(window._busyOn|0)){window._busyOn=qb;const be=document.getElementById('busy');if(be)be.classList.toggle('on',!!qb);}}if(tk&&!pulseOn)U.uP0.value=U.uT.value;pulseOn=tk;U.uK.value+=(tk-U.uK.value)*Math.min(1,dt*(tk?4:2.5));if(U.uK.value<.005&&!tk)U.uK.value=0;}
