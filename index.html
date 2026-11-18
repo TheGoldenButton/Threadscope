@@ -2178,8 +2178,9 @@ function flushGeom(){
 }
 function updateMovedOrbs(d){
   orbMoved=true;if(crossGroup.visible)crossGroup.visible=false;
+  // Apply immediately (no rAF deferral) so the nodes, edges and label track the pointer with zero added latency.
   if(d===undefined)_geomAll=true;else _geomDocs.add(d);
-  if(!_geomRAF)_geomRAF=requestAnimationFrame(()=>{_geomRAF=0;flushGeom();});
+  flushGeom();
 }
 function moveOrb(d,c){
   const orb=orbs[d];
