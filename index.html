@@ -1196,6 +1196,14 @@ function pruneWords(M){
   const seen=new Set(),out=i.filter(w=>{const k=w.w.toLowerCase();if(seen.has(k))return false;seen.add(k);return true;});
   out.con=con;return out;
 }
+/* keep the graph connected but lean: a maximum spanning forest (so no word is stranded) plus each word's strongest few links */
+function pruneConn(items,per){
+  const keep=new Set(),by=new Map(),par=new Map(),f=x=>{let r=x;while(par.get(r)!==r&&par.has(r))r=par.get(r);while(x!==r){const n=par.get(x);par.set(x,r);x=n;}return r;};
+  for(const it of items){(by.get(it.a)||by.set(it.a,[]).get(it.a)).push(it);(by.get(it.b)||by.set(it.b,[]).get(it.b)).push(it);par.set(it.a,it.a);par.set(it.b,it.b);}
+  by.forEach(l=>{l.sort((x,y)=>y.w-x.w);for(let i=0;i<Math.min(per,l.length);i++)keep.add(l[i].it||l[i]);});
+  for(const it of items.slice().sort((x,y)=>y.w-x.w)){const ra=f(it.a),rb=f(it.b);if(ra!==rb){par.set(ra,rb);keep.add(it);}}
+  return keep;
+}
 function buildField(){
   const cand=[];
   for(let i=2;i<vocab.length;i++){
@@ -1231,7 +1239,10 @@ function buildField(){
   [...used].sort((x,y)=>x-y).forEach(k=>{const [id,score]=list[k];remap.set(k,nodes.length);word2i.set(id,nodes.length);
     nodes.push({id,word:vocab[id],freq:cfreq[id],score,adj:[]});});
   edges=[];
+  const seenPair=new Set();
+  {const its=[];pairs.forEach(e=>{e.w=e.sw/e.c;its.push(e);});const kp=pruneConn(its,4);pairs.forEach((e,k)=>{if(!kp.has(e))pairs.delete(k);});}
   pairs.forEach(e=>{const A=remap.get(e.a),B=remap.get(e.b),fw=e.dir/e.c>=.5,w=e.sw/e.c;
+    if(A===B||A===undefined||B===undefined)return;const pk=A<B?A+'|'+B:B+'|'+A;if(seenPair.has(pk))return;seenPair.add(pk);
     const ed={s:fw?A:B,t:fw?B:A,w};const i=edges.length;edges.push(ed);
     nodes[A].adj.push({j:B,e:i});nodes[B].adj.push({j:A,e:i});});
   let mw=1e-6;for(const e of edges)if(e.w>mw)mw=e.w;edges.forEach(e=>e.wn=Math.sqrt(e.w/mw));
@@ -1311,6 +1322,7 @@ function buildFieldSeparated(){
       links.sort((x,y)=>(y.sw/y.c)-(x.sw/x.c));
       links.slice(0,K).forEach(e=>keptPairs.add(e));
     });
+    {const its=[];keptPairs.forEach(e=>{e.w=e.sw/e.c;its.push(e);});const kp=pruneConn(its,4);its.forEach(e=>{if(!kp.has(e))keptPairs.delete(e);});}
     const used=new Set();
     keptPairs.forEach(e=>{used.add(e.a);used.add(e.b);});
     FORCE.forEach(id=>{const k=id2kd.get(id);if(k!==undefined)used.add(k);});
@@ -2424,7 +2436,7 @@ function applyState(quick){
     }
   }else{
     for(let i=0;i<N;i++)nI[i]=.18+1.9*Math.pow(ni[i],1.2);
-    for(let e=0;e<E;e++){ei[e]=(.15+.34*edges[e].wn)*(.65+.7*(nodes[edges[e].s].nf+nodes[edges[e].t].nf)/2);er[e]=edges[e].wn;}
+    for(let e=0;e<E;e++){ei[e]=Math.max(.3,(.15+.34*edges[e].wn)*(.65+.7*(nodes[edges[e].s].nf+nodes[edges[e].t].nf)/2));er[e]=edges[e].wn;}
     if(isSep){
       orbs.forEach(orb=>{
         const docNodes=[];
@@ -2467,7 +2479,7 @@ function applyState(quick){
   }
   if(col.hide&&col.hide.length===N&&!hasCtx()){
     for(let i=0;i<N;i++){
-      if(col.hide[i]){nI[i]*=.1;ea[i]=.25;}
+      if(col.hide[i]){nI[i]=Math.max(nI[i],.5);ea[i]=1;}
       else if(col.cnt[i]>1){nI[i]=Math.max(nI[i],.75+.08*Math.min(5,col.cnt[i]));ea[i]=1;labs.push([i,0]);}
     }
   }
@@ -2499,7 +2511,7 @@ function applyState(quick){
     }else{
       cc=nc[i]===2?GO:nc[i]===1?mix(CY,AM,Math.min(1,nI[i])):nc[i]===3?WH:(ni[i]<.7?mix(VI,CY,ni[i]/.7):mix(CY,WH,(ni[i]-.7)/.3));
     }
-    nC.set(cc,i*3);if(!hid[i]&&!(colOn&&col.hide[i])&&(nI[i]>.1||pre[i]>.1))visible.push(i);
+    nC.set(cc,i*3);if(!hid[i]&&(nI[i]>.1||pre[i]>.1))visible.push(i);
   }
   if(col.hide&&col.hide.length===N&&!hasCtx())for(let i=0;i<N;i++)if(!col.hide[i]&&col.cnt[i]>1)nS[i]*=1+.14*Math.sqrt(col.cnt[i]-1);
   if(newest>=0)nS[newest]*=1.8;
@@ -2516,6 +2528,7 @@ function applyState(quick){
     for(let m=0;m<PN;m++){const q=k*PN+m,rv=m>=TR&&bkw;dI[q]=rv?act*Math.min(1,e.bk*2.2):act;dD[q]=rv?1-dir:dir;dC.set(dc,q*3);}
   });
   {let n=0;const sp=new Uint8Array(E);
+   /* a line is only drawn when BOTH of its words are on screen: while neighbouring words are collapsed into a dominant word, lines to the hidden ones are dropped so every visible line ends at a visible dot */
    for(let k=0;k<E;k++)if(ec[k]>0||ei[k]>.2){sp[k]=1;lIdx[n++]=k*2;lIdx[n++]=k*2+1;}
    lSpec=n;let amb=0;
    for(let r=0;r<E;r++){const k=eRank[r];if(!sp[k]&&ei[k]>0){lIdx[n++]=k*2;lIdx[n++]=k*2+1;amb++;}}
@@ -6090,10 +6103,8 @@ function xrKeepInView(matched){
 const _ev=new THREE.Vector3();
 function edgeBudget(){
   if(!lines||(!lAmbN&&!lSpec))return;
-  let fr=1;
-  if(!renderer.xr.isPresenting){camera.getWorldPosition(_ev);G.worldToLocal(_ev);fr=Math.max(.55,Math.min(1,1-(_ev.length()-2)*.12));}
-  else fr=1;
-  if(LOW)fr*=.8;
+  /* draw every co-occurrence line (one per word pair); only low-power devices thin the weakest ones */
+  let fr=LOW?.8:1;
   const na=Math.min(lAmbN,Math.max(Math.ceil(lAmbN*fr),Math.min(lAmbN,1500))),cnt=lSpec+na*2;
   if(cnt!==lastLN){lastLN=cnt;lines.geometry.setDrawRange(0,cnt);}
 }
