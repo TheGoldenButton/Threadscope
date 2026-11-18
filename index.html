@@ -481,15 +481,36 @@ function packScan(w){
   return {hits:w.hits,stride:w.stride,ids,acc,raw,fw};
 }
 
-function scanRaw(items){
+function senseSup(L,o,f,p,g,qs,Q,tmp){
+  const a=Math.max(f,o-HZ),b=Math.min(p-1,o+HZ);tmp.fill(0);
+  for(let j=a;j<=b;j++){const q=qs[L[j]]-1;if(q<0||q===g)continue;const k=DEC[Math.abs(j-o)]/DEC[1];k>tmp[q]&&(tmp[q]=k);}
+  let num=0,den=0;for(let q=0;q<Q.length;q++)q!==g&&!Q[q].st&&(den+=Q[q].w,num+=Q[q].w*tmp[q]);
+  return den>0?num/den:0;}
+function senseW(sup,st){return st&&st.c?1-st.c+st.c*Math.min(1,sup/st.ref):1;}
+function scanRaw(items,sn){
+  let curOW=1;
   const n=vocab.length,s=new Int32Array(n),ss=new Int32Array(svocab.length),SD=new Map();
   let hasS=false,L=null;
   const R=items.map((e,t)=>{
     let fq=0;e.ids.forEach(x=>{s[x]=t+1;fq+=cfreq[x];});e.sids.forEach(x=>{ss[x]=t+1;hasS=true;});
     const w={acc:new Map(),raw:new Map(),fw:new Map(),hits:0,stride:Math.max(1,Math.ceil(fq/4e4))};
-    const f=fwd=>(p,dist,m)=>{const r=L[p];if(exclC[r])return;const a=DEC[dist]*m;
+    const f=fwd=>(p,dist,m)=>{const r=L[p];if(exclC[r])return;const a=DEC[dist]*m*curOW;
       w.acc.set(r,(w.acc.get(r)||0)+a);w.raw.set(r,(w.raw.get(r)||0)+1);if(fwd)w.fw.set(r,(w.fw.get(r)||0)+a);};
     w.fF=f(1);w.fB=f(0);return w;});
+  let SST=null;
+  if(sn&&items.length>1&&sn.some(q=>!q.st)){
+    const V=items.map(()=>[]),cnt=items.map(()=>0),tmp=new Float32Array(items.length);
+    for(const d of corp){
+      const l=d.ids,h=l.length,bd=d.bnd||[0];buildPost(d);
+      const pos=[];items.forEach(e=>{for(const id of e.ids){const p=d.post.get(id);if(p)for(const k of p)pos.push(k);}});
+      pos.sort((x,y)=>x-y);let m=0,f=0,p=bd.length>1?bd[1]:h;
+      for(const o of pos){for(;o>=p;){m++;f=p;p=m+1<bd.length?bd[m+1]:h;}
+        const g=s[l[o]]-1;if(g<0)continue;
+        if(cnt[g]++%Math.max(1,Math.ceil(items[g].ids.reduce((x,y)=>x+cfreq[y],0)/4e4)))continue;
+        V[g].push(senseSup(l,o,f,p,g,s,sn,tmp));}}
+    SST=V.map(v=>{const P=v.filter(x=>x>0).sort((x,y)=>x-y),r=v.length?P.length/v.length:0;return {ref:P[P.length>>1]||1,c:4*r*(1-r)};});
+  }
+  const sq=SST?new Float32Array(items.length):null;
   let off=0;
   for(const d of corp){
     const l=d.ids,h=l.length,base=off,bd=d.bnd||[0];off+=h;L=l;
@@ -507,12 +528,13 @@ function scanRaw(items){
       if(e0-s0>=4){let k=2166136261;for(let q=s0;q<=e0;q++)k=Math.imul(k^l[q],16777619);k=(k>>>0)+'_'+(e0-s0);
         const at=base+s0,pv=SD.get(k);if(pv===undefined)SD.set(k,at);else if(pv!==at)continue;}
       if(w.hits++%w.stride)continue;
+      curOW=SST?senseW(senseSup(l,o,f,p,g,s,sn,sq),SST[g]):1;
       eachFwd(l,o,w.fF,p,d.pb);eachBwd(l,o,w.fB,f,d.pb);
     }
   }
   return R.map(packScan);
 }
-function leapScan(terms,excl){
+function leapScan(terms,excl,sense){
   
   const T=terms.length,own=new Int32Array(vocab.length).fill(-1),sown=new Int32Array(svocab.length).fill(-1);
   terms.forEach((e,t)=>{e.ids.forEach(x=>{own[x]=t;});(e.sids||[]).forEach(x=>{sown[x]=t;});});
@@ -524,24 +546,23 @@ function leapScan(terms,excl){
       sids=[...new Set(e.sids||[])].filter(x=>sown[x]===t).sort((a,b)=>a-b);
     eff[t]={ids,sids};keys[t]=ids.join(',')+';'+sids.join(',');});
   const ent=new Map(),miss=[];
-  for(const k of keys){if(ent.has(k))continue;const v=lscGet(k);if(v)ent.set(k,v);else{ent.set(k,null);miss.push(k);}}
+  for(const k of keys){if(ent.has(k))continue;const v=sense?null:lscGet(k);if(v)ent.set(k,v);else{ent.set(k,null);miss.push(k);}}
   if(miss.length){
     const at=new Map();keys.forEach((k,t)=>{if(!at.has(k))at.set(k,t);});
-    const res=scanRaw(miss.map(k=>eff[at.get(k)]));
+    const res=sense?scanRaw(eff,terms.map(t=>({w:t.w,st:!!t.st}))):scanRaw(miss.map(k=>eff[at.get(k)]));
     
-    for(let i=miss.length-1;i>=0;i--){ent.set(miss[i],res[i]);lscPut(miss[i],res[i]);}
+    if(sense)keys.forEach((k,t)=>ent.set(k,res[t]));else for(let i=miss.length-1;i>=0;i--){ent.set(miss[i],res[i]);lscPut(miss[i],res[i]);}
   }
   const DW=2*DEC.reduce((x,y)=>x+y,0);
   return keys.map(k=>{
     const c=ent.get(k),p=new Map(),hits=c.hits,rare=[];let a=0;
     for(let i=0;i<c.ids.length;i++){
       const r=c.ids[i];if(excl[r])continue;
-      const rareW=WDF&&WDF[r]>0&&WDF[r]<=3;if(hits>=20&&CN>3e3&&c.raw[i]*c.stride<2&&!rareW)continue;
+      if(hits>=20&&CN>3e3&&c.raw[i]*c.stride<2)continue;
       const o=cIdf[r];if(!(o>.08))continue;if(NWIN>=60&&WDF[r]/NWIN>.08)continue;/* very common words (in >8% of text windows) carry little signal */
       const v=c.acc[i],ex=Math.ceil(hits/c.stride)*DW*cfreq[r]/Math.max(1,LT);
       const sc=Math.log(1+v)*o*(GEN.get(vocab[r])||1)*Math.log(1+v/(ex+1));
-      p.set(r,sc);if(sc>a)a=sc;if(rareW)rare.push(r);}
-    if(rare.length&&a>0){const cf=QCUT*a;for(const q of rare)p.set(q,cf+(1-QCUT)*p.get(q));let m2=0;p.forEach(v=>{if(v>m2)m2=v;});a=m2;}
+      p.set(r,sc);if(sc>a)a=sc;}
     p.forEach((v,r)=>p.set(r,v/(a||1)));
     
     return {p,hits,
@@ -637,9 +658,9 @@ function coocc(qWords){
     ids.forEach(x=>o[x]=1);
     a.push({q:t,ids,sids,inferred,main:st,st:!ids.length,f:ids.reduce((x,y)=>x+cfreq[y],0)+sids.reduce((x,y)=>x+sfreq[y],0)});});
   if(!a.length)return null;
-  const wi=e=>Math.log(1+CN/e.f),lm=Math.max(...a.map(wi))||1;a.forEach(e=>{e.w=.3+.7*wi(e)/lm;});
+  const wi=e=>Math.log(1+CN/e.f),lm=Math.max(...a.map(wi))||1;a.forEach(e=>{e.w=wi(e)/lm;});
   const d=new Uint8Array(s);for(let e=0;e<s;e++)d[e]=exclC[e]||o[e];headIds().forEach(i=>{d[i]=1;});
-  const u=leapScan(a,d),m=a.map((_,i)=>i).filter(i=>u[i].hits>0);
+  const u=leapScan(a,d,a.length>1),m=a.map((_,i)=>i).filter(i=>u[i].hits>0);
   if(!m.length)return {seeds:a,M:[]};
   const f=m.map(i=>u[i]),p=m.map(i=>a[i].w),g=m.length,gs0=m.filter(i=>!a[i].st).length,gs=gs0||g,sfl=gs0?m.map(i=>!!a[i].st):null;
   let y=leapOverlap(f,p,Math.min(2,gs),0,sfl);
@@ -665,7 +686,7 @@ function coocc(qWords){
   M=M.filter(e=>okw(e.w)&&!junkW(e.w));
   {const cs=(x,y)=>{if(!x.size||!y.size)return 1;let d=0,nx=0,ny=0;x.forEach((v,k)=>{nx+=v*v;const u=y.get(k);u&&(d+=v*u);});y.forEach(v=>{ny+=v*v;});return d/(Math.sqrt(nx*ny)||1);},out=[];
    M.slice().sort((x,y)=>y.s-x.s).forEach(e=>{let h=null;
-     if(e.w.length>=4)for(const g of out)if(g.w.length>=4&&g.w.slice(0,3)===e.w.slice(0,3)&&famNear(g.w,e.w)){h=g;break;}
+     if(e.w.length>=4)for(const g of out)if(g.w.length>=4&&g.w.slice(0,3)===e.w.slice(0,3)&&famNear(g.w,e.w)&&cs(g.per,e.per)>=.6){h=g;break;}
      if(h){(h.fam||(h.fam=[{id:h.id,s:h.s}])).push({id:e.id,s:e.s});e.per.forEach((v,q)=>{(h.per.get(q)||0)<v&&h.per.set(q,v);});e.via.forEach(q=>{h.via.includes(q)||h.via.push(q);});h.tq=h.tq||e.tq;h.A=h.A||e.A;}
      else out.push(e);});
    M=out;}
