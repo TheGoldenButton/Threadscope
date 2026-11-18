@@ -265,9 +265,9 @@ input[type=text],input[type=password],select,textarea{background:rgba(255,255,25
 'use strict';
 let CUR=null;
 const PROG=t=>{if(CUR!==null)self.postMessage({rid:CUR,prog:t});};
-const NCAP=3000,K=6,FORCE=new Set();
+const NCAP=3000,K=10,FORCE=new Set();
 let nodes=[],edges=[],word2i=new Map(),FAMH=new Map(),fieldMode='unified',ORBS=[];
-const FV=4,SV='sw3';
+const FV=6,SV='sw3';
 
 const STOP=new Set(`the and for with are there was were been has had have did does doing having done you your yours her hers him his she they them their theirs its our ours mine that this per of to in is it be by as at an on am he me my we us if or so do but off out himself herself itself myself yourself ourselves themselves yes no thereby get gets got getting goes going went let lets one ones than then too very just also can could would should might may must shall these those such some any each both either neither other others another about from into onto here while upon up down even yet nor quite whenever wherever whatever whoever whichever what when where which who whom whose why how because since during before after between through under again further once`.split(' '));
 
@@ -1238,7 +1238,7 @@ function buildField(){
   try{edgeSeq();}catch(err){console.warn(err);edges.forEach(e=>{e.g=1;e.bk=0;e.fwd=1;});nodes.forEach(n=>{if(n.pos===undefined)n.pos=0;});}
   PROG('Laying out\u2026');
   layout();
-  ORBS=[{doc:0,name:(DOCS[0]&&DOCS[0].name)||'Unified Field',center:[0,0,0],radius:2.1,nodeCount:nodes.length}];
+  ORBS=[{doc:0,name:(DOCS[0]&&DOCS[0].name)||'Unified Field',center:[0,0,0],radius:3,nodeCount:nodes.length}];
   nodes.forEach(n=>{n.doc=0;n.docName=(DOCS[0]&&DOCS[0].name)||'Unified Field';n.orbCenter=[0,0,0];});
   edges.forEach(e=>{e.doc=0;});
 }
@@ -1247,7 +1247,7 @@ function buildFieldSeparated(){
   const K_docs=DOCS.length;
   if(K_docs<=1){
     buildField();
-    ORBS=[{doc:0,name:(DOCS[0]&&DOCS[0].name)||'Unified Field',center:[0,0,0],radius:2.1,nodeCount:nodes.length}];
+    ORBS=[{doc:0,name:(DOCS[0]&&DOCS[0].name)||'Unified Field',center:[0,0,0],radius:3,nodeCount:nodes.length}];
     return;
   }
   PROG('Building separated file fields\u2026');
@@ -1479,12 +1479,12 @@ function communities(subNodes,subEdges,N){
 }
 let SEED=null;
 function layout(subNodes,subEdges,SP){
-  if(!subNodes)subNodes=nodes;if(!subEdges)subEdges=edges;if(SP===undefined)SP=2.1;
+  if(!subNodes)subNodes=nodes;if(!subEdges)subEdges=edges;if(SP===undefined)SP=3;
   const N=subNodes.length;if(!N)return;
   if(N===1){subNodes[0].x=0;subNodes[0].y=0;subNodes[0].z=0;return;}
   const P=new Float32Array(N*3),D=new Float32Array(N*3);
   for(let i=0;i<N;i++){const u=Math.random()*2-1,a=Math.random()*6.283,r=Math.sqrt(Math.max(0,1-u*u));P[i*3]=r*Math.cos(a);P[i*3+1]=u;P[i*3+2]=r*Math.sin(a);}
-  const k=Math.cbrt(8/N),it=Math.max(50,Math.min(320,Math.floor(5e8/(N*N))));
+  const k=Math.cbrt(14/N),it=Math.max(50,Math.min(320,Math.floor(5e8/(N*N))));
   const CMN=N>=12?communities(subNodes,subEdges,N):{l:new Int32Array(N),nc:1},cm=CMN.l,nc=CMN.nc;
   const cc=new Float64Array(nc*3),cn=new Float64Array(nc),pv=new Float64Array(nc*3);
   if(nc>1){
@@ -1503,7 +1503,7 @@ function layout(subNodes,subEdges,SP){
     }else bhRepulse(P,D,N,k*k);
     for(const e of subEdges){
       const i=e.s,j=e.t,dx=P[i*3]-P[j*3],dy=P[i*3+1]-P[j*3+1],dz=P[i*3+2]-P[j*3+2];
-      const d=Math.sqrt(dx*dx+dy*dy+dz*dz)+1e-4,f=(.9/k)*(.3+.7*e.wn)*(nc>1?(cm[i]===cm[j]?1.4:.6):1);
+      const d=Math.sqrt(dx*dx+dy*dy+dz*dz)+1e-4,f=(.5/k)*(.3+.7*e.wn)*(nc>1?(cm[i]===cm[j]?1.4:.6):1);
       D[i*3]-=dx*f;D[i*3+1]-=dy*f;D[i*3+2]-=dz*f;D[j*3]+=dx*f;D[j*3+1]+=dy*f;D[j*3+2]+=dz*f;
     }
     if(nc>1){
@@ -1520,7 +1520,7 @@ function layout(subNodes,subEdges,SP){
     const t=.35*(1-n/it)+.01;
     for(let i=0;i<N;i++){
       if(PIN&&PIN[i])continue;
-      for(let c=0;c<3;c++)D[i*3+c]-=P[i*3+c]*.6;
+      for(let c=0;c<3;c++)D[i*3+c]-=P[i*3+c]*.3;
       const m=Math.hypot(D[i*3],D[i*3+1],D[i*3+2])+1e-6,s=Math.min(m,t)/m;
       for(let c=0;c<3;c++)P[i*3+c]+=D[i*3+c]*s;
     }
@@ -1529,7 +1529,7 @@ function layout(subNodes,subEdges,SP){
   let mx=0;for(let i=0;i<N;i++){P[i*3]-=cx;P[i*3+1]-=cy;P[i*3+2]-=cz;mx=Math.max(mx,Math.hypot(P[i*3],P[i*3+1],P[i*3+2]));}
   for(let i=0;i<N*3;i++)P[i]/=(mx||1);
   for(let i=0;i<N*3;i++)P[i]*=SP;
-  const dm=.35*Math.cbrt(4.19*SP*SP*SP/N);
+  const dm=.62*Math.cbrt(4.19*SP*SP*SP/N);
   for(let it=0;it<80;it++){
     let moved=false;const grid=new Map(),cs=dm;
     const key=(x,y,z)=>(x*73856093)^(y*19349663)^(z*83492791);
@@ -1808,11 +1808,11 @@ async function setFieldMode(mode){
 
 let FS=1.25,VS=1;try{const v=parseFloat(localStorage.getItem('cf.fs'));if(isFinite(v))FS=Math.max(.8,Math.min(1.6,v));}catch(e){}
 // Extra size multiplier for the word labels drawn in the field (on top of the Font / Label Scale setting).
-const WSZ=1.3;
+const WSZ=1.05;
 let nodes=[],edges=[],word2i=new Map(),sel=-1,Q=null;const SS=new Set();let selV=0;
 let curDocs=[],curCorpus=null,replaying=false,hist=[],corpora=[];
 const col={lv:null,f:0,n:-1,hide:null,cnt:null,t:0,sk:null};
-const FV=4,SV='sw3';var fsT=0,PRE=null;
+const FV=6,SV='sw3';var fsT=0,PRE=null;
 let HLOG=[];
 function saveField(){
   clearTimeout(fsT);const id=curCorpus;if(!id||!nodes.length)return;
@@ -1830,7 +1830,7 @@ const scene=new THREE.Scene();scene.background=new THREE.Color(0x01040a);
 const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.01,200);
 camera.position.set(0,1.6,.9);
 const dolly=new THREE.Group();dolly.add(camera);scene.add(dolly);
-const G=new THREE.Group();G.position.set(0,1.4,-1.1);G.scale.setScalar(.6);scene.add(G);
+const G=new THREE.Group();G.position.set(0,1.4,-1.1);G.scale.setScalar(.43);scene.add(G);
 const controls=new OrbitControls(camera,renderer.domElement);
 controls.target.copy(G.position);controls.enableDamping=true;controls.dampingFactor=.08;
 // Free navigation: zoom toward whatever the cursor is over (so you can dive into any orb, not just the scene centre),
@@ -1891,7 +1891,7 @@ function getDocColor(d){ return DOC_PALETTE[(d||0)%DOC_PALETTE.length]; }
 
 let nL=null,nHW=null,wvPend=false,wvT=0;
 const _mc=document.createElement('canvas').getContext('2d');
-function wordHW(n){if(n.hw===undefined){_mc.font='700 133px Inter,system-ui,-apple-system,sans-serif';const tw=_mc.measureText(n.word).width;const effW=Math.min(tw,920);n.hw=(effW/1024)*.3*FS*WSZ/2+.008;}return n.hw;}
+function wordHW(n){if(n.hw===undefined){_mc.font='500 133px Inter,system-ui,-apple-system,sans-serif';const tw=_mc.measureText(n.word).width;const effW=Math.min(tw,920);n.hw=(effW/1024)*.3*FS*WSZ/2+.008;}return n.hw;}
 function refreshWV(){
   if(!pts||!nHW||nHW.length!==nodes.length)return;
   nHW.fill(0);nL.fill(0);
@@ -2296,16 +2296,29 @@ function computeDivergence(){
 
 
 const labelCache=new Map();
+// Light label style: medium weight, no filled box, a thin dark halo only for legibility, and ink tinted by the word's
+// frequency (same ramp as the lines) so text and links read as one system.
+function labelInk(i,kind){
+  if(kind===1)return '#ffe9b8';
+  if(i==null||!nodes[i])return '#eaf8ff';
+  const c=mix(rainbow(cnorm(i)),[1,1,1],.5).map(v=>Math.round(255*Math.max(0,Math.min(1,v))));
+  return 'rgb('+c[0]+','+c[1]+','+c[2]+')';
+}
+function drawLabel(x,word,i,kind){
+  let fs=133;x.font='500 '+fs+'px Inter,system-ui,-apple-system,sans-serif';
+  const tw=x.measureText(word).width;
+  if(tw>920){fs=Math.max(48,Math.floor(fs*(920/tw)));x.font='500 '+fs+'px Inter,system-ui,-apple-system,sans-serif';}
+  x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';
+  x.lineWidth=Math.max(6,fs*.075);x.strokeStyle='rgba(1,5,12,.55)';x.strokeText(word,512,128);
+  x.shadowColor=kind===1?'rgba(255,179,71,.55)':'rgba(0,0,0,.5)';x.shadowBlur=kind===1?14:8;
+  x.fillStyle=labelInk(i,kind);x.fillText(word,512,128);
+}
 function label(i,kind,projection){
   const key=i+':'+kind;let s=projection?null:labelCache.get(key);
   if(!s){
     const word=projection?projection.word:nodes[i].word;
     const c=document.createElement('canvas');c.width=1024;c.height=256;const x=c.getContext('2d');
-    let fs=133;x.font='700 '+fs+'px Inter,system-ui,-apple-system,sans-serif';
-    let tw=x.measureText(word).width;
-    if(tw>920){fs=Math.max(48,Math.floor(fs*(920/tw)));x.font='700 '+fs+'px Inter,system-ui,-apple-system,sans-serif';}
-    x.textAlign='center';x.textBaseline='middle';
-    x.fillStyle='rgba(0,6,16,.62)';x.beginPath();x.roundRect(512-tw/2-40,128-fs*.64,tw+80,fs*1.28,fs*.42);x.fill();x.lineJoin='round';x.lineWidth=16;x.strokeStyle='rgba(0,6,16,.95)';x.strokeText(word,512,128);x.shadowColor=kind===1?'#ffb347':'#5df0ff';x.shadowBlur=22;x.fillStyle=kind===1?'#fff0c8':'#f2fdff';x.fillText(word,512,128);
+    drawLabel(x,word,projection?null:i,kind);
     const tx=new THREE.CanvasTexture(c);tx.anisotropy=renderer.capabilities.getMaxAnisotropy();tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
     const m=new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false});
     s=new THREE.Sprite(m);s.scale.set(.3*FS*WSZ,.075*FS*WSZ,1);s.renderOrder=10;if(!projection)labelCache.set(key,s);
@@ -2391,20 +2404,65 @@ function applyState(quick){
   if(Q&&Q.A){
     for(let i=0;i<N;i++){nI[i]=Q.show[i]?(.25+.75*Q.A[i])*(.55+.6*ni[i]):.14;nc[i]=Q.show[i]?1:0;ea[i]=Q.show[i]?.35+.65*Q.A[i]:.2;}
     for(let e=0;e<E;e++){ei[e]=Q.eI[e];ec[e]=Q.eI[e]>.09?1:0;er[e]=Math.max(0,Math.min(1,(Q.eI[e]-.09)/.95));}
-    Q.top.forEach(i=>labs.push([i,1]));
+    const qSeeds=Q.seed?new Set(Q.seed):new Set();
+    const spacedQ=[];
+    qSeeds.forEach(s=>{spacedQ.push(s);labs.push([s,1]);});
+    for(const i of Q.top){
+      if(qSeeds.has(i))continue;
+      const ni=nodes[i];
+      let tooClose=false;
+      for(const prev of spacedQ){
+        const np=nodes[prev];
+        const d2=(ni.x-np.x)*(ni.x-np.x)+(ni.y-np.y)*(ni.y-np.y)+(ni.z-np.z)*(ni.z-np.z);
+        if(d2 < 0.08){tooClose=true;break;}
+      }
+      if(!tooClose){
+        spacedQ.push(i);
+        labs.push([i,0]);
+        if(spacedQ.length >= 28) break;
+      }
+    }
   }else{
     for(let i=0;i<N;i++)nI[i]=.18+1.9*Math.pow(ni[i],1.2);
-    for(let e=0;e<E;e++){ei[e]=(.06+.18*edges[e].wn)*(.5+.8*(nodes[edges[e].s].nf+nodes[edges[e].t].nf)/2);er[e]=edges[e].wn;}
+    for(let e=0;e<E;e++){ei[e]=(.15+.34*edges[e].wn)*(.65+.7*(nodes[edges[e].s].nf+nodes[edges[e].t].nf)/2);er[e]=edges[e].wn;}
     if(isSep){
       orbs.forEach(orb=>{
         const docNodes=[];
         for(let i=0;i<N;i++)if(nodes[i].doc===orb.doc)docNodes.push(i);
         docNodes.sort((a,b)=>(nodes[b].score||0)-(nodes[a].score||0));
-        docNodes.slice(0,10).forEach(i=>labs.push([i,0]));
+        const orbSpaced=[];
+        for(const i of docNodes){
+          const ni=nodes[i];
+          let tooClose=false;
+          for(const prev of orbSpaced){
+            const np=nodes[prev];
+            const d2=(ni.x-np.x)*(ni.x-np.x)+(ni.y-np.y)*(ni.y-np.y)+(ni.z-np.z)*(ni.z-np.z);
+            if(d2 < 0.08){tooClose=true;break;}
+          }
+          if(!tooClose){
+            orbSpaced.push(i);
+            labs.push([i,0]);
+            if(orbSpaced.length >= 6) break;
+          }
+        }
       });
     }else if(!col.hide){
       const topNodes=[...Array(N).keys()].sort((a,b)=>(nodes[b].score||0)-(nodes[a].score||0));
-      topNodes.slice(0,20).forEach(i=>labs.push([i,0]));
+      const spacedAnchors=[];
+      for(const i of topNodes){
+        const ni=nodes[i];
+        let tooClose=false;
+        for(const prev of spacedAnchors){
+          const np=nodes[prev];
+          const d2=(ni.x-np.x)*(ni.x-np.x)+(ni.y-np.y)*(ni.y-np.y)+(ni.z-np.z)*(ni.z-np.z);
+          if(d2 < 0.20){tooClose=true;break;}
+        }
+        if(!tooClose){
+          spacedAnchors.push(i);
+          labs.push([i,0]);
+          if(spacedAnchors.length >= 12) break;
+        }
+      }
     }
   }
   if(col.hide&&col.hide.length===N&&!hasCtx()){
@@ -2469,7 +2527,7 @@ function applyState(quick){
   lines.geometry.attributes.aI.needsUpdate=true;lines.geometry.attributes.aCol.needsUpdate=true;
   const vs=new Set(visible),seenL=new Set();for(let j=labs.length-1;j>=0;j--){const id=labs[j][0];if(!vs.has(id)||seenL.has(id))labs.splice(j,1);else seenL.add(id);}
   slowDispose(labelGroup.children.filter(s=>s.userData.projection));
-  labelGroup.clear();labs.forEach(([i,k])=>labelGroup.add(label(i,k)));forcedSet=new Set(labs.map(l=>l[0]));
+  labelGroup.clear();labs.forEach(([i,k])=>{const sp=label(i,k);sp.material.opacity=(Q&&Q.A&&k===0)?.5+.5*Math.min(1,Q.A[i]):1;labelGroup.add(sp);});forcedSet=new Set(labs.map(l=>l[0]));
   addMorphemeProjections();
   refreshWV();
   updateCrossVisuals();
@@ -2553,7 +2611,7 @@ async function runQuery(text,again,opts){
   edges.forEach((e,k)=>{if(!show[e.s]||!show[e.t])return;let ov=0;
     pq[e.s].forEach((v,q)=>{ov+=Math.min(v,pq[e.t].get(q)||0);});
     ov=(ov+.25*Math.min(A[e.s],A[e.t]))*(.4+.6*e.wn);eIv[k]=ov;mo=Math.max(mo,ov);});
-  for(let k=0;k<E;k++)eIv[k]=eIv[k]>0?.1+.95*Math.pow(eIv[k]/mo,.8):.03;
+  for(let k=0;k<E;k++)eIv[k]=eIv[k]>0?.14+.95*Math.pow(eIv[k]/mo,.7):.06;
   if(!replaying&&!so)hebbPull([...seedK,...top.slice(0,4)]);
   let crossBridges=[];
   if(fieldMode==='separated'&&orbs.length>1){
@@ -4415,8 +4473,8 @@ renderer.xr.addEventListener('sessionend',()=>{
   try{voiceStop(false);}catch(e){}VOICE.hand=-1;
   amOpen=false;controls.enabled=true;kb.visible=false;ib.visible=false;rb.visible=false;rbPlaced=false;sbOpen=false;sb.visible=false;wbOpen=false;wb.visible=false;fbOpen=false;fb.visible=false;psXR=false;G.visible=true;arRest=0;arAnchor=null;arBusy=false;
   scene.background=bgColor;renderer.setClearAlpha(1);grid.visible=true;ringsG.visible=true;
-  {G.position.set(0,1.4,-1.1);G.scale.setScalar(.6);G.quaternion.identity();}
-  if(isFinite(G.scale.x+G.position.x)===false||G.scale.x<.05){G.position.set(0,1.4,-1.1);G.scale.setScalar(.6);G.quaternion.identity();}
+  {G.position.set(0,1.4,-1.1);G.scale.setScalar(.43);G.quaternion.identity();}
+  if(isFinite(G.scale.x+G.position.x)===false||G.scale.x<.05){G.position.set(0,1.4,-1.1);G.scale.setScalar(.43);G.quaternion.identity();}
   U.uG.value=1;U.uX.value=0;arMode=false;needCenter=false;placing=false;placedOnce=false;xrNote='';reticle.visible=false;planeG.visible=false;
   clearPlanes();teardownHit();PLN=[];seat=null;seatWanted=false;seatRing.visible=false;activeXRMode=null;updateXREntry();
   renderer.xr.setReferenceSpaceType('local-floor');
@@ -4833,13 +4891,12 @@ function platform(){
 }
 const lodGroup=new THREE.Group();G.add(lodGroup);
 const lodMap=new Map(),_cl=new THREE.Vector3(),_cw=new THREE.Vector3();
+const _vdirW=new THREE.Vector3(),_vdirL=new THREE.Vector3(),_invG=new THREE.Matrix4();
+let _connScores=new Float32Array(4000);
+const _connVisited=[];
 function lodSprite(i){
   const c=document.createElement('canvas');c.width=1024;c.height=256;const x=c.getContext('2d');
-  let fs=133;x.font='700 '+fs+'px Inter,system-ui,-apple-system,sans-serif';
-  let tw=x.measureText(nodes[i].word).width;
-  if(tw>920){fs=Math.max(48,Math.floor(fs*(920/tw)));x.font='700 '+fs+'px Inter,system-ui,-apple-system,sans-serif';}
-  x.textAlign='center';x.textBaseline='middle';
-  x.fillStyle='rgba(0,6,16,.62)';x.beginPath();x.roundRect(512-tw/2-40,128-fs*.64,tw+80,fs*1.28,fs*.42);x.fill();x.lineJoin='round';x.lineWidth=16;x.strokeStyle='rgba(0,6,16,.95)';x.strokeText(nodes[i].word,512,128);x.shadowColor='#5df0ff';x.shadowBlur=20;x.fillStyle='#f2fdff';x.fillText(nodes[i].word,512,128);
+  drawLabel(x,nodes[i].word,i,0);
   const tx=new THREE.CanvasTexture(c);tx.anisotropy=renderer.capabilities.getMaxAnisotropy();tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false}));
   sp.scale.set(.3*FS*WSZ,.075*FS*WSZ,1);sp.renderOrder=10;sp.userData.i=i;sp.position.set(nodes[i].x,nodes[i].y,nodes[i].z);return sp;
@@ -4849,22 +4906,233 @@ function slowDispose(list){for(const o of list)_dq.push(o);if(!_dt)_dt=setTimeou
 function _dstep(){_dt=0;const t0=performance.now();
   while(_dq.length&&performance.now()-t0<3){const o=_dq.pop();try{if(o.isSprite){if(o.material.map)o.material.map.dispose();o.material.dispose();}else if(o.dispose)o.dispose();}catch(e){}}
   if(_dq.length)_dt=setTimeout(_dstep,16);}
-function lodClear(){const l=[];lodMap.forEach(sp=>{lodGroup.remove(sp);l.push(sp);});lodMap.clear();slowDispose(l);}
+function lodClear(){
+  const l=[];lodMap.forEach(sp=>{lodGroup.remove(sp);l.push(sp);});lodMap.clear();slowDispose(l);
+  for(let k=0;k<_connVisited.length;k++)_connScores[_connVisited[k]]=0;
+  _connVisited.length=0;
+}
 let lodT=0;
 function lodLabels(dt){
   if(!nodes.length)return;
   wvT+=dt;if(wvPend&&wvT>.25){wvT=0;refreshWV();}
-  lodT+=dt;if(lodT<.07)return;lodT=0;
-  if(hasCtx()){if(lodMap.size){lodClear();wvPend=true;}return;}
+  lodT+=dt;if(lodT<.06)return;lodT=0;
+  if(col.hide&&col.hide.length===nodes.length&&!hasCtx()){if(lodMap.size){lodClear();wvPend=true;}return;}
   const cam=renderer.xr.isPresenting?renderer.xr.getCamera():camera;
   cam.getWorldPosition(_cw);_cl.copy(_cw);G.worldToLocal(_cl);
-  const c=[];
-  for(const i of visible){if(forcedSet.has(i)||(col.hide&&col.hide[i]))continue;const n=nodes[i],d=Math.hypot(n.x-_cl.x,n.y-_cl.y,n.z-_cl.z),R=2.4*(.65+.7*n.nf);if(d<R)c.push([i,d,(R-d)/(R*.35)]);}
-  c.sort((a,b)=>a[1]-b[1]);c.length=Math.min(c.length,70);
+
+  // View direction in local G coordinate space to filter and retain clear direction
+  cam.getWorldDirection(_vdirW);
+  _invG.copy(G.matrixWorld).invert();
+  _vdirL.copy(_vdirW).transformDirection(_invG).normalize();
+
+  // Detect if the camera/viewer is inside the field / room-scale orb
+  const fr=fieldR();
+  const distCenter=_cl.length();
+  const isInside=fieldEnvelops()||(distCenter<fr*1.35)||(fieldMode==='separated'&&orbs.some(o=>Math.hypot(_cl.x-o.center[0],_cl.y-o.center[1],_cl.z-o.center[2])<(o.radius||1.8)*1.35));
+
+  // When inside the room-filling orb, proximity covers the whole room/orb volume
+  const maxProximity=isInside?Math.max(fr*1.8,8.0):2.5;
+  const inView=[];
+  for(const i of visible){
+    if(col.hide&&col.hide[i])continue;
+    const n=nodes[i];
+    const dx=n.x-_cl.x,dy=n.y-_cl.y,dz=n.z-_cl.z;
+    const d=Math.hypot(dx,dy,dz);
+    if(d<0.04||d>maxProximity)continue;
+    const dirX=dx/d,dirY=dy/d,dirZ=dz/d;
+    const dot=dirX*_vdirL.x+dirY*_vdirL.y+dirZ*_vdirL.z;
+    // When outside, discard nodes outside forward view cone. When inside the room-scale orb, encompass all 360°
+    if(!isInside&&dot<0.35)continue;
+    inView.push({i,n,d,dx,dy,dz,dirX,dirY,dirZ,dot});
+  }
+
+  if(!inView.length){
+    if(lodMap.size){
+      for(const [i,sp] of lodMap){
+        if(sp.parent===lodGroup){lodGroup.remove(sp);wvPend=true;}
+        if(lodMap.size>300){sp.material.map.dispose();sp.material.dispose();lodMap.delete(i);}
+      }
+    }
+    return;
+  }
+
+  // Find focal anchor roots in the view
+  if(_connScores.length<nodes.length)_connScores=new Float32Array(nodes.length+500);
+  for(let k=0;k<_connVisited.length;k++)_connScores[_connVisited[k]]=0;
+  _connVisited.length=0;
+
+  const focalRoots=[];
+  if(SS.size){
+    for(const cand of inView){
+      if(SS.has(cand.i)&&!focalRoots.includes(cand.i))focalRoots.push(cand.i);
+    }
+  }
+  if(Q&&Q.seed&&Q.seed.size){
+    for(const cand of inView){
+      if(Q.seed.has(cand.i)&&!focalRoots.includes(cand.i))focalRoots.push(cand.i);
+    }
+  }
+  if(isInside){
+    // When inside the field, seed multi-hub connectivity across the room
+    for(const cand of inView){
+      if(cand.dot>0.5&&focalRoots.length<4){
+        focalRoots.push(cand.i);
+      }
+    }
+    const hubCandidates=inView.slice().sort((a,b)=>{
+      const degA=(a.n.adj?a.n.adj.length:0);
+      const degB=(b.n.adj?b.n.adj.length:0);
+      return (degB*2+(b.n.score||0))-(degA*2+(a.n.score||0));
+    });
+    for(const hc of hubCandidates){
+      let tooClose=false;
+      for(const frId of focalRoots){
+        const fn=nodes[frId];
+        const rx=hc.n.x-fn.x,ry=hc.n.y-fn.y,rz=hc.n.z-fn.z;
+        if(rx*rx+ry*ry+rz*rz<0.36){tooClose=true;break;}
+      }
+      if(!tooClose){
+        focalRoots.push(hc.i);
+        if(focalRoots.length>=12)break;
+      }
+    }
+  }else if(!focalRoots.length){
+    const bestRoots=[];
+    for(let k=0;k<inView.length;k++){
+      const cand=inView[k];
+      if(cand.dot>0.45){
+        const fScore=Math.pow(cand.dot,2.5)*(0.35+0.65*(cand.n.score||cand.n.nf||0.5))/(0.2+cand.d);
+        bestRoots.push({i:cand.i,n:cand.n,score:fScore});
+      }
+    }
+    if(!bestRoots.length){
+      let topC=inView[0];
+      for(let k=1;k<inView.length;k++)if(inView[k].dot>topC.dot)topC=inView[k];
+      bestRoots.push({i:topC.i,n:topC.n,score:1});
+    }else{
+      bestRoots.sort((a,b)=>b.score-a.score);
+    }
+    for(const r of bestRoots){
+      let tooClose=false;
+      for(const frId of focalRoots){
+        const fn=nodes[frId];
+        const rx=r.n.x-fn.x,ry=r.n.y-fn.y,rz=r.n.z-fn.z;
+        if(rx*rx+ry*ry+rz*rz<0.16){tooClose=true;break;}
+      }
+      if(!tooClose){
+        focalRoots.push(r.i);
+        if(focalRoots.length>=3)break;
+      }
+    }
+  }
+
+  // Propagate connectivity along graph edges from focal roots so words appear by connectivity
+  const queue=[];
+  for(const r of focalRoots){
+    _connScores[r]=1;
+    _connVisited.push(r);
+    queue.push(r);
+  }
+  let qHead=0;
+  const maxQueue=isInside?800:350;
+  while(qHead<queue.length&&queue.length<maxQueue){
+    const u=queue[qHead++];
+    const uConn=_connScores[u];
+    if(uConn<0.10)continue;
+    const adj=nodes[u].adj;
+    if(!adj)continue;
+    for(let a=0;a<adj.length;a++){
+      const {j,e}=adj[a];
+      const edge=edges[e];
+      const edgeW=edge?(edge.wn||0.4):0.4;
+      const candConn=uConn*(0.35+0.65*edgeW);
+      if(candConn>0.06&&candConn>_connScores[j]){
+        if(_connScores[j]===0)_connVisited.push(j);
+        _connScores[j]=candConn;
+        queue.push(j);
+      }
+    }
+  }
+
+  // Score candidates by connectivity, view alignment, and distance
+  const qualified=[];
+  for(let k=0;k<inView.length;k++){
+    const cand=inView[k];
+    if(forcedSet.has(cand.i))continue;
+    const conn=_connScores[cand.i];
+    if(conn<=0.06)continue; // Exclude random disconnected words
+    let alignWeight;
+    if(isInside){
+      alignWeight=cand.dot>0?(0.7+0.5*Math.pow(cand.dot,1.2)):0.65;
+    }else{
+      alignWeight=Math.pow(cand.dot,1.4);
+    }
+    const prominence=0.4+0.6*(cand.n.score||cand.n.nf||0.5);
+    cand.conn=conn;
+    cand.finalScore=conn*alignWeight*prominence/(0.3+(isInside?Math.min(cand.d,3.2):cand.d));
+    qualified.push(cand);
+  }
+  qualified.sort((a,b)=>b.finalScore-a.finalScore);
+
+  // Spacing filter: space words out in 3D and in screen view so they do not crowd or overlap
+  const minSpacing3D=(isInside?0.24:0.28)*(FS/1.25)*(WSZ/1.05);
+  const minSpacing3Dsq=minSpacing3D*minSpacing3D;
+  const maxWords=isInside?Math.min(110,Math.max(50,Math.floor(nodes.length*0.4))):24;
+  const chosen=[];
+
+  for(let k=0;k<qualified.length;k++){
+    const cand=qualified[k];
+    let tooClose=false;
+    // Check against forced static labels in view
+    for(const fId of forcedSet){
+      const fn=nodes[fId];
+      if(!fn)continue;
+      const fdx=cand.n.x-fn.x,fdy=cand.n.y-fn.y,fdz=cand.n.z-fn.z;
+      if(fdx*fdx+fdy*fdy+fdz*fdz<minSpacing3Dsq){tooClose=true;break;}
+    }
+    if(tooClose)continue;
+
+    // Check distance and angular overlap against already chosen words
+    for(let cIdx=0;cIdx<chosen.length;cIdx++){
+      const other=chosen[cIdx];
+      const ox=cand.n.x-other.n.x,oy=cand.n.y-other.n.y,oz=cand.n.z-other.n.z;
+      if(ox*ox+oy*oy+oz*oz<minSpacing3Dsq){tooClose=true;break;}
+      const cosAng=cand.dirX*other.dirX+cand.dirY*other.dirY+cand.dirZ*other.dirZ;
+      if(cosAng>0.994){tooClose=true;break;}
+    }
+    if(tooClose)continue;
+
+    chosen.push(cand);
+    if(chosen.length>=maxWords)break;
+  }
+
+  // Display active spaced-out connected words with smooth fade
   const on=new Set();
-  for(const [i,d,f] of c){on.add(i);let sp=lodMap.get(i);if(!sp){sp=lodSprite(i);lodMap.set(i,sp);}
-    if(sp.parent!==lodGroup){lodGroup.add(sp);wvPend=true;}sp.material.opacity=Math.min(1,f);}
-  for(const [i,sp] of lodMap)if(!on.has(i)){if(sp.parent===lodGroup)wvPend=true;lodGroup.remove(sp);if(lodMap.size>150){sp.material.map.dispose();sp.material.dispose();lodMap.delete(i);}}
+  for(let k=0;k<chosen.length;k++){
+    const cand=chosen[k];
+    on.add(cand.i);
+    let sp=lodMap.get(cand.i);
+    if(!sp){sp=lodSprite(cand.i);lodMap.set(cand.i,sp);}
+    if(sp.parent!==lodGroup){lodGroup.add(sp);wvPend=true;}
+    let op;
+    if(isInside){
+      const gazeBright=cand.dot>0?(0.75+0.25*Math.pow(cand.dot,1.2)):0.65;
+      const distFade=Math.min(1,Math.max(0.35,(maxProximity-cand.d)/(maxProximity*0.4)));
+      op=Math.min(1,Math.max(0.35,gazeBright*distFade*(0.5+0.5*cand.conn)));
+    }else{
+      const viewFade=Math.min(1,Math.max(0,(cand.dot-0.35)/0.22));
+      const distFade=Math.min(1,Math.max(0,(maxProximity-cand.d)/0.6));
+      op=Math.min(1,Math.max(0.2,viewFade*distFade*(0.45+0.55*cand.conn)));
+    }
+    sp.material.opacity=op;
+  }
+
+  for(const [i,sp] of lodMap){
+    if(!on.has(i)){
+      if(sp.parent===lodGroup){lodGroup.remove(sp);wvPend=true;}
+      if(lodMap.size>300){sp.material.map.dispose();sp.material.dispose();lodMap.delete(i);}
+    }
+  }
 }
 function unloadField(){
   EPOCH++;ingesting=false;clearTimeout(fsT);ENG.post({t:'reset'});forceWords=[];
@@ -5823,10 +6091,10 @@ const _ev=new THREE.Vector3();
 function edgeBudget(){
   if(!lines||(!lAmbN&&!lSpec))return;
   let fr=1;
-  if(!renderer.xr.isPresenting){camera.getWorldPosition(_ev);G.worldToLocal(_ev);fr=Math.max(.15,Math.min(1,1-(_ev.length()-2)*.2125));}
-  else fr=.6;
-  if(LOW)fr*=.65;
-  const na=Math.min(lAmbN,Math.max(Math.ceil(lAmbN*fr),Math.min(lAmbN,300))),cnt=lSpec+na*2;
+  if(!renderer.xr.isPresenting){camera.getWorldPosition(_ev);G.worldToLocal(_ev);fr=Math.max(.55,Math.min(1,1-(_ev.length()-2)*.12));}
+  else fr=1;
+  if(LOW)fr*=.8;
+  const na=Math.min(lAmbN,Math.max(Math.ceil(lAmbN*fr),Math.min(lAmbN,1500))),cnt=lSpec+na*2;
   if(cnt!==lastLN){lastLN=cnt;lines.geometry.setDrawRange(0,cnt);}
 }
 ['pointerdown','pointermove','wheel','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>{lastAct=performance.now();},{passive:true}));
