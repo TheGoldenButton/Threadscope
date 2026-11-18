@@ -1,4 +1,4 @@
-# Concept Field
+# Threadscope
 
 A single-file (`xrayvision.html`) tool that turns your text into a navigable 3D map of concepts. Words that tend to appear near each other in your documents are drawn close together and linked. You explore the map by asking questions, clicking words, and reading the source passages behind each connection. It runs in the browser, on desktop, in VR, or in mixed reality on Quest. There is no build step and no server.
 
