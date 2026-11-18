@@ -305,7 +305,7 @@ let CUR=null;
 const PROG=t=>{if(CUR!==null)self.postMessage({rid:CUR,prog:t});};
 const NCAP=3000,K=6,FORCE=new Set();
 let nodes=[],edges=[],word2i=new Map(),FAMH=new Map(),fieldMode='unified',ORBS=[];
-const FV=4,SV='sw2';
+const FV=4,SV='sw3';
 
 const STOP=new Set(`the and for with are there was were been has had have did does doing having done you your yours her hers him his she they them their theirs its our ours mine that this per of to in is it be by as at an on am he me my we us if or so do but off out himself herself itself myself yourself ourselves themselves yes no thereby get gets got getting goes going went let lets one ones than then too very just also can could would should might may must shall these those such some any each both either neither other others another about from into onto here while upon up down even yet nor quite whenever wherever whatever whoever whichever what when where which who whom whose why how because since during before after between through under again further once`.split(' '));
 
@@ -315,6 +315,7 @@ const STOP=new Set(`the and for with are there was were been has had have did do
 const STRUCT=new Set(`today tonight yesterday tomorrow later earlier twice ago soon already often always sometimes usually rarely seldom recently formerly lately meanwhile afterward afterwards ever year years month months week weeks day days decade decades century centuries hour hours minute minutes time times period second third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth fifteenth sixteenth seventeenth eighteenth nineteenth twentieth hundredth four five seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty thirty forty fifty sixty seventy eighty ninety hundred hundreds thousand thousands million millions billion billions dozen dozens slightly rather fairly nearly mostly largely mainly partly entirely completely totally extremely highly greatly especially particularly generally typically merely roughly approximately many much several numerous various enough plenty every somehow anyway toward towards across around beyond against beside besides amid back forward throughout within inside outside among amongst along alongside despite regarding concerning versus via beneath behind ahead apart aside away nearby therein thereof thereafter herein wherein whereby whereas whereupon hence accordingly consequently furthermore moreover nevertheless nonetheless otherwise instead indeed perhaps maybe namely respectively additionally together altogether forth onward however become becomes became becoming remain remains remained remaining seem seems appear appears appeared called named referred considered regarded contain contains contained consist consists consisting begin begins began begun started continue continues continued tend tends tended allow allows allowed require requires required involve involves involved live lives lived thing things way ways kind kinds sort sorts part parts number numbers amount lot lots bit case cases example examples fact facts large larger largest small smaller smallest big bigger biggest little huge tiny major minor main chief principal whole entire high higher highest low lower lowest long longer longest short early late latest recent current old young middle top previous former latter common general usual normal typical available necessary important significant simple basic real full said says say saying told tell tells telling asked ask asks replied reply answered cried exclaimed whispered shouted`.split(' '));
 const GEN=new Map();`able actually almost although art automatically basically bring brought came certain chapter come comes coming currently eventually far finally find first following found gave give given gives go gone good great immediately include included includes including keep kept knew know known knows last least leave less like look looked looks made make makes making man mean means meant men more most near need needs never new next now obtain obtained own potentially previously probably provide provides put really refer refers same saw see seemed seen show showed shown shows simply six specifically start still suddenly take taken takes therefore think thought three thus took tried try two use used uses using want wanted well whether will value values type types line version file result list set form view valid return returns returned single multiple different possible similar specific particular exactly indicate indicates indicating contents users user due argument arguments default defaults instance instances object objects`.split(' ').forEach(w=>GEN.set(w,.25));
 'over until unless though although whilst whereas across within without upon onto toward towards via per than then thus nor yet so if or and but as at by for in of on to with from into about off out up down under through between during before after while when where which who whom whose whether either neither both each also just only even still such very'.split(' ').forEach(w=>STRUCT.add(w));
+'not cannot never nothing none nobody nowhere all will now more most same'.split(' ').forEach(w=>STRUCT.add(w));
 const BREAKW=new Set('but however although though yet whereas while nevertheless nonetheless instead'.split(' '));
 const WHW=new Set('what when where who whom whose which why how'.split(' '));
 const okw=e=>e.length<=(e.indexOf(' ')>0?36:24)&&!/(.)\1\1/.test(e)&&!WHW.has(e);
@@ -405,6 +406,50 @@ const QUERY_NEGATION=new Set(['no','not','nor','never','neither','without']);
 function queryTerms(seq){
   return mergeQ(seq).filter(term=>QUERY_NEGATION.has(term)||term.endsWith("n't")||(!STOP.has(term)&&!BREAKW.has(term)));
 }
+
+// Statistical structural words. A word is treated as grammar glue (like "not") when ALL of these hold:
+//  - its frequency is an outlier for THIS text (robust z-score on log frequency),
+//  - it has no inflected forms in the text (no plural, -ed, -ing or possessive: content words almost always do),
+//  - it is not a proper noun (capitalised mid-sentence) and not a word from a file name (the topic itself),
+//  - it is spread evenly through the text instead of piling up in a few passages.
+let DYNSTRUCT=[];
+const SD={z:2.5,share:.0008,minN:12,D:2.2,cap:.5};
+function detectStruct(){
+  const out=new Set();DYNSTRUCT=[];
+  if(CN<1200)return out;
+  const ids=[];
+  for(let i=2;i<vocab.length;i++)if(cfreq[i]>=2&&vocab[i].charCodeAt(0)>=97&&vocab[i].indexOf(' ')<0&&vocab[i].indexOf("'")<0)ids.push(i);
+  if(ids.length<40)return out;
+  const lf=ids.map(i=>Math.log(cfreq[i])).sort((a,b)=>a-b),med=lf[lf.length>>1],
+    dv=lf.map(v=>Math.abs(v-med)).sort((a,b)=>a-b),sd=Math.max(.35,1.4826*dv[dv.length>>1]);
+  const cand=ids.filter(i=>cfreq[i]>=SD.minN&&cfreq[i]/CN>=SD.share&&(Math.log(cfreq[i])-med)/sd>=SD.z);
+  if(!cand.length)return out;
+  const w2i=new Map(cand.map(i=>[vocab[i],i])),fam=new Set();
+  for(let v=2;v<vocab.length;v++){const w=vocab[v];if(w.length<4||w.charCodeAt(0)<97||w.indexOf(' ')>0)continue;
+    for(const b of wForms(w,1)){const j=w2i.get(b);if(j!==undefined)fam.add(j);}}
+  const cap=new Map(cand.map(i=>[vocab[i],[0,0]])),re=/[\p{L}\p{M}]+(?:'[\p{L}\p{M}]+)?/gu;
+  for(const d of DOCS){
+    const tx=d.text.replace(/[\u2018\u2019]/g,"'");let m;re.lastIndex=0;
+    while((m=re.exec(tx))){const c=cap.get(m[0].toLowerCase());if(!c)continue;
+      let p=m.index-1;while(p>=0&&/[\s"'(\[\u201c\u2018]/.test(tx[p]))p--;
+      if(p<0||/[.!?]/.test(tx[p]))continue;
+      c[1]++;if(m[0][0]!==m[0][0].toLowerCase())c[0]++;}}
+  const prot=new Set();DOCS.forEach(d=>(String(d.name).toLowerCase().match(/[\p{L}\p{M}]{3,}/gu)||[]).forEach(w=>prot.add(w)));
+  let ns=0;corp.forEach(d=>{for(let e=0;e<d.seg.length;e++)if(d.seg[e]+1>ns)ns=d.seg[e]+1;});
+  const tot=new Float64Array(ns),cix=new Map(cand.map((c,k)=>[c,k])),cnt=cand.map(()=>new Float64Array(ns));
+  corp.forEach(d=>{const t=d.ids;for(let e=0;e<t.length;e++){const x=t[e];if(x>FILL){tot[d.seg[e]]++;const k=cix.get(x);if(k!==undefined)cnt[k][d.seg[e]]++;}}});
+  const full=[];for(let q=0;q<ns;q++)if(tot[q]>=DOCW*.6)full.push(q);
+  if(full.length<10)return out;
+  const T=full.reduce((a,q)=>a+tot[q],0);
+  cand.forEach((id,k)=>{
+    const w=vocab[id],c=cap.get(w);
+    if(fam.has(id)||prot.has(w)||(c[1]>=3&&c[0]/c[1]>=SD.cap))return;
+    let n=0;for(const q of full)n+=cnt[k][q];if(n<SD.minN)return;
+    let chi=0;for(const q of full){const ex=n*tot[q]/T;chi+=(cnt[k][q]-ex)*(cnt[k][q]-ex)/Math.max(ex,1e-9);}
+    if(chi/(full.length-1)<=SD.D){out.add(id);DYNSTRUCT.push(w);}
+  });
+  return out;
+}
 function recount(){
   cfreq=new Array(vocab.length).fill(0);CN=0;LT=0;
   sfreq=new Array(svocab.length).fill(0);corp.forEach(d=>{for(let i=0;i<d.sw.length;i++)if(d.sw[i])sfreq[d.sw[i]]++;});
@@ -428,6 +473,7 @@ function recount(){
     o.push(i);const m=new Map();for(let e=0;e<a.length;e++)m.set(a[e],Math.min(o[e],o[e+1])<PMIN);d.pb=m;d.bnd||(d.bnd=ideaBounds(d.ids));d.post=null;d.spost=null;});
   exclC=new Uint8Array(vocab.length);
   for(let e=1;e<vocab.length;e++)if(vocab[e].charCodeAt(0)<58||STRUCT.has(vocab[e]))exclC[e]=1;exclC[FILL]=1;
+  detectStruct().forEach(i=>{exclC[i]=1;});
 }
 
 function ideaBounds(ids){
@@ -1625,7 +1671,7 @@ self.onmessage=e=>{
       if(!res){self.postMessage({rid:m.rid,res:null});return;}
       let rebuilt=null;
       if(!m.again){
-        const need=[];res.seeds.forEach(sd=>sd.ids.forEach(id=>{if(word2i.get(id)===undefined&&cfreq[id]&&!FAMH.has(id))need.push(id);}));
+        const need=[];res.seeds.forEach(sd=>sd.ids.forEach(id=>{if(word2i.get(id)===undefined&&cfreq[id]&&!FAMH.has(id)&&!exclC[id])need.push(id);}));
         if(need.length){
           need.slice(0,60).forEach(id=>FORCE.add(id));
           if(fieldMode==='separated'&&DOCS.length>1)buildFieldSeparated();
@@ -1721,10 +1767,12 @@ async function setFieldMode(mode){
 }
 
 let FS=1.25,VS=1;try{const v=parseFloat(localStorage.getItem('cf.fs'));if(isFinite(v))FS=Math.max(.8,Math.min(1.6,v));}catch(e){}
+// Extra size multiplier for the word labels drawn in the field (on top of the Font / Label Scale setting).
+const WSZ=1.3;
 let nodes=[],edges=[],word2i=new Map(),sel=-1,Q=null;const SS=new Set();let selV=0;
 let curDocs=[],curCorpus=null,replaying=false,hist=[],corpora=[];
 const col={lv:null,f:0,n:-1,hide:null,cnt:null,t:0,sk:null};
-const FV=4,SV='sw2';var fsT=0,PRE=null;
+const FV=4,SV='sw3';var fsT=0,PRE=null;
 let HLOG=[];
 function saveField(){
   clearTimeout(fsT);const id=curCorpus;if(!id||!nodes.length)return;
@@ -1799,7 +1847,7 @@ function getDocColor(d){ return DOC_PALETTE[(d||0)%DOC_PALETTE.length]; }
 
 let nL=null,nHW=null,wvPend=false,wvT=0;
 const _mc=document.createElement('canvas').getContext('2d');
-function wordHW(n){if(n.hw===undefined){_mc.font='700 133px Inter,system-ui,-apple-system,sans-serif';const tw=_mc.measureText(n.word).width;const effW=Math.min(tw,920);n.hw=(effW/1024)*.3*FS/2+.008;}return n.hw;}
+function wordHW(n){if(n.hw===undefined){_mc.font='700 133px Inter,system-ui,-apple-system,sans-serif';const tw=_mc.measureText(n.word).width;const effW=Math.min(tw,920);n.hw=(effW/1024)*.3*FS*WSZ/2+.008;}return n.hw;}
 function refreshWV(){
   if(!pts||!nHW||nHW.length!==nodes.length)return;
   nHW.fill(0);nL.fill(0);
@@ -2228,7 +2276,7 @@ function label(i,kind,projection){
     x.fillStyle='rgba(0,6,16,.62)';x.beginPath();x.roundRect(512-tw/2-40,128-fs*.64,tw+80,fs*1.28,fs*.42);x.fill();x.lineJoin='round';x.lineWidth=16;x.strokeStyle='rgba(0,6,16,.95)';x.strokeText(word,512,128);x.shadowColor=kind===1?'#ffb347':'#5df0ff';x.shadowBlur=22;x.fillStyle=kind===1?'#fff0c8':'#f2fdff';x.fillText(word,512,128);
     const tx=new THREE.CanvasTexture(c);tx.anisotropy=renderer.capabilities.getMaxAnisotropy();tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
     const m=new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false});
-    s=new THREE.Sprite(m);s.scale.set(.3*FS,.075*FS,1);s.renderOrder=10;if(!projection)labelCache.set(key,s);
+    s=new THREE.Sprite(m);s.scale.set(.3*FS*WSZ,.075*FS*WSZ,1);s.renderOrder=10;if(!projection)labelCache.set(key,s);
   }
   if(projection){s.userData.projection=projection.weights;return s;}
   s.userData.i=i;s.position.set(nodes[i].x,nodes[i].y,nodes[i].z);return s;
@@ -3000,7 +3048,7 @@ function voiceToggle(){if(VOICE.st==='rec'||VOICE.st==='starting')voiceStop(true
 function palmRead(r,hd){
   const h=r.h;if(!h||!h.userData.on||h.visible===false)return null;
   const J=h.joints,g=n=>{const j=J[n];if(!j||j.jointRadius===undefined||j.visible===false)return null;return j.getWorldPosition(new THREE.Vector3());};
-  const w=g('wrist'),mm=g('middle-finger-metacarpal'),mp=g('middle-finger-phalanx-proximal'),im=g('index-finger-metacarpal'),pm=g('pinky-finger-metacarpal');
+  const w=g('wrist'),mm=g('middle-finger-metacarpal'),mp=g('middle-finger-phalanx-proximal'),im=g('index-finger-metacarpal'),pm=g('pinky-finger-metacarpal'),mt=g('middle-finger-tip');
   if(!w||!mm||!mp||!im||!pm)return null;
   let open=0,closed=0,tot=0;
   for(const f of ['index','middle','ring','pinky']){const t=g(f+'-finger-tip'),k=g(f+'-finger-phalanx-proximal');if(!t||!k)continue;tot++;
@@ -3009,7 +3057,9 @@ function palmRead(r,hd){
   const a=im.clone().sub(w),b=pm.clone().sub(w),right=!(r.c.userData.src&&r.c.userData.src.handedness==='left');
   const n=(right?a.cross(b):b.cross(a)).normalize(),c=mp.clone().lerp(mm,.35);
   const v=hd.clone().sub(c).normalize(),facing=n.y>.4||n.dot(v)>.6;
-  return {open:open>=3&&tot>=3&&spread>.65,closed:closed>=3&&tot>=3,n,c,facing};
+  // o: where the voice orb floats, most of the way from the middle knuckle out to the fingertip (c stays the palm centre used for the facing test)
+  const o=mt?mp.clone().lerp(mt,.8):c;
+  return {open:open>=3&&tot>=3&&spread>.65,closed:closed>=3&&tot>=3,n,c,o,facing};
 }
 const PALM_HOLD=.8;   
 function voiceStep(dt){
@@ -3108,7 +3158,7 @@ const _vo=new THREE.Vector3(),_va=new THREE.Vector3(),_vb=new THREE.Vector3(),_v
 let boltT=0,nearT=0,nearList=[];
 function orbTarget(){
   const xr=renderer.xr.isPresenting,cam=xr?renderer.xr.getCamera():camera;
-  if(xr&&VOICE.hand>=0&&VOICE.pr){_vo.copy(VOICE.pr.c).addScaledVector(VOICE.pr.n,.06);return;}
+  if(xr&&VOICE.hand>=0&&VOICE.pr){_vo.copy(VOICE.pr.o||VOICE.pr.c).addScaledVector(VOICE.pr.n,.06);return;}
   cam.getWorldPosition(_vo);cam.getWorldDirection(_vd);_vo.addScaledVector(_vd,xr?.5:.55).addScaledVector(UPV,-.1);
 }
 function nodeWorld(i,o){const n=nodes[i];return o.set(n.x,n.y,n.z).applyMatrix4(G.matrixWorld);}
@@ -4629,7 +4679,7 @@ function lodSprite(i){
   x.fillStyle='rgba(0,6,16,.62)';x.beginPath();x.roundRect(512-tw/2-40,128-fs*.64,tw+80,fs*1.28,fs*.42);x.fill();x.lineJoin='round';x.lineWidth=16;x.strokeStyle='rgba(0,6,16,.95)';x.strokeText(nodes[i].word,512,128);x.shadowColor='#5df0ff';x.shadowBlur=20;x.fillStyle='#f2fdff';x.fillText(nodes[i].word,512,128);
   const tx=new THREE.CanvasTexture(c);tx.anisotropy=renderer.capabilities.getMaxAnisotropy();tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false}));
-  sp.scale.set(.3*FS,.075*FS,1);sp.renderOrder=10;sp.userData.i=i;sp.position.set(nodes[i].x,nodes[i].y,nodes[i].z);return sp;
+  sp.scale.set(.3*FS*WSZ,.075*FS*WSZ,1);sp.renderOrder=10;sp.userData.i=i;sp.position.set(nodes[i].x,nodes[i].y,nodes[i].z);return sp;
 }
 var _dq=[],_dt=0;
 function slowDispose(list){for(const o of list)_dq.push(o);if(!_dt)_dt=setTimeout(_dstep,16);}
@@ -5859,7 +5909,7 @@ function applyFS(){
   document.documentElement.style.setProperty('--fs',FS);
   VS=Math.min(1.35,1+(FS-1)*.6);          
   [kb,ib,rb].forEach(m=>m.scale.setScalar(VS));
-  const rs=sp=>sp.scale.set(.3*FS,.075*FS,1);
+  const rs=sp=>sp.scale.set(.3*FS*WSZ,.075*FS*WSZ,1);
   labelCache.forEach(rs);lodMap.forEach(rs);
   nodes.forEach(n=>{n.hw=undefined;});wvPend=true;
   $('#sfsv').textContent=Math.round(FS*100)+'%';
