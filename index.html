@@ -1715,7 +1715,7 @@ async function setFieldMode(mode){
     buildVisuals();
     if(LASTQ&&LASTQ.trim()){await runQuery(LASTQ,true);}
     else applyState();
-    stat(mode==='separated'?`Separated into ${orbs.length} file orbs. Threads show overlap; red panels highlight divergence blind spots.`:'Unified into a single conceptual field.');
+    stat(mode==='separated'?`Separated into ${orbs.length} file orbs. Threads show overlap.`:'Unified into a single conceptual field.');
   }catch(e){stat('Mode switch failed: '+e.message);}
 }
 
@@ -1815,7 +1815,6 @@ let eRank=[],lIdx,dIdx,lSpec=0,lAmbN=0,dN=0,lastLN=-1,pts,lines,dots,dI,dD,dC,nA
 const crossGroup=new THREE.Group();G.add(crossGroup);
 const crossLabelsGroup=new THREE.Group();crossGroup.add(crossLabelsGroup);
 const orbHaloGroup=new THREE.Group();G.add(orbHaloGroup);
-const divergenceGroup=new THREE.Group();G.add(divergenceGroup);
 
 let crossMode='overlap';let showThreads=true;try{showThreads=localStorage.getItem('cf.threads')!=='0';}catch(e){}
 
@@ -1946,7 +1945,6 @@ function updateCrossVisuals(){
   if(crossLinesMesh){crossGroup.remove(crossLinesMesh);crossLinesMesh.geometry.dispose();crossLinesMesh=null;}
   if(crossDotsMesh){crossGroup.remove(crossDotsMesh);crossDotsMesh.geometry.dispose();crossDotsMesh=null;}
   crossLabelsGroup.clear();
-  updateDivergenceVisuals();
   if(!showThreads||fieldMode!=='separated'||!Q||!Q.crossBridges||!Q.crossBridges.length){
     crossGroup.visible=false;orbHaloGroup.visible=fieldMode==='separated'&&orbs.length>1;return;
   }
@@ -2014,7 +2012,6 @@ function updateCrossVisuals(){
     sp.userData={isBridge:true,bridge:b};
     crossLabelsGroup.add(sp);
   });
-  updateDivergenceVisuals();
 }
 
 let orbHaloObjs=[],orbLabels=[],orbMoved=false;
@@ -2178,43 +2175,6 @@ function computeDivergence(){
   return {docBlindSpots,topDivergent:allDivergent.slice(0,24)};
 }
 
-function updateDivergenceVisuals(){
-  divergenceGroup.clear();
-  if(fieldMode!=='separated'||orbs.length<2||!Q||!Q.A){
-    divergenceGroup.visible=false;return;
-  }
-  divergenceGroup.visible=true;
-  const div=computeDivergence();
-  
-  div.topDivergent.slice(0,16).forEach(spot=>{
-    const u=nodes[spot.i];
-    const c=document.createElement('canvas');c.width=1024;c.height=256;const ctx=c.getContext('2d');
-    
-    ctx.fillStyle='#ff243a';
-    ctx.beginPath();
-    ctx.roundRect(40,28,944,200,100);
-    ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,0.7)';
-    ctx.lineWidth=8;
-    ctx.stroke();
-    
-    ctx.fillStyle='#01050a';
-    ctx.textAlign='center';
-    ctx.textBaseline='middle';
-    let dfs=126;ctx.font='800 '+dfs+'px Inter,system-ui,-apple-system,sans-serif';
-    let dtw=ctx.measureText(spot.word).width;
-    if(dtw>880){dfs=Math.max(44,Math.floor(dfs*(880/dtw)));ctx.font='800 '+dfs+'px Inter,system-ui,-apple-system,sans-serif';}
-    ctx.fillText(spot.word,512,128);
-    const tx=new THREE.CanvasTexture(c);tx.minFilter=THREE.LinearMipmapLinearFilter;tx.colorSpace=THREE.SRGBColorSpace;
-    const sm=new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false});
-    const sp=new THREE.Sprite(sm);
-    sp.position.set(u.x,u.y,u.z);
-    sp.scale.set(.52*FS,.13*FS,1);
-    sp.renderOrder=38;
-    sp.userData={isDivergent:true,nodeIndex:spot.i,i:spot.i,doc:spot.doc};
-    divergenceGroup.add(sp);
-  });
-}
 
 const labelCache=new Map();
 function label(i,kind,projection){
@@ -2343,7 +2303,6 @@ function applyState(quick){
   }
   const div=(isSep&&Q&&Q.A)?computeDivergence():null;
   const divSet=div?new Set(div.topDivergent.map(d=>d.i)):null;
-  const divShownSet=div?new Set(div.topDivergent.slice(0,16).map(d=>d.i)):null;
   const hid=new Uint8Array(N);let newest=-1;
   const pointIndex=pts.geometry.index;let pointCount=0;
   visible=[];const colOn=!!(col.hide&&col.hide.length===N&&!hasCtx());
@@ -2389,11 +2348,10 @@ function applyState(quick){
   aT.needsUpdate=true;for(const a of ['aI','aDir','aCol'])dots.geometry.attributes[a].needsUpdate=true;
   for(const a of ['aI','aSize','aCol','aF','aP'])pts.geometry.attributes[a].needsUpdate=true;
   lines.geometry.attributes.aI.needsUpdate=true;lines.geometry.attributes.aCol.needsUpdate=true;
-  const vs=new Set(visible),seenL=new Set();for(let j=labs.length-1;j>=0;j--){const id=labs[j][0];if(!vs.has(id)||seenL.has(id)||(divShownSet&&divShownSet.has(id)))labs.splice(j,1);else seenL.add(id);}
+  const vs=new Set(visible),seenL=new Set();for(let j=labs.length-1;j>=0;j--){const id=labs[j][0];if(!vs.has(id)||seenL.has(id))labs.splice(j,1);else seenL.add(id);}
   slowDispose(labelGroup.children.filter(s=>s.userData.projection));
   labelGroup.clear();labs.forEach(([i,k])=>labelGroup.add(label(i,k)));forcedSet=new Set(labs.map(l=>l[0]));
   addMorphemeProjections();
-  if(divShownSet){divShownSet.forEach(i=>{forcedSet.add(i);const sp=lodMap.get(i);if(sp&&sp.parent===lodGroup)lodGroup.remove(sp);});}
   refreshWV();
   updateCrossVisuals();
   if(quick){kDirty=true;}else updateInfo();
@@ -2552,8 +2510,6 @@ function clearAll(){
   lodClear();
   $ps.hidden=true;
   PS.seq++;
-  divergenceGroup.clear();
-  divergenceGroup.visible=false;
   crossGroup.visible=false;
   crossLabelsGroup.clear();
   updatePulse(true);
@@ -3467,20 +3423,49 @@ function keyAt(px,py){
   return {k:k||null,px,py};
 }
 const rc=new THREE.Raycaster(),_o=new THREE.Vector3(),_d=new THREE.Vector3(),_q=new THREE.Quaternion();
+const blockerCenter=new THREE.Vector3(),blockerOffset=new THREE.Vector3();
+let radiusFrame=-1,unifiedRadius=0;
+function firstPanelIntersection(panel){
+  const hit=rc.intersectObject(panel,false)[0];
+  if(!hit||!arMode||placing||!G.visible||!nodes.length)return hit;
+  const scale=G.matrixWorld.getMaxScaleOnAxis();
+  function blocks(radius){
+    blockerOffset.subVectors(blockerCenter,rc.ray.origin);
+    const along=blockerOffset.dot(rc.ray.direction);
+    const radiusSquared=(radius*scale)**2;
+    const chordSquared=radiusSquared-blockerOffset.lengthSq()+along*along;
+    if(chordSquared<0)return false;
+    const halfChord=Math.sqrt(chordSquared);
+    return along+halfChord>=0&&along-halfChord<hit.distance;
+  }
+  if(fieldMode==='separated'&&orbs.length>1){
+    for(const orb of orbs){
+      blockerCenter.fromArray(orb.center).applyMatrix4(G.matrixWorld);
+      if(blocks(orb.radius||1.2))return null;
+    }
+  }else{
+    if(radiusFrame!==renderer.info.render.frame){
+      unifiedRadius=fieldR();
+      radiusFrame=renderer.info.render.frame;
+    }
+    blockerCenter.setFromMatrixPosition(G.matrixWorld);
+    if(blocks(unifiedRadius))return null;
+  }
+  return hit;
+}
 function panelNear(c){
   if(!kb.visible)return false;
   rayOf(c);_d.set(0,0,-1).applyQuaternion(_q);rc.set(_o,_d);
-  const h=rc.intersectObject(kb,false)[0];if(!h||!h.uv)return false;
+  const h=firstPanelIntersection(kb);if(!h||!h.uv)return false;
   const px=h.uv.x*KW,py=(1-h.uv.y)*KH,m=28;
   return KEYS.some(k=>(!HUIDE||k.id==='hideui')&&(!k.kbk||kbOpen)&&(!k.am||amOpen)&&(!k.dk||curDocs.length)&&(!(k.tlk||k.ctk)||hasCtx())&&px>=k.x-m&&px<=k.x+k.w+m&&py>=k.y-m&&py<=k.y+k.h+m);
 }
-let RAYOV=null;
-function rayOf(c){if(RAYOV&&RAYOV.c===c){_o.copy(RAYOV.o);_q.copy(RAYOV.q);}else{c.getWorldPosition(_o);c.getWorldQuaternion(_q);}}
+function rayOf(c){c.getWorldPosition(_o);c.getWorldQuaternion(_q);}
 function panelHit(c,keep){
   if(!kb.visible)return null;
   rayOf(c);_d.set(0,0,-1).applyQuaternion(_q);
   rc.set(_o,_d);rc.far=3;
-  const h=rc.intersectObject(kb,false)[0];if(!h||!h.uv)return null;
+  const h=firstPanelIntersection(kb);if(!h||!h.uv)return null;
   const o=keyAt(h.uv.x*KW,(1-h.uv.y)*KH);
   if(o)o.d=h.distance;
   return o&&(o.k||keep)?o:null;
@@ -3520,7 +3505,7 @@ const kOffL=new THREE.Vector3(),kBase=new THREE.Vector3();
 function kbPaneHit(c){
   if(!kb.visible||HUIDE)return null;
   rayOf(c);_d.set(0,0,-1).applyQuaternion(_q);rc.set(_o,_d);rc.far=3;
-  const h=rc.intersectObject(kb,false)[0];if(!h||!h.uv)return null;
+  const h=firstPanelIntersection(kb);if(!h||!h.uv)return null;
   const px=h.uv.x*KW,py=(1-h.uv.y)*KH;
   const top=px>=24&&px<=KW-24&&py>=10&&py<=180,kp=kbOpen&&px>=(KW-1060)/2&&px<=(KW+1060)/2&&py>=634&&py<=984;
   return (top||kp)?{d:h.distance}:null;
@@ -3673,7 +3658,7 @@ function infoHit(c, r){
   if(!ib.visible)return null;
   rayOf(c);_d.set(0,0,-1).applyQuaternion(_q);
   rc.set(_o,_d);rc.far=3.5;
-  let h=rc.intersectObject(ib,false)[0];
+  let h=firstPanelIntersection(ib);
   if((!h||!h.uv)&&r&&r.h&&r.h.userData.on){
     const ix=r.h.joints['index-finger-tip'], ph=r.h.joints['index-finger-phalanx-intermediate']||r.h.joints['index-finger-phalanx-proximal'];
     if(ix&&ph&&ix.visible!==false&&ph.visible!==false){
@@ -3681,7 +3666,7 @@ function infoHit(c, r){
       const p=ph.getWorldPosition(new THREE.Vector3());
       const d=o.clone().sub(p).normalize();
       rc.set(o,d);rc.far=3.5;
-      h=rc.intersectObject(ib,false)[0];
+      h=firstPanelIntersection(ib);
     }
   }
   if(!h||!h.uv)return null;
@@ -3745,12 +3730,6 @@ function uiStep(points){
     }
     if(r.ft){r.tp=false;return;}   
     
-    RAYOV=null;
-    if(r.c.userData.isHand){
-      const nw=performance.now(),H=r.rh||(r.rh=[]);H.push({t:nw,o:r.c.getWorldPosition(new THREE.Vector3()),q:r.c.getWorldQuaternion(new THREE.Quaternion())});
-      while(H.length>2&&nw-H[1].t>260)H.shift();
-      if(r.pin&&!r.tp){let e=null;for(const x of H){if(nw-x.t>=80)e=x;}if(e)RAYOV={c:r.c,o:e.o,q:e.q};}
-    }
     let hit=panelHit(r.c),ih=infoHit(r.c,r),rh=rdHit(r.c);
     let sh=r.bd?null:settingsHit(r.c),wh=r.bd?null:wikiHit(r.c);
     let fh=r.bd?null:filesHit(r.c);
@@ -3758,7 +3737,7 @@ function uiStep(points){
     if(sh||wh||fh){hit=null;ih=null;rh=null;}
     const kd=(!hit&&!ih&&!rh&&!sh&&!wh&&!fh&&!r.ft)?kbPaneHit(r.c):null;
     
-    const nr=!hit&&(r.c.userData.isHand?r.pin:r.c.userData.tr)&&!r.tp?panelNear(r.c):false;RAYOV=null;
+    const nr=!hit&&(r.c.userData.isHand?r.pin:r.c.userData.tr)&&!r.tp?panelNear(r.c):false;
     
     if(r.ibd&&ih){hit=null;rh=null;}else if(r.rds&&rh){hit=null;ih=null;}else if(hit&&hit.k&&!(rh&&rh.k)){ih=null;rh=null;}
     else{const dh=hit?hit.d:1e9,di=ih?ih.d:1e9,dr=rh?rh.d:1e9,m=Math.min(dh,di,dr);if(dh>m)hit=null;if(di>m)ih=null;if(dr>m)rh=null;}
@@ -4054,12 +4033,6 @@ renderer.domElement.addEventListener('pointerup',e=>{
     sfxChime(b.u);return;
   }
   
-  const hitDiv=divergenceGroup.visible&&divergenceGroup.children.length?ray.intersectObjects(divergenceGroup.children)[0]:null;
-  if(hitDiv&&hitDiv.object&&hitDiv.object.userData&&hitDiv.object.userData.nodeIndex!==undefined){
-    const ni=hitDiv.object.userData.nodeIndex;
-    select(ni);
-    sfxChime(ni);return;
-  }
   const i=pick(ray.ray.origin,ray.ray.direction,.02);
   if(i>=0)select(i);
   else{const xb=crossGroup.visible?crossPick(e.clientX,e.clientY):-1;
@@ -4189,10 +4162,6 @@ for(let i=0;i<2;i++){
       SS.clear();SS.add(b.u);SS.add(b.v);sel=b.v;selV++;applyState();
       sfxChime(b.u);return;
     }
-    const hitDiv=divergenceGroup.children.length?ray.intersectObjects(divergenceGroup.children)[0]:null;
-    if(hitDiv&&hitDiv.object&&hitDiv.object.userData&&hitDiv.object.userData.nodeIndex!==undefined){
-      select(hitDiv.object.userData.nodeIndex);return;
-    }
     const k=pick(o,d,.1);if(k>=0)select(k);
     else{const ek=edgePickRay(o,d,.06);if(ek>=0)selectEdge(ek);}});
   h.userData={on:false};h.addEventListener('connected',()=>h.userData.on=true);h.addEventListener('disconnected',()=>h.userData.on=false);
@@ -4218,7 +4187,7 @@ function recoverField(force){
 }
 function resetGestures(){
   mode='none';gi=-1;g0={};g1={};grabbing=false;twoHandInit=false;pushPullVel=0;
-  rig.forEach(r=>{r.pin=false;r.sm=null;r.cancel=false;r.tp=false;r.uiHold=false;r.orbHold=false;r.c.userData.sq=false;r.c.userData.tr=false;});
+  rig.forEach(r=>{r.pinchArmed=false;r.pinchSince=null;r.pin=false;r.sm=null;r.cancel=false;r.tp=false;r.uiHold=false;r.orbHold=false;r.c.userData.sq=false;r.c.userData.tr=false;});
 }
 let lostT=0;
 function xrWatch(dt){
@@ -4286,6 +4255,17 @@ function getHandPos(r,out){
   return null;
 }
 const _hpA=new THREE.Vector3(),_hpB=new THREE.Vector3(),_hpV=new THREE.Vector3();
+function updateHandPinch(r,gap,now){
+  if(gap>=.030){
+    r.pinchArmed=true;
+    r.pinchSince=null;
+    r.pin=false;
+  }else if(!r.pin){
+    if(!r.pinchArmed||gap>.016){r.pinchSince=null;return;}
+    if(r.pinchSince==null)r.pinchSince=now;
+    if(now-r.pinchSince>=65){r.pin=true;r.pinchArmed=false;}
+  }
+}
 function handPoint(r){
   const j=r.h&&r.h.joints,ti=j&&j['thumb-tip'],ix=j&&j['index-finger-tip'];
   if(r.c.userData.isHand){
@@ -4296,8 +4276,8 @@ function handPoint(r){
       if(Number.isFinite(gap)){
         _hpV.addVectors(_hpA,_hpB).multiplyScalar(.5);
         const jumped=r.sm && _hpV.distanceTo(r.sm)>.22;
-        if(!jumped || !r.pin){
-          r.pin=gap<(r.pin?.038:.025);
+        if(!jumped && gap>.001){
+          updateHandPinch(r,gap,performance.now());
           if(!r.sm || !r.pin || jumped)r.sm=_hpV.clone();
           else r.sm.lerp(_hpV,1-Math.exp(-32*GDT));
           return r.sm.clone();
@@ -4305,7 +4285,7 @@ function handPoint(r){
       }
     }
     // End the old grab before accepting a pose in a new tracking location.
-    r.cancel=r.pin;r.pin=false;r.sm=null;r.hk=null;
+    r.cancel=r.pin;r.pinchArmed=false;r.pinchSince=null;r.pin=false;r.sm=null;r.hk=null;
     return null;
   }
   r.rawPin=false;
@@ -4612,7 +4592,7 @@ function updateGeom(){
   const eo=lines.geometry.attributes.aO.array;edges.forEach((e,k)=>{const a=nodes[e.s],b=nodes[e.t];eo[k*6]=b.x;eo[k*6+1]=b.y;eo[k*6+2]=b.z;eo[k*6+3]=a.x;eo[k*6+4]=a.y;eo[k*6+5]=a.z;});lines.geometry.attributes.aO.needsUpdate=true;
   lines.geometry.attributes.position.needsUpdate=true;dots.geometry.attributes.position.needsUpdate=true;dots.geometry.attributes.aB.needsUpdate=true;
   const mv=sp=>{const n=nodes[sp.userData.i];if(n)sp.position.set(n.x,n.y,n.z);};
-  labelGroup.children.forEach(sp=>sp.userData.projection?positionMorphemeProjection(sp):mv(sp));lodMap.forEach(mv);divergenceGroup.children.forEach(mv);
+  labelGroup.children.forEach(sp=>sp.userData.projection?positionMorphemeProjection(sp):mv(sp));lodMap.forEach(mv);
 }
 function platform(){
   ringsG.visible=!arMode;
@@ -4659,7 +4639,7 @@ function lodLabels(dt){
 function unloadField(){
   EPOCH++;ingesting=false;clearTimeout(fsT);ENG.post({t:'reset'});forceWords=[];
   nodes=[];edges=[];word2i=new Map();SS.clear();selV++;sel=-1;Q=null;visible=[];forcedSet=new Set();docCount=0;curCorpus=null;curDocs=[];HLOG=[];renderDocs();
-  orbs=[];orbHaloGroup.clear();orbHaloGroup.visible=false;crossGroup.visible=false;divergenceGroup.clear();divergenceGroup.visible=false;crossLabelsGroup.clear();
+  orbs=[];orbHaloGroup.clear();orbHaloGroup.visible=false;crossGroup.visible=false;crossLabelsGroup.clear();
   if(pts){const g=[pts.geometry,lines.geometry,dots.geometry];G.remove(pts,lines,dots);pts=lines=dots=null;slowDispose(g);}
   slowDispose(labelGroup.children.filter(s=>s.userData.projection));
   labelGroup.clear();slowDispose([...labelCache.values()]);labelCache.clear();lodClear();
@@ -4715,7 +4695,7 @@ function rdSet(v){rdSy=Math.max(0,Math.min(rdMax,v));rdD=true;}
 function rdHit(c){
   if(!rb.visible)return null;
   rayOf(c);_d.set(0,0,-1).applyQuaternion(_q);rc.set(_o,_d);rc.far=2;
-  const h=rc.intersectObject(rb,false)[0];if(!h||!h.uv)return null;
+  const h=firstPanelIntersection(rb);if(!h||!h.uv)return null;
   const px=h.uv.x*RW,py=(1-h.uv.y)*RH;
   return {k:RK.find(k=>(!k.sc||rdMax>0)&&px>=k.x-4&&px<=k.x+k.w+4&&py>=k.y-4&&py<=k.y+k.h+4)||null,d:h.distance,px,py};
 }
@@ -4835,7 +4815,7 @@ function toggleSettingsXR(){
 function settingsHit(c){
   if(!sb.visible) return null;
   rayOf(c); _d.set(0,0,-1).applyQuaternion(_q); rc.set(_o,_d); rc.far=3.5;
-  const h=rc.intersectObject(sb,false)[0]; if(!h||!h.uv) return null;
+  const h=firstPanelIntersection(sb); if(!h||!h.uv) return null;
   const px=h.uv.x*SW, py=(1-h.uv.y)*SH;
   return {k:SK.find(k=>px>=k.x-4&&px<=k.x+k.w+4&&py>=k.y-4&&py<=k.y+k.h+4)||null, d:h.distance, px, py};
 }
@@ -4972,7 +4952,7 @@ function toggleWikiXR(){
 function wikiHit(c){
   if(!wb.visible) return null;
   rayOf(c); _d.set(0,0,-1).applyQuaternion(_q); rc.set(_o,_d); rc.far=3.5;
-  const h=rc.intersectObject(wb,false)[0]; if(!h||!h.uv) return null;
+  const h=firstPanelIntersection(wb); if(!h||!h.uv) return null;
   const px=h.uv.x*WBW, py=(1-h.uv.y)*WBH;
   return {k:WK_BTNS.find(k=>px>=k.x-4&&px<=k.x+k.w+4&&py>=k.y-4&&py<=k.y+k.h+4)||null, d:h.distance, px, py};
 }
@@ -5205,7 +5185,7 @@ function toggleFilesXR(history=false){
 function filesHit(c){
   if(!fb.visible) return null;
   rayOf(c); _d.set(0,0,-1).applyQuaternion(_q); rc.set(_o,_d); rc.far=3.5;
-  const h=rc.intersectObject(fb,false)[0]; if(!h||!h.uv) return null;
+  const h=firstPanelIntersection(fb); if(!h||!h.uv) return null;
   const px=h.uv.x*FBW, py=(1-h.uv.y)*FBH;
   return {k:fbBtns().find(k=>px>=k.x-4&&px<=k.x+k.w+4&&py>=k.y-4&&py<=k.y+k.h+4)||null, d:h.distance, px, py};
 }
