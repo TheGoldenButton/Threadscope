@@ -3816,6 +3816,7 @@ function uiStep(points){
   rig.forEach((r,i)=>{
     const point=points?.[i];
     if(!r.pin)r.orbHold=false;
+    if(r.pin&&r.orbHold){r.tp=true;return;}
     if(point&&r.h?.userData.on&&!placing){
       const touching=fieldMode==='separated'&&orbs.length>1?orbAtWorld(point)>=0:
         nodes.length>0&&point.distanceTo(G.position)<=fieldR()*G.scale.x+.035;
@@ -4409,6 +4410,7 @@ function handPoint(r){
         _hpV.addVectors(_hpA,_hpB).multiplyScalar(.5);
         const jumped=r.sm && _hpV.distanceTo(r.sm)>.22;
         if(!jumped || !r.pin){
+          r.lastHandPose=performance.now();
           r.pin=gap<(r.pin?.038:.025);
           if(!r.sm || !r.pin || jumped)r.sm=_hpV.clone();
           else r.sm.lerp(_hpV,1-Math.exp(-32*GDT));
@@ -4416,7 +4418,8 @@ function handPoint(r){
         }
       }
     }
-    // End the old grab before accepting a pose in a new tracking location.
+    // Brief joint occlusion during a pinch should hold the last position.
+    if(r.pin && r.sm && performance.now()-r.lastHandPose<100)return r.sm.clone();
     r.cancel=r.pin;r.pin=false;r.sm=null;r.hk=null;
     return null;
   }
@@ -4482,8 +4485,8 @@ function ogBegin(i,p,orb,k,moved){
 function ogUpdate(g,i,p,dt){
   const q=ogQuat(i,dt);
   if(!g.moved){
-    if(p.distanceTo(g.p0)<=(g.k>=0?.032:.025))return;
-    g.moved=true;ogAnchor(g,i,p);   // start from where the orb is: no jump
+    if(p.distanceTo(g.p0)<=.012)return;
+    g.moved=true;
   }
   const L=g.offW.length(),w=THREE.MathUtils.clamp((L-.15)/.25,0,1);
   let s=1;
@@ -4539,7 +4542,6 @@ function ogRun(dt,P,act){
     if(act.length===1)ogBegin(act[0],P[act[0]],t.orb,-1,true);   // keep holding it with the remaining hand
   }
   if(!act.length){mode='none';orbFinish();return true;}
-  mode='orb';
   if(act.length===2){
     if(OG.two){ogUpdateTwo(P[0],P[1],dt);return true;}
     if(P[0].distanceTo(P[1])<.025)return true;
@@ -4565,8 +4567,12 @@ function gestures(dt){
 
   const act=[0,1].filter(i=>P[i]&&rig[i].pin&&!rig[i].uiHold&&!placing);
   if(act.length)seatWanted=false;
-  if(fieldMode==='separated'&&orbs.length>1&&nodes.length){
-    if(orbGestures(dt,P,act)){rig.forEach(r=>{r.cancel=false;});return;}
+  for(const i of act)rig[i].orbHold=true;
+  if(fieldMode==='separated'&&orbs.length>1&&nodes.length&&mode!=='one'&&mode!=='two'){
+    if(orbGestures(dt,P,act)){
+      if(act.length)mode='orb';
+      rig.forEach(r=>{r.cancel=false;});return;
+    }
   }else if(OG.g[0]||OG.g[1]||OG.two)orbGrabReset();
   if(act.length===2){
     const a=P[0],b=P[1],d=a.distanceTo(b),M=a.clone().add(b).multiplyScalar(.5),v=b.clone().sub(a);
@@ -4587,7 +4593,6 @@ function gestures(dt){
     const i=act[0],p=P[i];
     if(mode!=='one'||gi!==i){
       const wasTwo=mode==='two';
-      const held=wasTwo?(g0.resize??g0.grabs?.[i]?.index):-1;
       if(mode==='one'&&!rig[gi]?.cancel)endTap();
       mode='one';gi=i;grabbing=true;
       let k=-1;
@@ -4596,24 +4601,13 @@ function gestures(dt){
         k=nearestWorld(p,.09);
         if(k<0){const o=rig[i].c.getWorldPosition(new THREE.Vector3()),d=new THREE.Vector3(0,0,-1).applyQuaternion(rig[i].c.getWorldQuaternion(new THREE.Quaternion()));k=pick(o,d,.1);}
       }
-      let ob=held??-1;if(ob<0)ob=k>=0&&fieldMode==='separated'&&orbs.length>1?nodes[k].doc:aimOrb(rig[i],p);
-      g1={p:p.clone(),P:G.position.clone(),q:G.quaternion.clone(),k,ob,moved:wasTwo};
-      if(wasTwo&&fieldMode==='separated'&&orbs[ob]){
-        g1.pl=G.worldToLocal(p.clone());g1.c0=orbs[ob].center.slice();
-      }
+      g1={p:p.clone(),P:G.position.clone(),q:G.quaternion.clone(),k,moved:wasTwo};
     }else if(grabbing){
-      if(!g1.moved){
-        if(p.distanceTo(g1.p)>(g1.k>=0?.032:.025)){
-          g1.moved=true;g1.p=p.clone();g1.P=G.position.clone();g1.q=G.quaternion.clone();
-          if(g1.ob>=0&&fieldMode==='separated'&&orbs[g1.ob]){g1.pl=G.worldToLocal(p.clone());g1.c0=orbs[g1.ob].center.slice();}
-        }
-      }else if((MOVE||fieldMode==='separated')&&g1.ob>=0){
-        if(fieldMode==='separated'&&g1.pl&&orbs[g1.ob]){
-          const l=G.worldToLocal(p.clone());moveOrb(g1.ob,[g1.c0[0]+l.x-g1.pl.x,g1.c0[1]+l.y-g1.pl.y,g1.c0[2]+l.z-g1.pl.z]);
-        }else{
-          G.position.copy(g1.P).add(p.clone().sub(g1.p));
-        }
-      }else if(!MOVE&&g1.ob>=0){
+      if(!g1.moved && p.distanceTo(g1.p)>.012)g1.moved=true;
+      if(!g1.moved)return;
+      if(MOVE){
+        G.position.copy(g1.P).add(p.clone().sub(g1.p));
+      }else{
         const c=G.position,v0=g1.p.clone().sub(c),v1=p.clone().sub(c);
         if(v0.length()>.04&&v1.length()>.04){
           const tq=new THREE.Quaternion().setFromUnitVectors(v0.normalize(),v1.normalize()).multiply(g1.q);
