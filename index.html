@@ -236,10 +236,15 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 
 #pt{left:50%;top:56px;transform:translateX(-50%);width:min(520px,calc(100vw - 20px));z-index:5;font-size:calc(13px*var(--fs,1))}
 #pt textarea{margin-top:8px;min-height:200px}
+#toolbar{position:fixed;top:4px;right:4px;display:flex;gap:6px;padding:4px;z-index:4}
+#toolbar #hbtn,#toolbar #sbtn{position:static}
+#xr-ui:xr-overlay{background:transparent;pointer-events:none}
+#xr-ui:xr-overlay > *{pointer-events:auto}
 </style>
 </head>
 <body>
 <div class="vig"></div>
+<div id="xr-ui">
 <div id="top">
   <div class="row" style="margin-top:0;align-items:center">
     <button id="attl" title="Add text to the field" aria-label="Add text" aria-haspopup="menu">+</button><input id="file" type="file" accept=".txt,.md,.text,.csv,.json,.html,.htm,.pdf,.docx,text/*" multiple>
@@ -252,8 +257,8 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 </div>
 <div id="addm" class="panel" role="menu" hidden><button data-a="file" role="menuitem">Files <small>text, PDF, Word, HTML</small></button><button data-a="wiki" role="menuitem">Wikipedia pages</button><button data-a="paste" role="menuitem">Paste text</button><button data-a="demo" role="menuitem">Demo text <small>computing, math, and AI</small></button><button data-a="url" role="menuitem">Web page / PDF by URL</button></div>
 <form id="qf" class="panel"><input id="q" type="text" placeholder="Ask about your text, e.g. how do algorithms use data?" autocomplete="off"><button type="button" id="micb" aria-label="Speak" title="Speak a query (Whisper). Click again to send."></button><button type="submit" id="askb" aria-label="Ask" title="Ask"></button></form>
-<button id="hbtn" title="History" aria-label="History">🌳</button>
-<button id="sbtn" title="Settings" aria-label="Settings">&#9881;</button>
+<div id="toolbar" class="panel"><button id="hbtn" title="History" aria-label="History">🌳</button>
+<button id="sbtn" title="Settings" aria-label="Settings">&#9881;</button></div>
 <div id="wk" class="panel" hidden>
   <div class="hh"><b>Wikipedia</b><button id="wkx" title="Close">&#10005;</button></div>
   <div class="row" style="margin-top:8px"><input id="wkq" type="text" placeholder="Search Wikipedia pages…" autocomplete="off"><button id="wkgo">Search</button></div>
@@ -298,6 +303,7 @@ body.llmoff #brain,body.llmoff #autol{display:none!important}
 <div id="rd" class="panel" hidden><div id="rdh"><button id="rdp" title="Older reading">&#8249;</button><span id="rdn">0/0</span><button id="rdnx" title="Newer reading">&#8250;</button><span id="rdt"></span><button id="rdst" title="Stop generating" hidden>&#9632; Stop</button><button id="rdx" title="Close">&#10005;</button></div><div id="rdb"></div><div id="rdm"></div><form id="rdf"><input id="rdq" type="text" placeholder="Ask a follow-up within this context" autocomplete="off"><button type="submit" id="rds">Send</button></form></div>
 <button id="helpbtn" aria-label="Help" aria-expanded="false" title="Help">?</button>
 <div id="hint" class="panel" hidden>Desktop: drag to orbit, wheel to zoom, WASD/QE to fly, click concepts to select several (selected words pulse; click again to deselect). Search skips common filler words, while keeping recognized phrases and negation. In AR, a query bar, keyboard and a results box float in view (point and pinch or trigger the bar to type). The keyboard's mic key dictates into the bar with Whisper: press it, speak, press it again, then press W for Wikipedia or Ask. Or open your palm (the orb) or tap the mic and say &ldquo;Wikipedia: your topic&rdquo; to pull that page in; add &ldquo;as its own sphere&rdquo; or &ldquo;into the unified space&rdquo; to choose where it lands. Mixed reality (Quest 3): press Enter mixed reality to see your room through the passthrough cameras. Pinch and drag anywhere to carry the data sphere (the right stick spins it), pinch with both hands and spread to resize and twist it, quick pinch on a word to select it (or tap a selected word chip in the list box to deselect it); select several to see how they connect, and pinch a selected word again to deselect it. Two hands pushing out pushes the orbs away; motioning forward pulls them toward you. Pointing at words in the word list highlights them with a SELECT cue for easy clicking. The field remembers where you put it between mixed-reality sessions. A adds the selected concept to the query, B clears. Press Place on the panel to snap the field onto a wall, table or floor. In AR the top buttons are: + paste copied text, \u21C4 switch saved text, W fetch Wikipedia for the typed topic, \u00B6 source passages, and the gear toggles the LLM. Brighter nodes are more frequent words. Zoom out and neighbouring words collapse into the most dominant word of their area (bigger dot, labelled); zoom in and they expand again. The field learns as you use it: words you query or select together are drawn a little closer each time, and the arrangement is saved per text. Line colour is based on how often the words at each end occur in your text: rare words are violet and blue, then green and yellow, and the most frequent words are orange and red, so each line blends between its two ends. The results box scrolls: thumbstick while pointing at it, or (hand tracking) touch it with your index fingertip and slide up or down like a touchscreen, with a flick for momentum; tap a row to select that word. Source passages: select a concept (or click a link line, or press the ¶ button on a row) to see the sentences where the words occur, with the document name; how many are shown adapts to how strongly the words resonate. Voice: hold out an open palm (palm up or toward you) steadily for about three quarters of a second in mixed reality with hand tracking. An orb appears in your hand with lightning arcing to the network; speak, then close your hand or pull it away to send. Whisper runs in your browser (the first use downloads a small model). On desktop, or with controllers, use the mic button. Attach PDF, Word or HTML files, or fetch URLs. Wikipedia takes several voices at once: &ldquo;Wikipedia Nikola Tesla and Aleister Crowley and Edgar Cayce&rdquo; makes one orb each. In Separated Orbs each orb is fully independent: pinch and drag an orb in mixed reality, or on desktop drag any of its words or its label to move it anywhere; Shift+wheel over an orb resizes it, and right-drag or Alt+drag on an orb rotates just that orb, zooming toward an orb expands its collapsed words on their own. The gold threads between orbs are labelled with words that are not in your query but sit beside it in more than one file. In AR the panels stay where they are until you turn your head more than 60&deg; either way, then swing round to face you.</div>
+</div>
 <script type="text/plain" id="engine-src">
 
 'use strict';
@@ -3415,17 +3421,17 @@ function hud(){
 }
 
 (function buildKeys(){
-  const B=KW-40;
+  const B=sbX+918;
   KEYS.push(
     {id:'hideui',x:(KW-320)/2,y:14,w:320,h:50,act:'hideui'},
     {id:'plus',x:sbX-140,y:106,w:56,h:56,act:'plus'},
     {id:'snd',x:sbX-210,y:106,w:56,h:56,act:'snd'},
     {id:'mic',x:sbX-280,y:106,w:56,h:56,act:'mic'},
-    {id:'dcnt',x:sbX-390,y:106,w:96,h:56,act:'dcnt',dk:true},
-    {id:'reset',label:'Reset',x:B-320,y:16,w:76,h:72,tool:true,act:'reset'},
-    {id:'pass',label:'Passages',x:B-236,y:16,w:76,h:72,tool:true,act:'pass'},
-    {id:'hist',label:'History',x:B-152,y:16,w:76,h:72,tool:true,act:'hist'},
-    {id:'set',label:'Settings',x:B-68,y:16,w:76,h:72,tool:true,act:'set'},
+    {id:'dcnt',x:sbX-396,y:106,w:96,h:56,act:'dcnt',dk:true},
+    {id:'reset',label:'Reset',x:B-320,y:98,w:76,h:72,tool:true,act:'reset'},
+    {id:'pass',label:'Passages',x:B-236,y:98,w:76,h:72,tool:true,act:'pass'},
+    {id:'hist',label:'History',x:B-152,y:98,w:76,h:72,tool:true,act:'hist'},
+    {id:'set',label:'Settings',x:B-68,y:98,w:76,h:72,tool:true,act:'set'},
     {id:'toggle',x:sbX+8,y:106,w:56,h:56,act:'toggle'},
     {id:'field',x:sbX+72,y:106,w:440,h:56,act:'open'},
     {id:'ask',label:'',x:sbX+524,y:106,w:56,h:56,act:'ask'},
@@ -3450,8 +3456,7 @@ function drawKB(){
   const hov=new Set(rig.map(r=>r.hk).filter(Boolean)),now=performance.now();
   const pane=(a,b,w,h,r,al)=>{rr(x,a,b,w,h,r);x.fillStyle='rgba(30,42,60,'+al+')';x.fill();x.strokeStyle='rgba(255,255,255,.4)';x.lineWidth=2.5;x.stroke();};
   if(!HUIDE){
-  pane(KW-380,4,360,96,16,.86);
-  pane(sbX,96,596,76,16,.5);
+  pane(sbX-406,90,1348,90,16,.72);
   if(kbOpen)pane((KW-1060)/2,634,1060,350,18,.82);}
   for(const k of KEYS){
     if(HUIDE&&k.id!=='hideui'&&!k.ib)continue;
@@ -3466,7 +3471,7 @@ function drawKB(){
       rr(x,k.x,k.y,k.w,k.h,10);
       x.fillStyle=fl?'#916b34':on?'#52667c':'#324357';x.fill();
       x.textAlign='center';x.fillStyle='#d6f6ff';x.font='30px '+F;
-      x.fillText(({reset:'↺',pass:'¶',hist:'◷',set:'⚙'})[k.id],cx,k.y+23);
+      x.fillText(({reset:'↺',pass:'¶',hist:document.getElementById('hbtn').textContent,set:'⚙'})[k.id],cx,k.y+23);
       x.font='600 16px '+F;x.fillText(k.label,cx,k.y+54,k.w-4);x.textAlign='left';
       continue;
     }
@@ -4192,6 +4197,9 @@ renderer.domElement.addEventListener('pointerup',e=>{
 addEventListener('keydown',e=>{if(!/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))keys[e.code]=true;});
 addEventListener('keyup',e=>keys[e.code]=false);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+const xrUI=document.getElementById('xr-ui');
+let sharedXRUI=false;
+xrUI.addEventListener('beforexrselect',e=>{if(e.target!==xrUI)e.preventDefault();});
 const arBtn=document.querySelector('#ar');
 if(navigator.xr&&navigator.xr.isSessionSupported)navigator.xr.isSessionSupported('immersive-ar').then(ok=>{arBtn.hidden=!ok;}).catch(()=>{});
 async function startXR(quiet){
@@ -4203,11 +4211,11 @@ async function startXR(quiet){
     else{stat('Loading the demo text. Press Enter again in a moment.');loadDemo();}
     return;
   }
-  const feats=['hit-test','plane-detection','hand-tracking','anchors'];try{renderer.xr.setFramebufferScaleFactor(2);}catch(e){}
+  const feats=['dom-overlay','hit-test','plane-detection','hand-tracking','anchors'];try{renderer.xr.setFramebufferScaleFactor(2);}catch(e){}
   try{
     let sess;
-    try{renderer.xr.setReferenceSpaceType('local-floor');sess=await navigator.xr.requestSession('immersive-ar',{requiredFeatures:['local-floor'],optionalFeatures:feats});}
-    catch(e){renderer.xr.setReferenceSpaceType('local');sess=await navigator.xr.requestSession('immersive-ar',{optionalFeatures:feats});}
+    try{renderer.xr.setReferenceSpaceType('local-floor');sess=await navigator.xr.requestSession('immersive-ar',{requiredFeatures:['local-floor'],optionalFeatures:feats,domOverlay:{root:xrUI}});}
+    catch(e){renderer.xr.setReferenceSpaceType('local');sess=await navigator.xr.requestSession('immersive-ar',{optionalFeatures:feats,domOverlay:{root:xrUI}});}
     await renderer.xr.setSession(sess);
   }catch(e){if(!quiet)stat('Could not start: '+(e&&e.message||e));}
 }
@@ -4217,7 +4225,7 @@ const QUEST=/OculusBrowser|Quest/i.test(navigator.userAgent);
 async function offerXR(){
   if(!navigator.xr||!navigator.xr.offerSession||renderer.xr.getSession())return;
   try{
-    const sess=await navigator.xr.offerSession('immersive-ar',{optionalFeatures:['local-floor','hit-test','plane-detection','hand-tracking','anchors']});
+    const sess=await navigator.xr.offerSession('immersive-ar',{optionalFeatures:['dom-overlay','local-floor','hit-test','plane-detection','hand-tracking','anchors'],domOverlay:{root:xrUI}});
     renderer.xr.setReferenceSpaceType('local-floor');await renderer.xr.setSession(sess);
   }catch(e){}
 }
@@ -4304,7 +4312,7 @@ function watchSession(s){
 }
 renderer.xr.addEventListener('sessionstart',()=>{
   const s=renderer.xr.getSession();
-  controls.enabled=false;kb.visible=true;kInit=false;kOffL.set(0,0,0);kbOpen=false;HUIDE=false;U.uX.value=1;needCenter=false;lostT=0;arRest=0;arTried=false;arAnchor=null;arLast=null;arDirty=false;arBusy=false;
+  sharedXRUI=!!s.domOverlayState;controls.enabled=false;kb.visible=!sharedXRUI;kInit=false;kOffL.set(0,0,0);kbOpen=false;HUIDE=false;U.uX.value=1;needCenter=false;lostT=0;arRest=0;arTried=false;arAnchor=null;arLast=null;arDirty=false;arBusy=false;
   try{renderer.xr.setFoveation(0);}catch(e){}
   {const bl=s.renderState&&s.renderState.baseLayer;U.uH.value=bl&&bl.framebufferHeight?bl.framebufferHeight:2000;}
   dolly.position.set(0,0,0);dolly.rotation.set(0,0,0);
@@ -4318,6 +4326,7 @@ renderer.xr.addEventListener('sessionstart',()=>{
   hud();
 });
 renderer.xr.addEventListener('sessionend',()=>{
+  sharedXRUI=false;
   if(arMode)arFlush();
   try{voiceStop(false);}catch(e){}VOICE.hand=-1;
   amOpen=false;controls.enabled=true;kb.visible=false;ib.visible=false;rb.visible=false;rbPlaced=false;sbOpen=false;sb.visible=false;wbOpen=false;wb.visible=false;fbOpen=false;fb.visible=false;psXR=false;G.visible=true;arRest=0;arAnchor=null;arBusy=false;
@@ -6008,7 +6017,7 @@ renderer.setAnimationLoop((t,frame)=>{
   {const tk=thinking()?1:0;if(tk&&!pulseOn)U.uP0.value=U.uT.value;pulseOn=tk;U.uK.value+=(tk-U.uK.value)*Math.min(1,dt*(tk?4:2.5));if(U.uK.value<.005&&!tk)U.uK.value=0;}
   G.updateMatrixWorld(true);voiceStep(dt);voiceVis(dt);platform();lodLabels(dt);colUpdate(dt);
   if(needCenter&&renderer.xr.isPresenting&&frame){const xc=renderer.xr.getCamera(),o=xc.getWorldPosition(new THREE.Vector3()),d=xc.getWorldDirection(new THREE.Vector3());d.y=0;if(d.lengthSq()>1e-4){d.normalize();G.scale.setScalar(centerS);const dist=.7;G.position.set(o.x+d.x*dist,o.y-.1,o.z+d.z*dist);G.quaternion.identity();needCenter=false;}}
-  if(renderer.xr.isPresenting){xrPerf(raw);xrWatch(dt);placeKB(dt);if(resetReq)xrResetField(frame);gestures(dt);sticks(dt);if(arMode&&frame){arPersist(frame,dt);arFrame(frame);}drawKBIfDirty();drawRdIfDirty();drawSbIfDirty();drawWbIfDirty();drawFbIfDirty();}
+  if(renderer.xr.isPresenting){xrPerf(raw);xrWatch(dt);placeKB(dt);if(resetReq)xrResetField(frame);gestures(dt);sticks(dt);if(arMode&&frame){arPersist(frame,dt);arFrame(frame);}if(!sharedXRUI){drawKBIfDirty();drawRdIfDirty();drawSbIfDirty();drawWbIfDirty();drawFbIfDirty();}}
   else{
     U.uH.value=renderer.domElement.height;
     const v=new THREE.Vector3(),sp=dt*1.2;
